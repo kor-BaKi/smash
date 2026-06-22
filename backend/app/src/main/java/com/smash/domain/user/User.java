@@ -108,4 +108,13 @@ public class User {
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+
+    // B-3: 조장 지정. 기존 조장 해제는 호출부(GroupService)가 이전 조장 User에 별도로 호출한다.
+    public void assignAsLeader() {
+        this.isLeader = true;
+    }
+
+    public void unassignLeader() {
+        this.isLeader = false;
+    }
 }

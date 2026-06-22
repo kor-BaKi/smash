@@ -8,4 +8,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByStudentNo(String studentNo);
 
     boolean existsByStudentNo(String studentNo);
+
+    long countByGroupId(Long groupId);
 }

@@ -49,6 +49,9 @@ public class SecurityConfig {
                         ).permitAll()
                         // 핸들러 없는 요청이 /error로 forward될 때 401로 덮이는 것 방지
                         .requestMatchers("/error").permitAll()
+                        // 운영 설정(B영역)은 전부 임원만. GET /api/v1/groups는 이 패턴에 안 걸려서
+                        // anyRequest().authenticated()로 자연스럽게 "공통(인증만 필요)" 처리됨.
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
