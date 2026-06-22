@@ -66,6 +66,11 @@ public class User {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    // ERD에는 없는 컬럼. Refresh Token Rotation 정책(단일기기 가정)을 위해
+    // 사용자별 현재 유효한 refresh token 1개만 보관한다.
+    @Column(name = "refresh_token", length = 255)
+    private String refreshToken;
+
     @Builder
     private User(String name, String studentNo, String department, String phone,
                   Role role, String joinTerm, Status status) {
@@ -97,5 +102,10 @@ public class User {
     public void activate(String encodedPassword) {
         this.password = encodedPassword;
         this.status = Status.ACTIVE;
+    }
+
+    // 로그인/재발급 시 회전, 로그아웃 시 null로 폐기
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }
