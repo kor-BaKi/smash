@@ -117,4 +117,9 @@ public class User {
     public void unassignLeader() {
         this.isLeader = false;
     }
+
+    // C-5: 임원의 개별 수정. C-4(confirm)의 일괄 조건부 UPDATE와 달리 이미 배정된 조도 덮어쓸 수 있다.
+    public void assignGroup(Long groupId) {
+        this.groupId = groupId;
+    }
 }
