@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/smash?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: ""
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create   # 개발 초기에만 create, 나중에 validate로 변경
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    user:
+      name: disable   # Spring Security 기본 로그인 페이지 비활성화용 (임시)
+      password: disable
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+
+server:
+  port: 8080
+
+jwt:
+  secret: smash-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
+  access-expiration: 1800000    # 30분 (ms)
+  refresh-expiration: 1209600000 # 14일 (ms)
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    com.smash: debug
