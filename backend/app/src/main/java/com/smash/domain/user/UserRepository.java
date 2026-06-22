@@ -19,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // "미배정자"에 같이 잡힌다.
     List<User> findByGroupIdIsNullAndStatusAndRole(Status status, Role role);
 
+    // E-1: 충족 현황 조회 대상 (해당 조 소속 + 활성 부원).
+    List<User> findByGroupIdAndStatusAndRole(Long groupId, Status status, Role role);
+
     // C-4 정합성 3중 체크 중 하나: WHERE group_id IS NULL 조건부 UPDATE로 동시성 보호.
     // 영향행수 0 = 그 사이 이미 배정됨 (skip 판정용).
     @Modifying

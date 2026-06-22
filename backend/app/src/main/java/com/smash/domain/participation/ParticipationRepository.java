@@ -17,4 +17,10 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     List<Participation> findByUserIdAndCarryoverTargetActivityIdIn(Long userId, Collection<Long> targetActivityIds);
 
     void deleteByActivityIdAndUserId(Long activityId, Long userId);
+
+    // E-1: 충족 계산용. 어느 활동(날짜)에 달린 응답인지는 activityId로 다시 조회해서 월 범위와 대조한다.
+    List<Participation> findByUserIdAndTypeIn(Long userId, Collection<ParticipationType> types);
+
+    // E-3: 타조참 집계.
+    List<Participation> findByActivityIdInAndType(Collection<Long> activityIds, ParticipationType type);
 }
