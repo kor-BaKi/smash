@@ -6,12 +6,23 @@ import '../../activity/page/today_activity_page.dart';
 import '../../assignment/page/assignment_page.dart';
 import '../../attendance/page/attendance_page.dart';
 import '../../auth/model/auth_user.dart';
+import '../../auth/page/login_page.dart';
 import '../../auth/provider/auth_controller.dart';
 import '../../availability/page/availability_page.dart';
 import '../../group/page/group_page.dart';
 import '../../invite/page/invite_code_page.dart';
 import '../../schedule/page/activity_schedule_page.dart';
 import '../../statistics/page/statistics_page.dart';
+
+Future<void> _logout(BuildContext context, WidgetRef ref) async {
+  await ref.read(authControllerProvider.notifier).logout();
+  if (context.mounted) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
+    );
+  }
+}
 
 // 로그인한 user.role에 따라 임원/부원 홈으로 분기. 각 화면의 실제 내용은 이후 단계(조 배정,
 // 투표/이월, 출석현황)에서 채워나간다.
@@ -28,20 +39,30 @@ class HomePage extends ConsumerWidget {
     }
 
     return user.role == UserRole.admin
-        ? _AdminHome(user: user)
-        : _MemberHome(user: user);
+        ? _AdminHome(user: user, ref: ref)
+        : _MemberHome(user: user, ref: ref);
   }
 }
 
 class _AdminHome extends StatelessWidget {
-  const _AdminHome({required this.user});
+  const _AdminHome({required this.user, required this.ref});
 
   final AuthUser user;
+  final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('임원 홈')),
+      appBar: AppBar(
+        title: const Text('임원 홈'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: '로그아웃',
+            onPressed: () => _logout(context, ref),
+          ),
+        ],
+      ),
       body: ListView(
         children: [
           Padding(
@@ -106,14 +127,24 @@ class _AdminHome extends StatelessWidget {
 }
 
 class _MemberHome extends StatelessWidget {
-  const _MemberHome({required this.user});
+  const _MemberHome({required this.user, required this.ref});
 
   final AuthUser user;
+  final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('부원 홈')),
+      appBar: AppBar(
+        title: const Text('부원 홈'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: '로그아웃',
+            onPressed: () => _logout(context, ref),
+          ),
+        ],
+      ),
       body: ListView(
         children: [
           Padding(

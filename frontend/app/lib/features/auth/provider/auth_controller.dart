@@ -22,4 +22,9 @@ class AuthController extends AsyncNotifier<AuthUser?> {
           .login(studentNo, password),
     );
   }
+
+  Future<void> logout() async {
+    await ref.read(authApiProvider).logout();
+    state = const AsyncData(null);
+  }
 }

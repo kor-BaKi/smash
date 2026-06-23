@@ -40,4 +40,15 @@ class AuthApi {
       throw ApiException.fromDioException(e);
     }
   }
+
+  // 서버 호출이 실패해도(토큰 만료 등) 로컬 토큰은 항상 지워서 로그아웃을 보장한다.
+  Future<void> logout() async {
+    try {
+      await _dio.post('/auth/logout');
+    } on DioException {
+      // ignore
+    } finally {
+      await _tokenStorage.clear();
+    }
+  }
 }
