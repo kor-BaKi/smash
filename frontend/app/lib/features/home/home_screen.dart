@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../assignment/assignment_screen.dart';
 import '../auth/auth_controller.dart';
 import '../auth/auth_user.dart';
+import '../availability/availability_screen.dart';
 import '../group/group_screen.dart';
 import '../invite/invite_code_screen.dart';
 import '../schedule/activity_schedule_screen.dart';
@@ -16,10 +18,14 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).value;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('로그인 정보가 없습니다.')));
+      return const Scaffold(
+        body: Center(child: Text('로그인 정보가 없습니다.')),
+      );
     }
 
-    return user.role == UserRole.admin ? _AdminHome(user: user) : _MemberHome(user: user);
+    return user.role == UserRole.admin
+        ? _AdminHome(user: user)
+        : _MemberHome(user: user);
   }
 }
 
@@ -41,20 +47,35 @@ class _AdminHome extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.groups),
             title: const Text('조 관리'),
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const GroupScreen())),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const GroupScreen(),
+              ),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.qr_code),
             title: const Text('가입코드 관리'),
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const InviteCodeScreen())),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const InviteCodeScreen(),
+              ),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.schedule),
             title: const Text('정규활동 일정 관리'),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const ActivityScheduleScreen(),
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.assignment_ind),
+            title: const Text('조 배정'),
             onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const ActivityScheduleScreen())),
+                .push(MaterialPageRoute(builder: (_) => const AssignmentScreen())),
           ),
         ],
       ),
@@ -71,7 +92,20 @@ class _MemberHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('부원 홈')),
-      body: Center(child: Text('${user.name}님, 환영합니다 (MEMBER)')),
+      body: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('${user.name}님, 환영합니다 (MEMBER)'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.checklist),
+            title: const Text('가능요일 제출'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const AvailabilityScreen())),
+          ),
+        ],
+      ),
     );
   }
 }
