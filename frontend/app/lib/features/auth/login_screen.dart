@@ -8,7 +8,8 @@ class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() =>
+      _LoginScreenState();
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
@@ -23,14 +24,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    await ref.read(authControllerProvider.notifier).login(
+    await ref
+        .read(authControllerProvider.notifier)
+        .login(
           _studentNoController.text.trim(),
           _passwordController.text,
         );
 
     final state = ref.read(authControllerProvider);
     if (state.hasValue && state.value != null && mounted) {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
     }
   }
 
@@ -54,7 +59,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: '비밀번호'),
+              decoration: const InputDecoration(
+                labelText: '비밀번호',
+              ),
               obscureText: true,
             ),
             const SizedBox(height: 24),
@@ -63,13 +70,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
                   authState.error.toString(),
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 ),
               ),
             FilledButton(
               onPressed: isLoading ? null : _submit,
               child: isLoading
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )
                   : const Text('로그인'),
             ),
           ],

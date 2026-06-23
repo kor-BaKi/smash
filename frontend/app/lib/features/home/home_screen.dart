@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/auth_controller.dart';
 import '../auth/auth_user.dart';
+import '../group/group_screen.dart';
+import '../invite/invite_code_screen.dart';
+import '../schedule/activity_schedule_screen.dart';
 
 // 로그인한 user.role에 따라 임원/부원 홈으로 분기. 각 화면의 실제 내용은 이후 단계(조 배정,
 // 투표/이월, 출석현황)에서 채워나간다.
@@ -29,7 +32,32 @@ class _AdminHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('임원 홈')),
-      body: Center(child: Text('${user.name}님, 환영합니다 (ADMIN)')),
+      body: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('${user.name}님, 환영합니다 (ADMIN)'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.groups),
+            title: const Text('조 관리'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const GroupScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.qr_code),
+            title: const Text('가입코드 관리'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const InviteCodeScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.schedule),
+            title: const Text('정규활동 일정 관리'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const ActivityScheduleScreen())),
+          ),
+        ],
+      ),
     );
   }
 }
