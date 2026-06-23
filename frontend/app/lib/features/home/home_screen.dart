@@ -11,6 +11,7 @@ import '../availability/availability_screen.dart';
 import '../group/group_screen.dart';
 import '../invite/invite_code_screen.dart';
 import '../schedule/activity_schedule_screen.dart';
+import '../statistics/statistics_screen.dart';
 
 // 로그인한 user.role에 따라 임원/부원 홈으로 분기. 각 화면의 실제 내용은 이후 단계(조 배정,
 // 투표/이월, 출석현황)에서 채워나간다.
@@ -91,6 +92,12 @@ class _AdminHome extends StatelessWidget {
             title: const Text('출석 현황'),
             onTap: () => Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const AttendanceScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.insights),
+            title: const Text('통계'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const StatisticsScreen())),
           ),
         ],
       ),
