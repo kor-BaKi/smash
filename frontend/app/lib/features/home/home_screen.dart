@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../activity/admin_activity_screen.dart';
+import '../activity/today_activity_screen.dart';
 import '../assignment/assignment_screen.dart';
 import '../auth/auth_controller.dart';
 import '../auth/auth_user.dart';
@@ -77,6 +79,12 @@ class _AdminHome extends StatelessWidget {
             onTap: () => Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const AssignmentScreen())),
           ),
+          ListTile(
+            leading: const Icon(Icons.event_note),
+            title: const Text('활동 관리'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const AdminActivityScreen())),
+          ),
         ],
       ),
     );
@@ -103,6 +111,12 @@ class _MemberHome extends StatelessWidget {
             title: const Text('가능요일 제출'),
             onTap: () => Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const AvailabilityScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.how_to_vote),
+            title: const Text('오늘의 투표'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const TodayActivityScreen())),
           ),
         ],
       ),
