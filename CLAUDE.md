@@ -193,3 +193,17 @@ com.smash
 - 커밋 메시지는 기존 로그와 동일하게 Conventional Commits 접두사(`feat:`/`fix:`/`chore:`/`docs:`/`test:`)
   + 한글 설명.
 - 커밋은 항상 사용자에게 먼저 알리고 메시지를 제안한 뒤, 확인받고 실행한다 (자동 커밋 금지).
+
+## 8. Flutter 파일 규칙
+
+### 폴더 구조 원칙
+- API 호출 코드 → `core/api/`
+- 화면(Page) → `features/{기능}/page/`
+- Riverpod Provider → `features/{기능}/provider/`
+- 요청/응답 모델 → `features/{기능}/model/`
+- 공통 위젯 → `shared/widgets/`
+
+### 파일 추가 시 필수
+새 파일을 만들 때마다 `frontend/flutter.md`의 해당 섹션에
+`| 파일 경로 | 역할 한 줄 설명 |` 형태로 반드시 추가할 것.
+파일 이동/삭제 시에도 flutter.md 동기화 필수.
