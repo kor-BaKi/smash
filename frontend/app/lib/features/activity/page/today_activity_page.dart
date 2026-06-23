@@ -9,17 +9,28 @@ import 'activity_detail_page.dart';
 class TodayActivityPage extends ConsumerWidget {
   const TodayActivityPage({super.key});
 
-  Future<void> _handleButtonTap(BuildContext context, WidgetRef ref, TodayActivity activity, ClientParticipationType type) async {
+  Future<void> _handleButtonTap(
+    BuildContext context,
+    WidgetRef ref,
+    TodayActivity activity,
+    ClientParticipationType type,
+  ) async {
     if (type != ClientParticipationType.carryover) {
-      await ref.read(todayActivitiesProvider.notifier).submit(activity.activityId, type);
+      await ref
+          .read(todayActivitiesProvider.notifier)
+          .submit(activity.activityId, type);
       return;
     }
 
-    final candidates = await ref.read(activityApiProvider).getCarryoverCandidates(activity.activityId);
+    final candidates = await ref
+        .read(activityApiProvider)
+        .getCarryoverCandidates(activity.activityId);
     if (!context.mounted) return;
 
     if (candidates.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('이월이 불가능합니다.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이월이 불가능합니다.')),
+      );
       return;
     }
 
@@ -28,10 +39,12 @@ class TodayActivityPage extends ConsumerWidget {
       builder: (dialogContext) => SimpleDialog(
         title: const Text('이월할 날짜 선택'),
         children: candidates
-            .map((c) => SimpleDialogOption(
-                  onPressed: () => Navigator.pop(dialogContext, c),
-                  child: Text('${c.date} (${c.status})'),
-                ))
+            .map(
+              (c) => SimpleDialogOption(
+                onPressed: () => Navigator.pop(dialogContext, c),
+                child: Text('${c.date} (${c.status})'),
+              ),
+            )
             .toList(),
       ),
     );
@@ -39,7 +52,11 @@ class TodayActivityPage extends ConsumerWidget {
     if (selected != null) {
       await ref
           .read(todayActivitiesProvider.notifier)
-          .submit(activity.activityId, ClientParticipationType.carryover, targetActivityId: selected.targetActivityId);
+          .submit(
+            activity.activityId,
+            ClientParticipationType.carryover,
+            targetActivityId: selected.targetActivityId,
+          );
     }
   }
 
@@ -60,40 +77,69 @@ class TodayActivityPage extends ConsumerWidget {
                 ButtonSegment(value: 'ALL', label: Text('전체 조')),
               ],
               selected: {scope},
-              onSelectionChanged: (selection) => ref.read(todayScopeProvider.notifier).state = selection.first,
+              onSelectionChanged: (selection) =>
+                  ref.read(todayScopeProvider.notifier).state =
+                      selection.first,
             ),
           ),
           Expanded(
             child: activitiesState.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text(error.toString())),
+              loading: () => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              error: (error, _) =>
+                  Center(child: Text(error.toString())),
               data: (activities) {
                 if (activities.isEmpty) {
-                  return const Center(child: Text('오늘 활동이 없습니다.'));
+                  return const Center(
+                    child: Text('오늘 활동이 없습니다.'),
+                  );
                 }
                 return RefreshIndicator(
-                  onRefresh: () => ref.read(todayActivitiesProvider.notifier).refresh(),
+                  onRefresh: () => ref
+                      .read(todayActivitiesProvider.notifier)
+                      .refresh(),
                   child: ListView.builder(
                     itemCount: activities.length,
                     itemBuilder: (context, index) {
                       final activity = activities[index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment
+                                        .spaceBetween,
                                 children: [
-                                  Text(activity.groupLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => ActivityDetailPage(activityId: activity.activityId),
-                                      ),
+                                  Text(
+                                    activity.groupLabel,
+                                    style: const TextStyle(
+                                      fontWeight:
+                                          FontWeight.bold,
                                     ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(
+                                          context,
+                                        ).push(
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                ActivityDetailPage(
+                                                  activityId:
+                                                      activity
+                                                          .activityId,
+                                                ),
+                                          ),
+                                        ),
                                     child: const Text('상세보기'),
                                   ),
                                 ],
@@ -104,22 +150,49 @@ class TodayActivityPage extends ConsumerWidget {
                                     : '내 응답: ${activity.myParticipation!.type.koreanLabel}',
                               ),
                               if (activity.voteClosed)
-                                const Text('투표 마감', style: TextStyle(color: Colors.grey))
+                                const Text(
+                                  '투표 마감',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                )
                               else
                                 Wrap(
                                   spacing: 8,
                                   children: [
-                                    ...activity.availableButtons.map(
-                                      (type) => OutlinedButton(
-                                        onPressed: () => _handleButtonTap(context, ref, activity, type),
-                                        child: Text(type.koreanLabel),
-                                      ),
-                                    ),
-                                    if (activity.myParticipation != null)
+                                    ...activity.availableButtons
+                                        .map(
+                                          (
+                                            type,
+                                          ) => OutlinedButton(
+                                            onPressed: () =>
+                                                _handleButtonTap(
+                                                  context,
+                                                  ref,
+                                                  activity,
+                                                  type,
+                                                ),
+                                            child: Text(
+                                              type.koreanLabel,
+                                            ),
+                                          ),
+                                        ),
+                                    if (activity
+                                            .myParticipation !=
+                                        null)
                                       TextButton(
-                                        onPressed: () =>
-                                            ref.read(todayActivitiesProvider.notifier).cancel(activity.activityId),
-                                        child: const Text('응답 취소'),
+                                        onPressed: () => ref
+                                            .read(
+                                              todayActivitiesProvider
+                                                  .notifier,
+                                            )
+                                            .cancel(
+                                              activity
+                                                  .activityId,
+                                            ),
+                                        child: const Text(
+                                          '응답 취소',
+                                        ),
                                       ),
                                   ],
                                 ),
