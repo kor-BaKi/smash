@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../activity/admin_activity_screen.dart';
 import '../activity/today_activity_screen.dart';
 import '../assignment/assignment_screen.dart';
+import '../attendance/attendance_screen.dart';
 import '../auth/auth_controller.dart';
 import '../auth/auth_user.dart';
 import '../availability/availability_screen.dart';
@@ -84,6 +85,12 @@ class _AdminHome extends StatelessWidget {
             title: const Text('활동 관리'),
             onTap: () => Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const AdminActivityScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.bar_chart),
+            title: const Text('출석 현황'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const AttendanceScreen())),
           ),
         ],
       ),
