@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:smash_app/main.dart';
+import 'package:smash_app/app.dart';
 
 // 실제 백엔드로 5단계(출석 현황) 화면을 검증한다.
 // 사전 조건: 화 3-5시 조에 부원(테스트부원)이 있고, 2026년 6월 기준

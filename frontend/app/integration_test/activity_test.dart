@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:smash_app/main.dart';
+import 'package:smash_app/app.dart';
 
 // 실제 백엔드로 4단계(엔진2 활동/투표) 화면을 검증한다.
 // 사전 조건: 부원(30001/test1234)이 화 3-5시 조에 배정되어 있고, 오늘(화) 활동이 이미 생성되어 있어야 한다.

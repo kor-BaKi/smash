@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:smash_app/main.dart';
+import 'package:smash_app/app.dart';
 
 // 실제 백엔드로 3단계(엔진1 조 배정) 화면을 검증한다.
 // 사전 조건: club_groups에 10개 조가 이미 있고, 부원 계정(30001/test1234, group_id=NULL)이 있어야 한다.

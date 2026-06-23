@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:smash_app/main.dart';
+import 'package:smash_app/app.dart';
 
 // 실제 백엔드(localhost:8080)로 2단계(운영 설정) 화면 3개를 순서대로 검증한다.
 // 사전 조건: 백엔드가 떠 있고, smash2026/smash2017 ADMIN 계정만 있고
