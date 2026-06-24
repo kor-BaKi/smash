@@ -2,6 +2,7 @@ package com.smash.api.auth;
 
 import com.smash.auth.JwtProvider;
 import com.smash.common.exception.BusinessException;
+import com.smash.domain.invite.InviteCodeRepository;
 import com.smash.domain.user.Status;
 import com.smash.domain.user.User;
 import com.smash.domain.user.UserRepository;
@@ -17,9 +18,16 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final InviteCodeRepository inviteCodeRepository;
 
     @Transactional
     public AuthResponse signup(SignupRequest request) {
+
+        inviteCodeRepository.findByCodeAndIsActiveTrue(request.getCode())
+                .orElseThrow(() -> new BusinessException(
+                        "INVALID_INVITE_CODE", "유효하지 않은 가입코드입니다."
+                ));
+
         User user = userRepository.findByStudentNo(request.getStudentNo())
                 .orElseThrow(() -> new BusinessException(
                         "STUDENT_NO_NOT_FOUND", "사전 등록된 학번이 없습니다."));
