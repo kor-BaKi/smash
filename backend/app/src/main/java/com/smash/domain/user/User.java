@@ -32,6 +32,8 @@ public class User {
 
     private String joinTerm;
 
+    private Long groupId; // 추가
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -65,5 +67,10 @@ public class User {
         this.joinTerm = joinTerm;
         this.role = role;
         this.status = status;
+    }
+
+    public void signup(String encodedPassword) {
+        this.password = encodedPassword;
+        this.status = Status.ACTIVE;
     }
 }
