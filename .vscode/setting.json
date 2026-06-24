@@ -1,0 +1,6 @@
+{
+  "files.associations": { "CLAUDE.md": "markdown", "CLAUDE.local.md": "markdown" },
+  "files.exclude": { "**/.claude": true },
+  "search.exclude": { "**/.claude": true },
+  "terminal.integrated.inheritEnv": true
+}
