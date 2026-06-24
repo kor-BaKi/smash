@@ -9,6 +9,7 @@ import '../../auth/model/auth_user.dart';
 import '../../auth/page/login_page.dart';
 import '../../auth/provider/auth_controller.dart';
 import '../../availability/page/availability_page.dart';
+import '../../free_period/page/free_period_page.dart';
 import '../../group/page/group_page.dart';
 import '../../invite/page/invite_code_page.dart';
 import '../../schedule/page/activity_schedule_page.dart';
@@ -93,6 +94,15 @@ class _AdminHome extends StatelessWidget {
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => const ActivitySchedulePage(),
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.beach_access),
+            title: const Text('자유활동 기간 관리'),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const FreePeriodPage(),
               ),
             ),
           ),

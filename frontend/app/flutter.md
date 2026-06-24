@@ -23,6 +23,7 @@
 | lib/core/api/invite_code_api.dart | 가입코드 목록/발급/활성화 API 호출 |
 | lib/core/api/activity_schedule_api.dart | 정규활동 일정 조회/전체교체 API 호출 |
 | lib/core/api/statistics_api.dart | 통계(충족률추이/조별비교/이월빈도) API 호출 |
+| lib/core/api/free_period_api.dart | 자유활동 기간 목록/등록/삭제 API 호출 |
 
 ## core/constants
 | 파일 경로 | 역할 |
@@ -112,6 +113,13 @@
 | lib/features/statistics/page/statistics_page.dart | 통계(충족률추이/조별비교/이월빈도) 화면 |
 | lib/features/statistics/provider/statistics_controller.dart | 통계 controller |
 | lib/features/statistics/model/statistics.dart | 통계 모델 |
+
+## features/free_period
+| 파일 경로 | 역할 |
+|---|---|
+| lib/features/free_period/page/free_period_page.dart | 자유활동 기간 관리 화면 |
+| lib/features/free_period/provider/free_period_controller.dart | 자유활동 기간 controller |
+| lib/features/free_period/model/free_period.dart | 자유활동 기간 모델 |
 
 ## shared/theme
 | 파일 경로 | 역할 |
