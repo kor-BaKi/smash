@@ -17,7 +17,7 @@ public enum ErrorCode {
     CARRYOVER_NOT_AVAILABLE(HttpStatus.CONFLICT, "이월이 불가능합니다."),
     INVALID_CARRYOVER_TARGET(HttpStatus.BAD_REQUEST, "이월 대상으로 선택할 수 없는 활동입니다."),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "수정할 값이 없습니다."),
-    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "조회 기간이 올바르지 않습니다.");
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "기간이 올바르지 않습니다.");
 
     private final HttpStatus status;
     private final String message;

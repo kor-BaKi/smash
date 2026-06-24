@@ -14,8 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-// Phase 2(자유활동 기간 관리 UI/API)에서 관리 예정. 지금은 엔티티+조회만 두고
-// 데이터는 직접 등록한다고 가정(스케줄러가 오늘이 이 기간에 속하는지만 확인).
+// 임원이 직접 등록/삭제(FreePeriodService). 스케줄러는 오늘이 이 기간에 속하는지만 확인.
 @Entity
 @Table(name = "free_period")
 @Getter
@@ -44,6 +43,10 @@ public class FreePeriod {
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
+    }
+
+    public static FreePeriod create(String name, LocalDate startDate, LocalDate endDate) {
+        return FreePeriod.builder().name(name).startDate(startDate).endDate(endDate).build();
     }
 
     public boolean includes(LocalDate date) {
