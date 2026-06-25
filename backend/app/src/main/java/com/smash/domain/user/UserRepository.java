@@ -12,4 +12,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByStudentNo(String studentNo);
 
+    int countByGroupId(Long groupId);
+
 }
