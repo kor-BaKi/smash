@@ -29,10 +29,10 @@ public class ActivitySchedule { // 스케줄러가 자동으로 매일 활동을
     private TimeSlot timeSlot;
 
     @Column(nullable = false)
-    private Boolean isActive;
+    private boolean isActive;
 
     @Builder
-    public ActivitySchedule(DayOfWeek dayOfWeek, TimeSlot timeSlot, Boolean isActive) {
+    public ActivitySchedule(DayOfWeek dayOfWeek, TimeSlot timeSlot, boolean isActive) {
         this.dayOfWeek = dayOfWeek;
         this.timeSlot = timeSlot;
         this.isActive = isActive;
