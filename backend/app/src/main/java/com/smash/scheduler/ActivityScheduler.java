@@ -22,7 +22,7 @@ public class ActivityScheduler {
     private final GroupRepository groupRepository;
 
     // 매일 자정에 실행 : [초] : (0 = 0초) [분] : (0 = 0분) [시] (0 = 0시) [일] : (* = 매일) [월] : * = 매월) [요일] : (* = 매일)
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 9 * * 1-5")
     @Transactional
     public void createDetailActivities() {
         LocalDate today = LocalDate.now();
