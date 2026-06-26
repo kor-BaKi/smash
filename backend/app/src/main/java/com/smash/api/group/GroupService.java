@@ -20,7 +20,7 @@ public class GroupService {
     @Transactional
     public void createGroups(GroupRequest request) {
         for (GroupRequest.GroupItem item : request.getGroups()) { // 조 배열을 하나씩 순회하면서 이미 존재하는 조합이면 skip, 없으면 새로 저장. 중복 등록을 막는 로직.
-            if (!groupRepository.existsAllByDayOfWeekAndTimeSlot(
+            if (!groupRepository.existsByDayOfWeekAndTimeSlot(
                     item.getDayOfWeek(), item.getTimeSlot()
             )) {
                 groupRepository.save(Group.builder()
