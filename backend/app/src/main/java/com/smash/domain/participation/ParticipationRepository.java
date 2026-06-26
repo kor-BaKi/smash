@@ -58,4 +58,6 @@ public interface ParticipationRepository extends JpaRepository<Participation, In
             @Param("userId") Long userId,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
+
+    List<Participation> findByActivity(Activity activity);
 }

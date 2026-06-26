@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "activity", uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "acitivity_date"})) // 같은 조에 같은 날짜로 활동이 중복 생성되는 걸 DB 레벨에서 막습니다. 스케줄러가 실수로 두 번 실행돼도 중복이 생기지 않습니다.
+@Table(name = "activity", uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "activity_date"})) // 같은 조에 같은 날짜로 활동이 중복 생성되는 걸 DB 레벨에서 막습니다. 스케줄러가 실수로 두 번 실행돼도 중복이 생기지 않습니다.
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Activity {
