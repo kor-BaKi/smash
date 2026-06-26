@@ -15,7 +15,7 @@ public class ApiResponse<T> {
         this.error = error;
     }
 
-    public static <T> ApiResponse<T> success(T data) {
+    public static <T> ApiResponse<T> success(T data) { // { success: true, data: [...] } 구조로 감싸기
         return new ApiResponse<>(true, data, null);
     }
 

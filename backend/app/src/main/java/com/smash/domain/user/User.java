@@ -73,4 +73,8 @@ public class User {
         this.password = encodedPassword;
         this.status = Status.ACTIVE;
     }
+
+    public void assignGroup(Long groupId) {
+        this.groupId = groupId;
+    }
 }
