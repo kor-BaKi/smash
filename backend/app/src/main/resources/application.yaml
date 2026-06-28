@@ -26,4 +26,8 @@ jwt:
   access-expiration: 1800000  # 30분
   refresh-expiration: 1209600000 # 14일
 
-
+logging:
+  level:
+    org.hibernate.SQL: debug
+    com.smash: debug
+    org.springframework.web: debug

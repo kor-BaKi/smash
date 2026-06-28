@@ -19,4 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.groupId IS NULL AND u.status = 'ACTIVE' AND u.deletedAt IS NULL")
     List<User> findUnassignedMembers();
 
+    List<User> findByGroupId(Long groupId);
+
+    @Query("SELECT u FROM User u WHERE u.status = 'ACTIVE' AND u.deletedAt IS NULL")
+    List<User> findAllActiveMembers();
 }
