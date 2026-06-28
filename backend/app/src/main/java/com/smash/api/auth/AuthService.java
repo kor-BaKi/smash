@@ -3,6 +3,8 @@ package com.smash.api.auth;
 import com.smash.auth.JwtProvider;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.invite.InviteCodeRepository;
+import com.smash.domain.token.RefreshToken;
+import com.smash.domain.token.RefreshTokenRepository;
 import com.smash.domain.user.Status;
 import com.smash.domain.user.User;
 import com.smash.domain.user.UserRepository;
@@ -10,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +23,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final InviteCodeRepository inviteCodeRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public AuthResponse signup(SignupRequest request) {
@@ -41,7 +46,7 @@ public class AuthService {
         return buildAuthResponse(user);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByStudentNo(request.getStudentNo())
                 .orElseThrow(() -> new BusinessException(
@@ -64,6 +69,17 @@ public class AuthService {
                 user.getId(), user.getRole().name());
         String refreshToken = jwtProvider.generateRefreshToken(user.getId());
 
+        // Refresh Token 서버 저장 (있으면 교체, 없으면 새로 생성)
+        LocalDateTime expiresAt = LocalDateTime.now()
+                .plusSeconds(jwtProvider.getRefreshExpiration() / 1000);
+
+        refreshTokenRepository.findByUserId(user.getId())
+                .ifPresentOrElse(
+                        existing -> existing.rotate(refreshToken, expiresAt),
+                        () -> refreshTokenRepository.save(RefreshToken.builder()
+                                .userId(user.getId()).token(refreshToken).expiresAt(expiresAt).build())
+                );
+
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -74,5 +90,55 @@ public class AuthService {
                         .groupId(user.getGroupId())
                         .build())
                 .build();
+    }
+
+    // 토큰 재발급
+    @Transactional
+    public AuthResponse refresh(String refreshToken) {
+        // 서버에 저장된 토큰과 비교
+        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new BusinessException(
+                        "INVALID_REFRESH_TOKEN", "유효하지 않는 리프레시 토큰입니다."
+                ));
+
+        // JWT 유효성 검증
+        if (!jwtProvider.isValid(refreshToken)) {
+            refreshTokenRepository.delete(stored);
+            throw new BusinessException("INVALID_REFRESH_TOKEN", "만료된 리프레시 토큰입니다.");
+        }
+
+        // 새 토큰 발급
+        Long userId = jwtProvider.getUserId(refreshToken);
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(
+                "RESOURCE_NOT_FOUND", "유저를 찾을 수 없습니다."
+        ));
+
+        String newAccessToken = jwtProvider.generateAccessToken(
+                user.getId(), user.getRole().name()
+        );
+        String newRefreshToken = jwtProvider.generateRefreshToken(user.getId());
+
+        LocalDateTime expiresAt = LocalDateTime.now()
+                .plusSeconds(jwtProvider.getRefreshExpiration() / 1000);
+
+        // 기존 토큰 교체
+        stored.rotate(newRefreshToken, expiresAt);
+
+        return AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .user(AuthResponse.UserInfo.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .role(user.getRole().name())
+                        .groupId(user.getGroupId())
+                        .build())
+                .build();
+    }
+
+    // 로그아웃
+    @Transactional
+    public void logout(Long userId) {
+        refreshTokenRepository.deleteByUserId(userId);
     }
 }

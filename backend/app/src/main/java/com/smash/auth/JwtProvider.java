@@ -80,4 +80,8 @@ public class JwtProvider { // 토큰을 만들고 검증
             return false;
         }
     }
+
+    public long getRefreshExpiration() {
+        return refreshExpiration;
+    }
 }
