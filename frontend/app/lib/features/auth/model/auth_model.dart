@@ -38,7 +38,7 @@ class AuthResponse {
     return AuthResponse(
       accessToken: json['data']['accessToken'],
       refreshToken: json['data']['refreshToken'],
-      user: json['date']['user'],
+      user: UserInfo.fromJson(json['data']['user']),
     );
   }
 }

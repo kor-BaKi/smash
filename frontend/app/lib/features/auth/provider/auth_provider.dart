@@ -11,14 +11,18 @@ class AuthState {
   // user = UserInfo, isLoading = false → 로그인 완료
   // user = null, errorMessage = "실패" → 로그인 실패
   final UserInfo? user;
-  final bool? isLoading;
+  final bool isLoading;
   final String? errorMessage;
 
-  const AuthState({this.user, this.isLoading, this.errorMessage});
+  const AuthState({this.user, this.isLoading = false, this.errorMessage});
 
   bool get isLoggedIn => user != null;
 
-  AuthState copyWith({UserInfo? user, bool? isLoading, String? errorMessage}) {
+  AuthState copyWith({
+    UserInfo? user,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
     return AuthState(
       // ?? :  null 이면 오른쪽 값 사용
       user: user ?? this.user,
@@ -48,7 +52,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = state.copyWith(user: auth.user, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: '로그인에 실패했습니다.');
+      print('로그인 에러: $e'); // 추가
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: '로그인에 실패했습니다.',
+      );
     }
   }
 
