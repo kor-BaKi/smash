@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../auth/provider/auth_provider.dart';
+import 'member_home_view.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -31,9 +31,9 @@ class HomePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Text(user.isAdmin ? '임원 홈 (준비 중)' : '부원 홈 (준비 중)'),
-      ),
+      body: user.isAdmin
+          ? const Center(child: Text('임원 홈 (준비 중)'))
+          : const MemberHomeView(),
     );
   }
 }
