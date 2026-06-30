@@ -11,6 +11,16 @@ class ActivityApi {
     return response.data['data'];
   }
 
+  // 이월 후보 조회
+  static Future<List<dynamic>> getCarryoverCandidates(
+    int activityId,
+  ) async {
+    final response = await _dio.get(
+      '/me/activities/$activityId/carryover-candidates',
+    );
+    return response.data['data'];
+  }
+
   // 참여 응답
   static Future<void> participate({
     required int activityId,
