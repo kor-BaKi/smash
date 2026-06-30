@@ -5,7 +5,7 @@ import 'package:app/features/auth/model/auth_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthState {
-  // 앱의 로그인 상태를 표현하는 데이터 클래스
+  // 앱의 로그인 상태를 표현하는 데이터 클래스 (지금 누가 로그인했는지)
   // user = null, isLoading = false  → 비로그인 상태
   // user = null, isLoading = true   → 로그인 요청 중
   // user = UserInfo, isLoading = false → 로그인 완료
