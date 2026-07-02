@@ -1,5 +1,7 @@
+import 'package:app/features/home/page/availability_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../auth/provider/auth_provider.dart';
 import 'member_home_view.dart';
 
@@ -33,6 +35,8 @@ class HomePage extends ConsumerWidget {
       ),
       body: user.isAdmin
           ? const Center(child: Text('임원 홈 (준비 중)'))
+          : user.groupId == null
+          ? const AvailabilityPage()
           : const MemberHomeView(),
     );
   }
