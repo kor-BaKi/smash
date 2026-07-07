@@ -34,4 +34,10 @@ class AuthApi {
   static Future<void> logout() async {
     await _dio.post('/auth/logout');
   }
+
+  // 내 정보 조회
+  static Future<Map<String, dynamic>> getMe() async {
+    final response = await _dio.get('/me');
+    return response.data;
+  }
 }

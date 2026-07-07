@@ -73,9 +73,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // 앱 시작 시 토큰 확인
   Future<void> checkToken() async {
     final token = await TokenStorage.getAccessToken();
-    if (token == null) return;
-    // 토큰 있으면 로그인 상태 유지
-    // 실제로는 /me API로 유저 정보를 다시 가져와야 하지만 MVP에서는 로그인 화면으로 보내는 것을 처리
+    if (token == null) return; // 토큰 없으면 로그인 화면
+
+    try {
+      final response = await AuthApi.getMe();
+      final user = UserInfo.fromJson(response['data']);
+      state = state.copyWith(user: user);
+    } catch (e) {
+      // 토큰 만료 or 오류 -> 토큰 삭제 후 로그인 화면
+      await TokenStorage.deleteAll();
+    }
   }
 }
 

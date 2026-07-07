@@ -141,4 +141,18 @@ public class AuthService {
     public void logout(Long userId) {
         refreshTokenRepository.deleteByUserId(userId);
     }
+
+    @Transactional(readOnly = true)
+    public AuthResponse.UserInfo getMe(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "유저를 찾을 수 없습니다."
+                ));
+        return AuthResponse.UserInfo.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .role(user.getRole().name())
+                .groupId(user.getGroupId())
+                .build();
+    }
 }
