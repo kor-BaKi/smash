@@ -41,4 +41,9 @@ public class InviteCode {
     public void toggleActive(boolean isActive) {
         this.isActive = isActive;
     }
+
+    public void regenerate(String newCode) {
+        this.code = newCode;
+        this.isActive = true;
+    }
 }
