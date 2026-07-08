@@ -6,9 +6,9 @@ import com.smash.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,5 +30,19 @@ public class AdminMemberController {
             @RequestBody MemberRegisterRequest.BulkRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
                 adminMemberService.registerMembers(request)));
+    }
+
+    // 지원자(PENDING) 목록 조회
+    @GetMapping("/api/v1/admin/members/pending")
+    public ResponseEntity<ApiResponse<List<MemberRegisterResponse>>> getPendingApplicants() {
+        return ResponseEntity.ok(ApiResponse.success(
+                adminMemberService.getPendingApplicants()));
+    }
+
+    // 불합격 처리
+    @PatchMapping("/api/v1/admin/members/{userId}/reject")
+    public ResponseEntity<ApiResponse<Void>> reject(@PathVariable Long userId) {
+        adminMemberService.reject(userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

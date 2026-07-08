@@ -77,4 +77,8 @@ public class User {
     public void assignGroup(Long groupId) {
         this.groupId = groupId;
     }
+
+    public void reject() {
+        this.status = Status.REJECTED;
+    }
 }

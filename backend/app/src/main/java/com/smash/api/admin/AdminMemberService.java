@@ -98,4 +98,33 @@ public class AdminMemberService {
                 .successCount(succeeded.size())
                 .build();
     }
+
+    // 지원자(PENDING) 목록 조회
+    @Transactional(readOnly = true)
+    public List<MemberRegisterResponse> getPendingApplicants() {
+        return userRepository.findAllPending()
+                .stream()
+                .map(user -> MemberRegisterResponse.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .studentNo(user.getStudentNo())
+                        .status(user.getStatus().name())
+                        .build())
+                .toList();
+    }
+
+    // 불합격 처리
+    @Transactional
+    public void reject(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new com.smash.common.exception.BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 지원자입니다."));
+
+        if (user.getStatus() != Status.PENDING) {
+            throw new com.smash.common.exception.BusinessException(
+                    "INVALID_STATUS", "대기 상태인 지원자만 불합격 처리할 수 있습니다.");
+        }
+
+        user.reject();
+    }
 }
