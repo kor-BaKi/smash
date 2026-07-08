@@ -1,12 +1,12 @@
 package com.smash.api.activity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
 @Builder
 public class ActivityDetailResponse {
 
@@ -18,6 +18,17 @@ public class ActivityDetailResponse {
     private Summary summary;
     private Participants participants;
 
+    public Long getActivityId() { return activityId; }
+    public LocalDate getActivityDate() { return activityDate; }
+    public String getGroupLabel() { return groupLabel; }
+    public String getActivityType() { return activityType; }
+
+    @JsonProperty("isCancelled")
+    public boolean isCancelled() { return isCancelled; }
+
+    public Summary getSummary() { return summary; }
+    public Participants getParticipants() { return participants; }
+
     @Getter
     @Builder
     public static class Summary {
@@ -27,7 +38,6 @@ public class ActivityDetailResponse {
         private int freeAttend;
         private int absent;
     }
-
 
     @Getter
     @Builder

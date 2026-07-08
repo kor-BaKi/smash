@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../model/activity_model.dart';
 import '../provider/activity_provider.dart';
+import 'activity_detail_dialog.dart';
 
 class MemberHomeView extends ConsumerStatefulWidget {
   const MemberHomeView({super.key});
@@ -127,6 +128,21 @@ class _ActivityCard extends ConsumerWidget {
                   ),
                 ),
               ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => ActivityDetailDialog(
+                      activityId: activity.activityId,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.bar_chart, size: 18),
+                label: const Text('투표 결과 보기'),
+              ),
+            ),
           ],
         ),
       ),

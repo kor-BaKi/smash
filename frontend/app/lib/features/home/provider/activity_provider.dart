@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/activity_api.dart';
+import '../model/activity_detail_model.dart';
 import '../model/activity_model.dart';
 import '../model/carryover_candidate_model.dart';
 
@@ -10,6 +11,8 @@ class ActivityState {
   final String? errorMessage;
   final List<CarryoverCandidate> carryoverCandidates;
   final bool isLoadingCandidates;
+  final ActivityDetail? selectedDetail;
+  final bool isLoadingDetail;
 
   const ActivityState({
     this.activities = const [],
@@ -17,6 +20,8 @@ class ActivityState {
     this.errorMessage,
     this.carryoverCandidates = const [],
     this.isLoadingCandidates = false,
+    this.selectedDetail,
+    this.isLoadingDetail = false,
   });
 
   ActivityState copyWith({
@@ -25,6 +30,8 @@ class ActivityState {
     String? errorMessage,
     List<CarryoverCandidate>? carryoverCandidates,
     bool? isLoadingCandidates,
+    ActivityDetail? selectedDetail,
+    bool? isLoadingDetail,
   }) {
     return ActivityState(
       activities: activities ?? this.activities,
@@ -32,6 +39,8 @@ class ActivityState {
       errorMessage: errorMessage ?? this.errorMessage,
       carryoverCandidates: carryoverCandidates ?? this.carryoverCandidates,
       isLoadingCandidates: isLoadingCandidates ?? this.isLoadingCandidates,
+      selectedDetail: selectedDetail ?? this.selectedDetail,
+      isLoadingDetail: isLoadingDetail ?? this.isLoadingDetail,
     );
   }
 }
@@ -96,6 +105,24 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       await loadTodayActivities();
     } catch (e) {
       state = state.copyWith(errorMessage: '참여 응답에 실패했습니다.');
+    }
+  }
+
+  // 활동 상세(투표 결과) 조회 - 추가
+  Future<void> loadActivityDetail(int activityId) async {
+    state = state.copyWith(isLoadingDetail: true, errorMessage: null);
+
+    try {
+      final data = await ActivityApi.getActivityDetail(activityId);
+      state = state.copyWith(
+        selectedDetail: ActivityDetail.fromJson(data),
+        isLoadingDetail: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoadingDetail: false,
+        errorMessage: '투표 결과를 불러오지 못했습니다.',
+      );
     }
   }
 }

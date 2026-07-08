@@ -40,4 +40,12 @@ class ActivityApi {
   static Future<void> cancelParticipation(int activityId) async {
     await _dio.delete('/me/activities/$activityId/participation');
   }
+
+  // 활동 상세 조회 (투표 결과) - 추가
+  static Future<Map<String, dynamic>> getActivityDetail(
+    int activityId,
+  ) async {
+    final response = await _dio.get('/activities/$activityId');
+    return response.data['data'];
+  }
 }

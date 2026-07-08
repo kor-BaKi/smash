@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/provider/auth_provider.dart';
+import 'attendance_page.dart';
 import 'member_home_view.dart';
 
 class HomePage extends ConsumerWidget {
@@ -31,20 +32,34 @@ class HomePage extends ConsumerWidget {
       // 임원만 사이드 메뉴 노출
       drawer: user.isAdmin ? const _AdminDrawer() : null,
       body: user.groupId == null
-          ? const _NeedGroupNotice()
+          ? _NeedGroupNotice(isAdmin: user.isAdmin)
           : const MemberHomeView(),
     );
   }
 }
 
 class _NeedGroupNotice extends StatelessWidget {
-  const _NeedGroupNotice();
+  const _NeedGroupNotice({required this.isAdmin});
+
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
-    // 조 미배정 상태 (가능 요일 제출 화면은 별도 라우트로 이미 처리 중이므로
-    // 여기서는 안내만 표시. 라우팅에서 이미 걸러지는 케이스.
-    return const Center(child: Text('조 배정을 기다리는 중입니다.'));
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('조 배정을 기다리는 중입니다.'),
+          if (isAdmin) ...[
+            const SizedBox(height: 8),
+            Text(
+              '왼쪽 상단 메뉴에서 운영 기능을 이용할 수 있습니다.',
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 
@@ -75,7 +90,15 @@ class _AdminDrawer extends StatelessWidget {
             _DrawerItem(
               icon: Icons.bar_chart,
               label: '출석 현황',
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AttendancePage(),
+                  ),
+                );
+              },
             ),
             _DrawerItem(
               icon: Icons.auto_awesome,
