@@ -1,32 +1,38 @@
-import 'package:app/features/auth/provider/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+import '../provider/auth_provider.dart';
+
+class SignupPage extends ConsumerStatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  ConsumerState<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
+class _SignupPageState extends ConsumerState<SignupPage> {
+  final _codeController = TextEditingController();
   final _studentNoController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
+    _codeController.dispose();
     _studentNoController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _signup() async {
     if (!_formKey.currentState!.validate()) return;
     await ref
         .read(authProvider.notifier)
-        .login(_studentNoController.text.trim(), _passwordController.text);
+        .signup(
+          _codeController.text.trim(),
+          _studentNoController.text.trim(),
+          _passwordController.text,
+        );
   }
 
   @override
@@ -34,6 +40,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
+      appBar: AppBar(title: const Text('회원가입')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -43,22 +50,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'SMASH',
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+                // 가입코드
+                TextFormField(
+                  controller: _codeController,
+                  decoration: const InputDecoration(
+                    labelText: '가입코드',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.vpn_key),
                   ),
-                  textAlign: TextAlign.center,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '가입코드를 입력해주세요.';
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  '배드민턴 동아리 운영 관리',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 16),
 
+                // 학번
                 TextFormField(
                   controller: _studentNoController,
                   keyboardType: TextInputType.number,
@@ -76,6 +85,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 16),
 
+                // 비밀번호
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -88,12 +98,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     if (value == null || value.isEmpty) {
                       return '비밀번호를 입력해주세요.';
                     }
+                    if (value.length < 4) {
+                      return '비밀번호는 4자 이상이어야 합니다.';
+                    }
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 8),
 
+                // 에러 메시지
                 if (authState.errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -106,8 +119,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 const SizedBox(height: 16),
 
+                // 회원가입 버튼
                 ElevatedButton(
-                  onPressed: authState.isLoading ? null : _login,
+                  onPressed: authState.isLoading ? null : _signup,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -115,12 +129,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ? const CircularProgressIndicator(
                           color: Colors.white,
                         )
-                      : const Text('로그인', style: TextStyle(fontSize: 16)),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => context.push('/signup'),
-                  child: const Text('아직 계정이 없으신가요? 가입하기'),
+                      : const Text('가입하기', style: TextStyle(fontSize: 16)),
                 ),
               ],
             ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'features/auth/page/signup_page.dart';
 import 'features/auth/provider/auth_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -17,8 +18,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isLoggedIn = authState.isLoggedIn;
       final isLoginPage = state.matchedLocation == '/login';
+      final isSignupPage = state.matchedLocation == '/signup';
 
-      if (!isLoggedIn && !isLoginPage) return '/login';
+      if (!isLoggedIn && !isLoginPage && !isSignupPage) return '/login';
       if (isLoggedIn && isLoginPage) return '/home';
       return null;
     },
@@ -30,6 +32,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/home',
         builder: (context, state) => const HomePage(),
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupPage(),
       ),
     ],
   );

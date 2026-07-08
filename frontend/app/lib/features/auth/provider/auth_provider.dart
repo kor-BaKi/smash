@@ -84,6 +84,35 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await TokenStorage.deleteAll();
     }
   }
+
+  // 회원가입
+  Future<void> signup(
+    String code,
+    String studentNo,
+    String password,
+  ) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final response = await AuthApi.signup(
+        code: code,
+        studentNo: studentNo,
+        password: password,
+      );
+
+      final auth = AuthResponse.fromJson(response);
+
+      await TokenStorage.saveAccessToken(auth.accessToken);
+      await TokenStorage.saveRefreshToken(auth.refreshToken);
+
+      state = state.copyWith(user: auth.user, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: '회원가입에 실패했습니다. 가입코드와 학번을 확인해주세요.',
+      );
+    }
+  }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
