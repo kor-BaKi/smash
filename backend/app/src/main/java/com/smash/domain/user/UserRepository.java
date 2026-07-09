@@ -26,4 +26,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.status = 'PENDING' ORDER BY u.createdAt DESC")
     List<User> findAllPending();
+
+    @Query("SELECT u FROM User u WHERE u.status IN ('PENDING', 'REJECTED') ORDER BY u.createdAt DESC")
+    List<User> findAllApplicants();
 }

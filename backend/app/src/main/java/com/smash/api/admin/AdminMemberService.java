@@ -99,10 +99,10 @@ public class AdminMemberService {
                 .build();
     }
 
-    // 지원자(PENDING) 목록 조회
+    // 지원자 전체 목록 조회 (합격 대기 + 불합격 모두 포함)
     @Transactional(readOnly = true)
     public List<MemberRegisterResponse> getPendingApplicants() {
-        return userRepository.findAllPending()
+        return userRepository.findAllApplicants()
                 .stream()
                 .map(user -> MemberRegisterResponse.builder()
                         .id(user.getId())
@@ -126,5 +126,20 @@ public class AdminMemberService {
         }
 
         user.reject();
+    }
+
+    // 불합격 취소 (다시 PENDING으로 복구)
+    @Transactional
+    public void restore(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new com.smash.common.exception.BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 지원자입니다."));
+
+        if (user.getStatus() != Status.REJECTED) {
+            throw new com.smash.common.exception.BusinessException(
+                    "INVALID_STATUS", "불합격 상태인 지원자만 복구할 수 있습니다.");
+        }
+
+        user.restorePending();
     }
 }

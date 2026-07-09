@@ -36,4 +36,20 @@ class MemberRegisterApi {
     );
     return response.data['data'];
   }
+
+  // 지원자(PENDING) 목록 조회
+  static Future<List<dynamic>> getPendingApplicants() async {
+    final response = await _dio.get('/admin/members/pending');
+    return response.data['data'];
+  }
+
+  // 불합격 처리
+  static Future<void> reject(int userId) async {
+    await _dio.patch('/admin/members/$userId/reject');
+  }
+
+  // 불합격 취소(복구)
+  static Future<void> restore(int userId) async {
+    await _dio.patch('/admin/members/$userId/restore');
+  }
 }

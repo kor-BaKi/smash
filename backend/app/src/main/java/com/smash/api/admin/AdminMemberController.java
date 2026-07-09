@@ -45,4 +45,11 @@ public class AdminMemberController {
         adminMemberService.reject(userId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    // 불합격 취소 (복구)
+    @PatchMapping("/api/v1/admin/members/{userId}/restore")
+    public ResponseEntity<ApiResponse<Void>> restore(@PathVariable Long userId) {
+        adminMemberService.restore(userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

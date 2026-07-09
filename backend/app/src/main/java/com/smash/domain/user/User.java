@@ -81,4 +81,8 @@ public class User {
     public void reject() {
         this.status = Status.REJECTED;
     }
+
+    public void restorePending() {
+        this.status = Status.PENDING;
+    }
 }

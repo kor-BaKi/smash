@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/provider/auth_provider.dart';
+import 'applicant_page.dart';
 import 'attendance_page.dart';
 import 'invite_code_page.dart';
 import 'member_home_view.dart';
@@ -108,8 +109,16 @@ class _AdminDrawer extends StatelessWidget {
             ),
             _DrawerItem(
               icon: Icons.person_add,
-              label: '합격자 등록',
-              onTap: () => Navigator.pop(context),
+              label: '지원자 관리',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ApplicantPage(),
+                  ),
+                );
+              },
             ),
             _DrawerItem(
               icon: Icons.vpn_key,
