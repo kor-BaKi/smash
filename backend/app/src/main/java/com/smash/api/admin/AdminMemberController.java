@@ -52,4 +52,18 @@ public class AdminMemberController {
         adminMemberService.restore(userId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    // 전체 유저 목록 조회
+    @GetMapping("/api/v1/admin/members")
+    public ResponseEntity<ApiResponse<List<MemberRegisterResponse>>> getAllMembers() {
+        return ResponseEntity.ok(ApiResponse.success(adminMemberService.getAllMembers()));
+    }
+
+    // 특정 조 소속 부원 목록
+    @GetMapping("/api/v1/admin/groups/{groupId}/members")
+    public ResponseEntity<ApiResponse<List<MemberRegisterResponse>>> getGroupMembers(
+            @PathVariable Long groupId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                adminMemberService.getGroupMembers(groupId)));
+    }
 }

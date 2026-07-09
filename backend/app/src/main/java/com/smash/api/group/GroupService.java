@@ -56,4 +56,13 @@ public class GroupService {
 
         group.assignLeader(request.getLeaderUserId());
     }
+
+    @Transactional
+    public void removeLeader(Long groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 조입니다."));
+
+        group.assignLeader(null);
+    }
 }

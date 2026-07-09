@@ -3,12 +3,14 @@ class RegisteredMember {
   final String name;
   final String studentNo;
   final String status;
+  final String? role;
 
   RegisteredMember({
     required this.id,
     required this.name,
     required this.studentNo,
     required this.status,
+    this.role,
   });
 
   factory RegisteredMember.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class RegisteredMember {
       name: json['name'],
       studentNo: json['studentNo'],
       status: json['status'],
+      role: json['role'],
     );
   }
 }

@@ -46,12 +46,12 @@ public class AssignmentController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @PatchMapping("/api/v1/amdin/members/{userId}/group")
+    @PatchMapping("/api/v1/admin/members/{userId}/group")
     public ResponseEntity<ApiResponse<Void>> assignMember(
             @PathVariable Long userId,
-            @RequestBody Long groupId
+            @RequestBody GroupAssignRequest request
     ) {
-        assignmentService.assignMember(userId, groupId);
+        assignmentService.assignMember(userId, request.getGroupId());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 

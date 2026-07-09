@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/provider/auth_provider.dart';
 import 'applicant_page.dart';
+import 'assignment_page.dart';
 import 'attendance_page.dart';
+import 'group_management_page.dart';
 import 'invite_code_page.dart';
 import 'member_home_view.dart';
 
@@ -87,7 +89,15 @@ class _AdminDrawer extends StatelessWidget {
             _DrawerItem(
               icon: Icons.groups,
               label: '조 편성 관리',
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const GroupManagementPage(),
+                  ),
+                );
+              },
             ),
             _DrawerItem(
               icon: Icons.bar_chart,
@@ -105,7 +115,15 @@ class _AdminDrawer extends StatelessWidget {
             _DrawerItem(
               icon: Icons.auto_awesome,
               label: '자동 배정',
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AssignmentPage(),
+                  ),
+                );
+              },
             ),
             _DrawerItem(
               icon: Icons.person_add,

@@ -35,6 +35,8 @@ public class Group {
         this.leaderUserId = leaderUserId;
     }
 
+
+
     public String getLabel() {
         return dayOfWeek.getLabel() + " " + timeSlot.getLabel();
     }

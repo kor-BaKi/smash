@@ -35,4 +35,10 @@ public class GroupController {
         groupService.assignLeader(groupId, request);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    @DeleteMapping("/api/v1/admin/groups/{groupId}/leader")
+    public ResponseEntity<ApiResponse<Void>> removeLeader(@PathVariable Long groupId) {
+        groupService.removeLeader(groupId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

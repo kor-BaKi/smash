@@ -13,6 +13,7 @@ public class MemberRegisterResponse {
     private String name;
     private String studentNo;
     private String status;
+    private String role;
 
     @Getter
     @Builder

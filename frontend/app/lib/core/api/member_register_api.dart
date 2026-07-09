@@ -52,4 +52,16 @@ class MemberRegisterApi {
   static Future<void> restore(int userId) async {
     await _dio.patch('/admin/members/$userId/restore');
   }
+
+  // 전체 유저 목록 조회
+  static Future<List<dynamic>> getAllMembers() async {
+    final response = await _dio.get('/admin/members');
+    return response.data['data'];
+  }
+
+  // 특정 조 소속 부원 목록
+  static Future<List<dynamic>> getGroupMembers(int groupId) async {
+    final response = await _dio.get('/admin/groups/$groupId/members');
+    return response.data['data'];
+  }
 }

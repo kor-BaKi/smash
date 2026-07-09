@@ -48,4 +48,9 @@ class ActivityApi {
     final response = await _dio.get('/activities/$activityId');
     return response.data['data'];
   }
+
+  // 개별 수동 배정 (미배정자 등 즉시 배정)
+  static Future<void> assignMember(int userId, int groupId) async {
+    await _dio.patch('/admin/members/$userId/group', data: groupId);
+  }
 }

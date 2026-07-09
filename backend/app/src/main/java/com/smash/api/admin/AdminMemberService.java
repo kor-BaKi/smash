@@ -142,4 +142,34 @@ public class AdminMemberService {
 
         user.restorePending();
     }
+
+    // 전체 유저 목록 조회 (탈퇴자 제외)
+    @Transactional(readOnly = true)
+    public List<MemberRegisterResponse> getAllMembers() {
+        return userRepository.findAllMembers()
+                .stream()
+                .map(user -> MemberRegisterResponse.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .studentNo(user.getStudentNo())
+                        .status(user.getStatus().name())
+                        .role(user.getRole().name())
+                        .build())
+                .toList();
+    }
+
+    // 특정 조 소속 부원 목록
+    @Transactional(readOnly = true)
+    public List<MemberRegisterResponse> getGroupMembers(Long groupId) {
+        return userRepository.findByGroupId(groupId)
+                .stream()
+                .map(user -> MemberRegisterResponse.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .studentNo(user.getStudentNo())
+                        .status(user.getStatus().name())
+                        .role(user.getRole().name())
+                        .build())
+                .toList();
+    }
 }
