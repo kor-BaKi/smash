@@ -1,3 +1,4 @@
+import 'package:app/features/home/page/schedule_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -108,6 +109,19 @@ class _AdminDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const AttendancePage(),
+                  ),
+                );
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.event_available,
+              label: '정규활동 일정',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SchedulePage(),
                   ),
                 );
               },

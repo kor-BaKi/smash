@@ -17,7 +17,7 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
-    @PutMapping("/api/v1/amdin/activity-schedules")
+    @PutMapping("/api/v1/admin/activity-schedules")
     public ResponseEntity<ApiResponse<Void>> updateSchedules(
             @RequestBody @Valid ScheduleRequest request
     ) {
