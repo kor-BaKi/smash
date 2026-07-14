@@ -70,7 +70,7 @@ class _ActivityCard extends ConsumerWidget {
             Row(
               children: [
                 Text(
-                  activity.groupLabel,
+                  '${activity.groupLabel} ${activity.activityType == 'FREE' ? '자유활동' : '정규활동'}',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -160,7 +160,7 @@ class _ActivityCard extends ConsumerWidget {
       case 'OTHER_GROUP':
         return '타조참';
       case 'FREE_ATTEND':
-        return '자유참여';
+        return '참여';
       default:
         return type;
     }
