@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/provider/auth_provider.dart';
+import 'activity_admin_page.dart';
 import 'applicant_page.dart';
 import 'assignment_page.dart';
 import 'attendance_page.dart';
@@ -122,6 +123,19 @@ class _AdminDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const SchedulePage(),
+                  ),
+                );
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.calendar_month,
+              label: '날짜별 활동 관리',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ActivityAdminPage(),
                   ),
                 );
               },
