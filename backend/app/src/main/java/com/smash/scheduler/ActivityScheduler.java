@@ -20,6 +20,7 @@ public class ActivityScheduler {
     private final ActivityScheduleRepository scheduleRepository;
     private final ActivityRepository activityRepository;
     private final GroupRepository groupRepository;
+    private final FreePeriodRepository freePeriodRepository;
 
     // 매일 자정에 실행 : [초] : (0 = 0초) [분] : (0 = 0분) [시] (0 = 0시) [일] : (* = 매일) [월] : * = 매월) [요일] : (* = 매일)
     @Scheduled(cron = "0 0 9 * * 1-5")
@@ -51,15 +52,25 @@ public class ActivityScheduler {
             return;
         }
 
+        ActivityType type = resolveActivityType(date);
+
         Activity activity = Activity.builder()
                 .group(group)
                 .activityDate(date)
-                .activityType(ActivityType.REGULAR)
+                .activityType(type)
                 .createdBy(CreatedBy.AUTO)
                 .build();
 
         activityRepository.save(activity);
-        log.info("활동 생성: {} {} {}", group.getLabel(), date, ActivityType.REGULAR);
+        // 수정
+        log.info("활동 생성: {} {} {}", group.getLabel(), date, type);
+    }
+
+    private ActivityType resolveActivityType(LocalDate date) {
+        return freePeriodRepository.findAll().stream()
+                .anyMatch(period -> period.contains(date))
+                ? ActivityType.FREE
+                : ActivityType.REGULAR;
     }
 
 }
