@@ -7,6 +7,7 @@ import 'activity_admin_page.dart';
 import 'applicant_page.dart';
 import 'assignment_page.dart';
 import 'attendance_page.dart';
+import 'free_period_page.dart';
 import 'group_management_page.dart';
 import 'invite_code_page.dart';
 import 'member_home_view.dart';
@@ -136,6 +137,19 @@ class _AdminDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const ActivityAdminPage(),
+                  ),
+                );
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.beach_access,
+              label: '자유활동 기간',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FreePeriodPage(),
                   ),
                 );
               },

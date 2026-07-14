@@ -104,6 +104,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       // 응답 후 최신 상태로 다시 불러오기
       await loadTodayActivities();
     } catch (e) {
+      print('참여 응답 에러: $e');
       state = state.copyWith(errorMessage: '참여 응답에 실패했습니다.');
     }
   }

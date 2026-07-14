@@ -30,7 +30,7 @@ public class ActivityController {
             @PathVariable Long activityId,
             @RequestBody @Valid ParticipationRequest request
     ) {
-        activityService.participate(activityId, userId, request);
+        activityService.participate(userId, activityId, request);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -49,7 +49,7 @@ public class ActivityController {
             @AuthenticationPrincipal Long userId,
             @PathVariable Long activityId
     ) {
-        activityService.cancelParticipation(activityId, userId);
+        activityService.cancelParticipation(userId, activityId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 

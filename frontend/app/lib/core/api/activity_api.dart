@@ -28,7 +28,7 @@ class ActivityApi {
     int? targetActivityId,
   }) async {
     await _dio.post(
-      'me/activities/$activityId/participation',
+      '/me/activities/$activityId/participation',
       data: {
         'type': type,
         if (targetActivityId != null) 'targetActivityId': targetActivityId,
