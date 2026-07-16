@@ -1,7 +1,10 @@
-import 'package:app/features/auth/provider/auth_provider.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/app_theme.dart';
+import '../provider/auth_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -34,93 +37,126 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.cardBg,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.fromLTRB(28, 40, 28, 28),
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'SMASH',
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
+                  child: const Center(
+                    child: Text(
+                      'S',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 30,
+                      ),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 24),
                 const Text(
-                  '배드민턴 동아리 운영 관리',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                  textAlign: TextAlign.center,
+                  '다시 만나 반가워요',
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                    color: AppColors.ink,
+                  ),
                 ),
-                const SizedBox(height: 48),
-
+                const SizedBox(height: 6),
+                const Text(
+                  'SMASH 계정으로 로그인하세요',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                _buildLabel('학번'),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _studentNoController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '학번',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '학번을 입력해주세요.';
-                    }
-                    return null;
-                  },
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? '학번을 입력해주세요.' : null,
                 ),
                 const SizedBox(height: 16),
-
+                _buildLabel('비밀번호'),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: '비밀번호',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '비밀번호를 입력해주세요.';
-                    }
-                    return null;
-                  },
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? '비밀번호를 입력해주세요.' : null,
                 ),
-
                 const SizedBox(height: 8),
-
                 if (authState.errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
                       authState.errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(
+                        color: AppColors.danger,
+                        fontSize: 13,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-
-                const SizedBox(height: 16),
-
+                const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: authState.isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
                   child: authState.isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
-                      : const Text('로그인', style: TextStyle(fontSize: 16)),
+                      : const Text('로그인'),
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => context.push('/signup'),
-                  child: const Text('아직 계정이 없으신가요? 가입하기'),
+                const SizedBox(height: 20),
+                Center(
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textTertiary,
+                        fontFamily: 'Pretendard',
+                      ),
+                      children: [
+                        const TextSpan(text: '아직 회원이 아니신가요? '),
+                        TextSpan(
+                          text: '가입하기',
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.push('/signup'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -129,4 +165,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ),
     );
   }
+
+  Widget _buildLabel(String text) => Text(
+    text,
+    style: const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      color: AppColors.textTertiary,
+    ),
+  );
 }

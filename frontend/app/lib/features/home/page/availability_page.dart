@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../provider/availability_provider.dart';
 
 class AvailabilityPage extends ConsumerStatefulWidget {
@@ -36,68 +37,138 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
     final state = ref.watch(availabilityProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('가능 요일 선택')),
+      backgroundColor: AppColors.scaffoldBg,
+      appBar: AppBar(title: const Text('가능 요일 제출')),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    '참여 가능한 조를 모두 선택해주세요.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
+                  padding: const EdgeInsets.all(20),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBg,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      '아직 조가 배정되지 않았어요. 참여 가능한 활동을 모두 선택해 주세요.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.primaryDeep,
+                        height: 1.5,
+                      ),
                     ),
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: state.groups.length,
-                    itemBuilder: (context, index) {
-                      final group = state.groups[index];
-                      final isSelected = state.selectedGroupIds.contains(
-                        group.id,
-                      );
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBg,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListView.separated(
+                      itemCount: state.groups.length,
+                      separatorBuilder: (_, __) => const Divider(
+                        height: 1,
+                        color: AppColors.neutralBg,
+                      ),
+                      itemBuilder: (context, index) {
+                        final group = state.groups[index];
+                        final isSelected = state.selectedGroupIds.contains(
+                          group.id,
+                        );
 
-                      return CheckboxListTile(
-                        title: Text(group.label),
-                        value: isSelected,
-                        onChanged: (_) {
-                          ref
+                        return InkWell(
+                          onTap: () => ref
                               .read(availabilityProvider.notifier)
-                              .toggleGroup(group.id);
-                        },
-                      );
-                    },
+                              .toggleGroup(group.id),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : Colors.transparent,
+                                    border: isSelected
+                                        ? null
+                                        : Border.all(
+                                            color: AppColors.divider,
+                                            width: 2,
+                                          ),
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  child: isSelected
+                                      ? const Icon(
+                                          Icons.check,
+                                          size: 16,
+                                          color: Colors.white,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  group.label,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: isSelected
+                                        ? AppColors.ink
+                                        : AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-                if (state.errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      state.errorMessage!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: state.isSubmitting ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: state.isSubmitting
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                          : Text(
-                              '제출 (${state.selectedGroupIds.length}개 선택)',
-                              style: const TextStyle(fontSize: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                  color: AppColors.scaffoldBg,
+                  child: Column(
+                    children: [
+                      if (state.errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            state.errorMessage!,
+                            style: const TextStyle(
+                              color: AppColors.danger,
+                              fontSize: 13,
                             ),
-                    ),
+                          ),
+                        ),
+                      ElevatedButton(
+                        onPressed: state.isSubmitting ? null : _submit,
+                        child: state.isSubmitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('제출하기'),
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../provider/schedule_provider.dart';
 
 const _dayLabels = {
@@ -10,8 +11,10 @@ const _dayLabels = {
   'THU': '목',
   'FRI': '금',
 };
-
-const _timeSlotLabels = {'SLOT_13_15': '1-3시', 'SLOT_15_17': '3-5시'};
+const _timeSlotLabels = {
+  'SLOT_13_15': '13:00–15:00',
+  'SLOT_15_17': '15:00–17:00',
+};
 
 class SchedulePage extends ConsumerStatefulWidget {
   const SchedulePage({super.key});
@@ -24,14 +27,13 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(scheduleProvider.notifier).loadSchedules();
-    });
+    Future.microtask(
+      () => ref.read(scheduleProvider.notifier).loadSchedules(),
+    );
   }
 
   Future<void> _save() async {
     await ref.read(scheduleProvider.notifier).save();
-
     final state = ref.read(scheduleProvider);
     if (state.saved && mounted) {
       ScaffoldMessenger.of(
@@ -45,6 +47,7 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
     final state = ref.watch(scheduleProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
         title: const Text('정규활동 일정'),
         actions: [
@@ -54,13 +57,16 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
                   )
                 : const Text(
                     '저장',
                     style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
           ),
@@ -70,41 +76,61 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    '활성화된 요일에만 매일 자동으로 활동이 생성됩니다.',
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '활성화된 요일에만 매일 자동으로 활동이 생성됩니다.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: state.schedules.length,
-                    itemBuilder: (context, index) {
-                      final item = state.schedules[index];
-                      final label =
-                          '${_dayLabels[item.dayOfWeek]} ${_timeSlotLabels[item.timeSlot]}';
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBg,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListView.separated(
+                      itemCount: state.schedules.length,
+                      separatorBuilder: (_, __) => const Divider(
+                        height: 1,
+                        color: AppColors.neutralBg,
+                      ),
+                      itemBuilder: (context, index) {
+                        final item = state.schedules[index];
+                        final label =
+                            '${_dayLabels[item.dayOfWeek]} ${_timeSlotLabels[item.timeSlot]}';
 
-                      return SwitchListTile(
-                        title: Text(label),
-                        value: item.isActive,
-                        onChanged: (_) {
-                          ref
+                        return SwitchListTile(
+                          title: Text(
+                            label,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: item.isActive
+                                  ? AppColors.ink
+                                  : AppColors.textTertiary,
+                            ),
+                          ),
+                          value: item.isActive,
+                          activeThumbColor: Colors.white,
+                          activeTrackColor: AppColors.primary,
+                          onChanged: (_) => ref
                               .read(scheduleProvider.notifier)
-                              .toggle(item.id);
-                        },
-                      );
-                    },
-                  ),
-                ),
-                if (state.errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Text(
-                      state.errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+                              .toggle(item.id),
+                        );
+                      },
                     ),
                   ),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
     );

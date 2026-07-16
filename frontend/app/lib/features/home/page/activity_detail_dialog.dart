@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../model/activity_detail_model.dart';
 import '../provider/activity_provider.dart';
 
@@ -31,33 +32,30 @@ class _ActivityDetailDialogState
     final state = ref.watch(activityProvider);
     final detail = state.selectedDetail;
 
-    return AlertDialog(
-      title: const Text('투표 결과'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: state.isLoadingDetail
-            ? const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            : state.errorMessage != null
-            ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(state.errorMessage!),
-              )
-            : detail == null
-            ? const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Text('데이터가 없습니다.'),
-              )
-            : _DetailBody(detail: detail),
+    return Dialog(
+      backgroundColor: AppColors.cardBg,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('닫기'),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: SizedBox(
+          width: double.maxFinite,
+          child: state.isLoadingDetail
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : state.errorMessage != null
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(state.errorMessage!),
+                )
+              : detail == null
+              ? const SizedBox()
+              : _DetailBody(detail: detail),
         ),
-      ],
+      ),
     );
   }
 }
@@ -69,106 +67,174 @@ class _DetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '${detail.groupLabel} · ${detail.activityDate}',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+    final total =
+        detail.summary.regular +
+        detail.summary.carryover +
+        detail.summary.otherGroup +
+        detail.summary.freeAttend;
+    final participants = [
+      ...detail.participants.regular,
+      ...detail.participants.carryover,
+      ...detail.participants.otherGroup,
+      ...detail.participants.freeAttend,
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          '투표 결과',
+          style: TextStyle(
+            fontSize: 19,
+            fontWeight: FontWeight.w800,
+            color: AppColors.ink,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          detail.groupLabel,
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textTertiary,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: _StatBox(
+                count: total,
+                label: '참여',
+                bg: AppColors.primaryBg,
+                fg: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _StatBox(
+                count: detail.summary.absent,
+                label: '불참',
+                bg: AppColors.neutralBg,
+                fg: AppColors.textTertiary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          '참여자',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textTertiary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (participants.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              '참여자가 없습니다.',
+              style: TextStyle(color: AppColors.textTertiary),
+            ),
+          )
+        else
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 240),
+            child: SingleChildScrollView(
+              child: Column(
+                children: participants
+                    .map(
+                      (p) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 15,
+                              backgroundColor: AppColors.neutralBg,
+                              child: Text(
+                                p.name.characters.first,
+                                style: const TextStyle(
+                                  color: AppColors.textTertiary,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              p.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          _CountRow(label: '참여', count: detail.summary.regular),
-          _CountRow(label: '이월', count: detail.summary.carryover),
-          _CountRow(label: '타조참', count: detail.summary.otherGroup),
-          _CountRow(label: '자유참여', count: detail.summary.freeAttend),
-          _CountRow(label: '불참', count: detail.summary.absent),
-          const Divider(height: 24),
-          _ParticipantGroup(
-            title: '참여',
-            people: detail.participants.regular,
+        const SizedBox(height: 22),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.neutralBg,
+              foregroundColor: AppColors.textSecondary,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('닫기'),
           ),
-          _ParticipantGroup(
-            title: '이월',
-            people: detail.participants.carryover,
-          ),
-          _ParticipantGroup(
-            title: '타조참',
-            people: detail.participants.otherGroup,
-          ),
-          _ParticipantGroup(
-            title: '자유참여',
-            people: detail.participants.freeAttend,
-          ),
-          _ParticipantGroup(
-            title: '불참',
-            people: detail.participants.absent,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _CountRow extends StatelessWidget {
-  final String label;
+class _StatBox extends StatelessWidget {
   final int count;
+  final String label;
+  final Color bg;
+  final Color fg;
 
-  const _CountRow({required this.label, required this.count});
+  const _StatBox({
+    required this.count,
+    required this.label,
+    required this.bg,
+    required this.fg,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(
-            '$count명',
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ],
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
-}
-
-class _ParticipantGroup extends StatelessWidget {
-  final String title;
-  final List<ParticipantInfo> people;
-
-  const _ParticipantGroup({required this.title, required this.people});
-
-  @override
-  Widget build(BuildContext context) {
-    if (people.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            '$count',
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: fg,
+            ),
           ),
-          const SizedBox(height: 4),
-          Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            children: people
-                .map(
-                  (p) => Chip(
-                    label: Text(p.name),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                )
-                .toList(),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: fg,
+            ),
           ),
         ],
       ),
