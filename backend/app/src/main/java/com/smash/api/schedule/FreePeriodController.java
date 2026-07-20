@@ -6,26 +6,28 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class FreePeriodController {
 
     private final FreePeriodService freePeriodService;
 
-    @GetMapping("/api/v1/admin/free-period")
-    public ResponseEntity<ApiResponse<FreePeriodResponse>> getCurrent() {
-        return ResponseEntity.ok(ApiResponse.success(freePeriodService.getCurrent()));
+    @GetMapping("/api/v1/admin/free-periods")
+    public ResponseEntity<ApiResponse<List<FreePeriodResponse>>> getAll() {
+        return ResponseEntity.ok(ApiResponse.success(freePeriodService.getAll()));
     }
 
-    @PutMapping("/api/v1/admin/free-period")
-    public ResponseEntity<ApiResponse<FreePeriodResponse>> setPeriod(
+    @PostMapping("/api/v1/admin/free-periods")
+    public ResponseEntity<ApiResponse<FreePeriodResponse>> add(
             @RequestBody @Valid FreePeriodRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(freePeriodService.setPeriod(request)));
+        return ResponseEntity.ok(ApiResponse.success(freePeriodService.add(request)));
     }
 
-    @DeleteMapping("/api/v1/admin/free-period")
-    public ResponseEntity<ApiResponse<Void>> clear() {
-        freePeriodService.clear();
+    @DeleteMapping("/api/v1/admin/free-periods/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+        freePeriodService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

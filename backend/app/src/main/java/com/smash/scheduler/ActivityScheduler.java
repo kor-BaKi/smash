@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import jakarta.annotation.PostConstruct;
 
 @Slf4j // Lombok이 log 변수를 자동 생성
 @Component
@@ -21,6 +22,11 @@ public class ActivityScheduler {
     private final ActivityRepository activityRepository;
     private final GroupRepository groupRepository;
     private final FreePeriodRepository freePeriodRepository;
+
+    @PostConstruct
+    public void runOnStartup() {
+        createDetailActivities();
+    }
 
     // 매일 자정에 실행 : [초] : (0 = 0초) [분] : (0 = 0분) [시] (0 = 0시) [일] : (* = 매일) [월] : * = 매월) [요일] : (* = 매일)
     @Scheduled(cron = "0 0 9 * * 1-5")

@@ -140,22 +140,11 @@ class _AdminDrawer extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
               child: Row(
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'S',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20,
-                        ),
-                      ),
+                  Center(
+                    child: Image.asset(
+                      'assets/icon/logo_transparent.png',
+                      width: 140,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(width: 12),

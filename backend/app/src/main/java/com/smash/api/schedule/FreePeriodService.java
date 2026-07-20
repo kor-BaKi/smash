@@ -15,47 +15,51 @@ public class FreePeriodService {
 
     private final FreePeriodRepository freePeriodRepository;
 
-    // 조회 (없으면 null)
+    // 전체 조회
     @Transactional(readOnly = true)
-    public FreePeriodResponse getCurrent() {
-        List<FreePeriod> all = freePeriodRepository.findAll();
-        if (all.isEmpty()) return null;
-        return FreePeriodResponse.of(all.get(0));
+    public List<FreePeriodResponse> getAll() {
+        return freePeriodRepository.findAll().stream()
+                .map(FreePeriodResponse::of)
+                .sorted((a,b) -> a.getStartDate().compareTo(b.getStartDate()))
+                .toList();
     }
 
-    // 설정 (있으면 덮어쓰기, 없으면 생성)
+    // 추가 (기존 기간과 겹치면 거부)
     @Transactional
-    public FreePeriodResponse setPeriod(FreePeriodRequest request) {
+    public FreePeriodResponse add(FreePeriodRequest request) {
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new BusinessException(
-                    "INVALID_INPUT", "종료일은 시작일보다 빠를 수 없습니다.");
+                    "INVALID_INPUT", "종료일은 시작일보다 빠를 수 없습니다."
+            );
         }
 
-        List<FreePeriod> existing = freePeriodRepository.findAll();
+        boolean overlaps = freePeriodRepository.findAll().stream()
+                .anyMatch(existing ->
+                        !request.getStartDate().isAfter(existing.getStartDate()) &&
+                                !existing.getStartDate().isAfter(request.getEndDate()));
 
-        if (existing.isEmpty()) {
-            FreePeriod created = freePeriodRepository.save(
-                    FreePeriod.builder()
-                            .startDate(request.getStartDate())
-                            .endDate(request.getEndDate())
-                            .build());
-            return FreePeriodResponse.of(created);
-        } else {
-            FreePeriod period = existing.get(0);
-            period.update(request.getStartDate(), request.getEndDate());
-
-            if (existing.size() > 1) {
-                for (int i = 1; i < existing.size(); i++) {
-                    freePeriodRepository.delete(existing.get(i));
-                }
-            }
-            return FreePeriodResponse.of(period);
+        if (overlaps) {
+            throw new BusinessException(
+                    "OVERLAPPING_PERIOD", "이미 등록된 기간과 겹칩니다."
+            );
         }
+
+        FreePeriod created = freePeriodRepository.save(
+                FreePeriod.builder()
+                        .startDate(request.getStartDate()).endDate(request.getEndDate()).build()
+        );
+
+        return FreePeriodResponse.of(created);
     }
 
-    // 삭제 (자유활동 기간 해제)
+    // 개발 삭제
     @Transactional
-    public void clear() {
-        freePeriodRepository.deleteAll();
+    public void delete(Long id) {
+        if (!freePeriodRepository.existsById(id)) {
+            throw new BusinessException(
+                    "RESOURCE_NOT_FOUND", "해당 기간을 찾을 수 없습니다."
+            );
+        }
+        freePeriodRepository.deleteById(id);
     }
 }

@@ -294,18 +294,12 @@ public class ActivityService {
 
     // 투표 마감 판정
     private boolean isVoteClosed(Activity activity) {
-
-        return false;
-
-        /*
         LocalTime closeTime = activity.getGroup().getTimeSlot() == TimeSlot.SLOT_13_15
                 ? LocalTime.of(13, 0)  // 1-3시 조면 13시 마감
                 : LocalTime.of(15, 0); // 1-3 조가 아니면 15시 마감
         return LocalDate.now().isAfter(activity.getActivityDate()) ||
                 (LocalDate.now().equals(activity.getActivityDate()) &&
                         LocalTime.now().isAfter(closeTime));
-
-         */
     }
 
 
