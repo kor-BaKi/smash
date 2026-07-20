@@ -44,7 +44,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       backgroundColor: AppColors.cardBg,
       appBar: AppBar(backgroundColor: AppColors.cardBg, elevation: 0),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(28, 0, 28, 28),
           child: Form(
             key: _formKey,

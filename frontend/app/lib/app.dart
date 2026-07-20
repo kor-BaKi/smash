@@ -52,6 +52,7 @@ class SmashApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'SMASH',
       theme: AppTheme.light(),
+      debugShowCheckedModeBanner: false,
       routerConfig: router,
     );
   }
