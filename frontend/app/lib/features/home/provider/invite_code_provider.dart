@@ -75,6 +75,10 @@ class InviteCodeNotifier extends StateNotifier<InviteCodeState> {
     final current = state.code;
     if (current == null) return;
 
+    print(
+      '=== toggle 호출: current.isActive=${current.isActive}, 보낼 값=${!current.isActive}',
+    ); // 추가
+
     try {
       await InviteCodeApi.toggle(current.id, !current.isActive);
       await load(); // 최신 상태 다시 조회
