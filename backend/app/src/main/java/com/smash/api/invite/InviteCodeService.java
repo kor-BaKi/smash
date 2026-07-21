@@ -58,7 +58,7 @@ public class InviteCodeService {
                 .orElseThrow(() -> new BusinessException(
                         "RESOURE_NOT_FOUND", "존재하지 않는 가입코드입니다."
                 ));
-        inviteCode.toggleActive(request.isActive());
+        inviteCode.toggleActive(request.getIsActive());
     }
 
 

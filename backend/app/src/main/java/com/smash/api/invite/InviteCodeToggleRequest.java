@@ -9,5 +9,5 @@ import lombok.Setter;
 public class InviteCodeToggleRequest {
 
     @NotNull
-    private boolean isActive;
+    private Boolean isActive;
 }
