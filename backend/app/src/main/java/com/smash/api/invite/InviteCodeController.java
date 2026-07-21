@@ -29,6 +29,7 @@ public class InviteCodeController {
             @PathVariable Long id,
             @RequestBody @Valid InviteCodeToggleRequest request
     ) {
+        System.out.println("=== toggle 요청값: isActive=" + request.isActive()); // 추가
         inviteCodeService.toggleInviteCode(id, request);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
