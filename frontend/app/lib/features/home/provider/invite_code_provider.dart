@@ -40,7 +40,9 @@ class InviteCodeNotifier extends StateNotifier<InviteCodeState> {
 
     try {
       final data = await InviteCodeApi.getList();
+      print('=== 서버 응답 raw: $data'); // 추가
       final code = data.isEmpty ? null : InviteCode.fromJson(data.first);
+      print('=== 파싱된 isActive: ${code?.isActive}'); // 추가
       state = state.copyWith(code: code, isLoading: false);
     } catch (e) {
       state = state.copyWith(
