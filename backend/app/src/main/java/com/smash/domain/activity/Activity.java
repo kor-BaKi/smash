@@ -1,6 +1,7 @@
 package com.smash.domain.activity;
 
 import com.smash.domain.group.Group;
+import com.smash.domain.group.TimeSlot;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "activity", uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "activity_date"})) // 같은 조에 같은 날짜로 활동이 중복 생성되는 걸 DB 레벨에서 막습니다. 스케줄러가 실수로 두 번 실행돼도 중복이 생기지 않습니다.
@@ -60,6 +62,17 @@ public class Activity {
 
     public void changeType(ActivityType activityType) { // 정규 <-> 자유 전환
         this.activityType = activityType;
+    }
+
+    public boolean isVoteClosed() {
+        LocalTime closeTime = this.group.getTimeSlot() == TimeSlot.SLOT_13_15
+                ? LocalTime.of(13, 0)   // 1-3시 조면 13시 마감
+                : LocalTime.of(15, 0);  // 1-3 조가 아니면 15시 마감
+
+        LocalDate today = LocalDate.now();
+        return today.isAfter(this.activityDate) ||
+                (today.equals(this.activityDate) &&
+                        LocalTime.now().isAfter(closeTime));
     }
 
 }

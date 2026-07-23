@@ -47,7 +47,7 @@ public class ActivityService {
                     user.getGroupId().equals(activity.getGroup().getId()); // 부원의 조 iD와 활동의 조 id가 같은지
 
             List<String> buttons = resolvedButtons(user, activity, isMyGroup);
-            boolean voteClosed = isVoteClosed(activity);
+            boolean voteClosed = activity.isVoteClosed();
 
             Participation myParticipation = participationRepository
                     .findByActivityAndUser(activity, user).orElse(null);
@@ -80,7 +80,7 @@ public class ActivityService {
         Activity activity = getActivity(activityId);
 
         // 투표 마감 확인
-        if (isVoteClosed(activity)) {
+        if (activity.isVoteClosed()) {
             throw new BusinessException("VOTE_CLOSED", "투표가 마감되었습니다.");
         }
 
@@ -164,7 +164,7 @@ public class ActivityService {
         User user = getUser(userId);
         Activity activity = getActivity(activityId);
 
-        if (isVoteClosed(activity)) {
+        if (activity.isVoteClosed()) {
             throw new BusinessException("VOTE_CLOSED", "투표가 마감되어 취소할 수 없습니다.");
         }
 
@@ -291,17 +291,6 @@ public class ActivityService {
 
         return List.of("CARRYOVER", "OTHER_GROUP"); // 본인 조 정규 활동이 아닌 경우 -> 이월 or 타조참
     }
-
-    // 투표 마감 판정
-    private boolean isVoteClosed(Activity activity) {
-        LocalTime closeTime = activity.getGroup().getTimeSlot() == TimeSlot.SLOT_13_15
-                ? LocalTime.of(13, 0)  // 1-3시 조면 13시 마감
-                : LocalTime.of(15, 0); // 1-3 조가 아니면 15시 마감
-        return LocalDate.now().isAfter(activity.getActivityDate()) ||
-                (LocalDate.now().equals(activity.getActivityDate()) &&
-                        LocalTime.now().isAfter(closeTime));
-    }
-
 
 
 
