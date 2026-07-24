@@ -45,8 +45,7 @@ class FreePeriodServiceTest {
         request.setStartDate(LocalDate.of(2026, 6, 30));
         request.setEndDate(LocalDate.of(2026, 6, 1));
 
-        when(freePeriodRepository.findAll()).thenReturn(Collections.emptyList());
-
+        // findAll() stub 제거 — 이 케이스는 findAll()에 도달하지 않음
         assertThatThrownBy(() -> freePeriodService.add(request))
                 .isInstanceOf(BusinessException.class);
     }
@@ -61,9 +60,10 @@ class FreePeriodServiceTest {
 
         when(freePeriodRepository.findAll()).thenReturn(List.of(existing));
 
+        // 기존 기간(6/1~6/30) 안에 완전히 포함되는 기간
         FreePeriodRequest request = new FreePeriodRequest();
-        request.setStartDate(LocalDate.of(2026, 6, 15));
-        request.setEndDate(LocalDate.of(2026, 7, 15));
+        request.setStartDate(LocalDate.of(2026, 6, 1));
+        request.setEndDate(LocalDate.of(2026, 6, 15));
 
         assertThatThrownBy(() -> freePeriodService.add(request))
                 .isInstanceOf(BusinessException.class);
