@@ -7,6 +7,7 @@ import '../../auth/provider/auth_provider.dart';
 import 'activity_admin_page.dart';
 import 'applicant_page.dart';
 import 'assignment_page.dart';
+import 'availability_page.dart';
 import 'free_period_page.dart';
 import 'group_management_page.dart';
 import 'invite_code_page.dart';
@@ -105,18 +106,53 @@ class _NeedGroupNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('조 배정을 기다리는 중입니다.'),
-          if (isAdmin) ...[
-            const SizedBox(height: 8),
-            Text(
-              '왼쪽 상단 메뉴에서 운영 기능을 이용할 수 있습니다.',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              '아직 조가 배정되지 않았어요.',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
+            const SizedBox(height: 8),
+            if (isAdmin) ...[
+              Text(
+                '왼쪽 상단 메뉴에서 운영 기능을 이용할 수 있습니다.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textTertiary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ] else ...[
+              Text(
+                '참여 가능한 요일을 제출해주세요.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textTertiary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AvailabilityPage(),
+                    ),
+                  );
+                },
+                child: const Text('가능 요일 제출하기'),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
