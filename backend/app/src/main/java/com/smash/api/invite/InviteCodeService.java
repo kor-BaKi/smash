@@ -56,7 +56,7 @@ public class InviteCodeService {
     public void toggleInviteCode(Long id, InviteCodeToggleRequest request) {
         InviteCode inviteCode = inviteCodeRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(
-                        "RESOURE_NOT_FOUND", "존재하지 않는 가입코드입니다."
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 가입코드입니다."
                 ));
         inviteCode.toggleActive(request.getIsActive());
     }
