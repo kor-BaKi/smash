@@ -20,6 +20,8 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,21 +38,35 @@ public class ActivityService {
         User user = getUser(userId);
         LocalDate today = LocalDate.now();
 
-        // 오늘 전체 활동 조회 (lazy 생성 포함)
         List<Activity> todayActivities = activityRepository.findByActivityDate(today);
+
+        // 활동 ID 목록 추출
+        List<Long> activityIds = todayActivities.stream()
+                .map(Activity::getId)
+                .toList();
+
+        // participation을 한 번에 조회
+        List<Participation> myParticipations = participationRepository
+                .findByActivityIdInAndUserId(activityIds, userId);
+
+        // activityId → participation 맵으로 변환
+        Map<Long, Participation> participationMap = myParticipations.stream()
+                .collect(Collectors.toMap(
+                        p -> p.getActivity().getId(),
+                        p -> p
+                ));
 
         List<ActivityResponse> responses = new ArrayList<>();
         for (Activity activity : todayActivities) {
             if (activity.isCancelled()) continue;
 
-            boolean isMyGroup = user.getGroupId() != null && // 부원이 조에 배정됐는지
-                    user.getGroupId().equals(activity.getGroup().getId()); // 부원의 조 iD와 활동의 조 id가 같은지
+            boolean isMyGroup = user.getGroupId() != null &&
+                    user.getGroupId().equals(activity.getGroup().getId());
 
             List<String> buttons = resolvedButtons(user, activity, isMyGroup);
             boolean voteClosed = activity.isVoteClosed();
 
-            Participation myParticipation = participationRepository
-                    .findByActivityAndUser(activity, user).orElse(null);
+            Participation myParticipation = participationMap.get(activity.getId());
 
             responses.add(ActivityResponse.builder()
                     .activityId(activity.getId())
@@ -58,15 +74,16 @@ public class ActivityService {
                     .groupId(activity.getGroup().getId())
                     .groupLabel(activity.getGroup().getLabel())
                     .activityType(activity.getActivityType())
-                    .isMyGroup(isMyGroup).availableButtons(buttons)
+                    .isMyGroup(isMyGroup)
+                    .availableButtons(buttons)
                     .myParticipation(myParticipation == null ? null
                             : ActivityResponse.ParticipationInfo.builder()
-                                    .participationId(myParticipation.getId())
-                                    .type(myParticipation.getType().name())
-                                    .targetActivityId(myParticipation.getCarryoverTarget() == null
-                                                      ? null : myParticipation.getCarryoverTarget().getId())
-                                    .build())
-                            .voteClosed(voteClosed)
+                            .participationId(myParticipation.getId())
+                            .type(myParticipation.getType().name())
+                            .targetActivityId(myParticipation.getCarryoverTarget() == null
+                                              ? null : myParticipation.getCarryoverTarget().getId())
+                            .build())
+                    .voteClosed(voteClosed)
                     .build());
         }
 

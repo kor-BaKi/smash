@@ -60,4 +60,9 @@ public interface ParticipationRepository extends JpaRepository<Participation, In
             @Param("end") LocalDate end);
 
     List<Participation> findByActivity(Activity activity);
+
+    @Query("SELECT p FROM Participation p WHERE p.activity.id IN :activityIds AND p.user.id = :userId")
+    List<Participation> findByActivityIdInAndUserId(
+            @Param("activityIds") List<Long> activityIds,
+            @Param("userId") Long userId);
 }
