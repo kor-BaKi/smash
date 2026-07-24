@@ -1,6 +1,7 @@
 package com.smash.domain.activity;
 
 import com.smash.domain.group.Group;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     Optional<Activity> findByGroupAndActivityDate(Group group, LocalDate date);
 
+    @EntityGraph(attributePaths = {"group"})
     List<Activity> findByActivityDate(LocalDate date);
 
     @Query("SELECT a FROM Activity a WHERE a.group.id = :groupId " +
