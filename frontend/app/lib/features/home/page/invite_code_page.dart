@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -50,13 +51,43 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        Text(
-                          code?.code ?? '없음',
-                          style: const TextStyle(
-                            fontSize: 34,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 4,
-                            color: AppColors.primary,
+                        GestureDetector(
+                          onTap: code == null
+                              ? null
+                              : () {
+                                  Clipboard.setData(
+                                    ClipboardData(text: code.code),
+                                  );
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('가입코드가 복사되었습니다.'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                code?.code ?? '없음',
+                                style: const TextStyle(
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 4,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              if (code != null) ...[
+                                const SizedBox(width: 8),
+                                const Icon(
+                                  Icons.copy,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         const SizedBox(height: 14),
