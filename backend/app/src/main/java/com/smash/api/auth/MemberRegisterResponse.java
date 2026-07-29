@@ -14,6 +14,7 @@ public class MemberRegisterResponse {
     private String studentNo;
     private String status;
     private String role;
+    private Long groupId;
 
     @Getter
     @Builder

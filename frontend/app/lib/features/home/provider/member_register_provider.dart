@@ -5,6 +5,7 @@ import '../model/member_register_model.dart';
 
 class MemberRegisterState {
   final List<RegisteredMember> pendingApplicants;
+  final List<RegisteredMember> allMembers;
   final bool isLoading;
   final bool isSubmitting;
   final BulkRegisterResult? lastResult;
@@ -12,6 +13,7 @@ class MemberRegisterState {
 
   const MemberRegisterState({
     this.pendingApplicants = const [],
+    this.allMembers = const [],
     this.isLoading = false,
     this.isSubmitting = false,
     this.lastResult,
@@ -20,6 +22,7 @@ class MemberRegisterState {
 
   MemberRegisterState copyWith({
     List<RegisteredMember>? pendingApplicants,
+    List<RegisteredMember>? allMembers,
     bool? isLoading,
     bool? isSubmitting,
     BulkRegisterResult? lastResult,
@@ -27,6 +30,7 @@ class MemberRegisterState {
   }) {
     return MemberRegisterState(
       pendingApplicants: pendingApplicants ?? this.pendingApplicants,
+      allMembers: allMembers ?? this.allMembers,
       isLoading: isLoading ?? this.isLoading,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       lastResult: lastResult ?? this.lastResult,
@@ -117,6 +121,23 @@ class MemberRegisterNotifier extends StateNotifier<MemberRegisterState> {
       await loadPendingApplicants(); // 최신 목록 갱신
     } catch (e) {
       state = state.copyWith(errorMessage: '복구에 실패했습니다.');
+    }
+  }
+
+  // 전체 부원 목록 조회
+  Future<void> loadAllMembers() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final data = await MemberRegisterApi.getAllMembers();
+      final members = data
+          .map((json) => RegisteredMember.fromJson(json))
+          .toList();
+      state = state.copyWith(allMembers: members, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: '부원 목록을 불러오지 못했습니다.',
+      );
     }
   }
 }

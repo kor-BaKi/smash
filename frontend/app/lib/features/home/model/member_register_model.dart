@@ -4,6 +4,7 @@ class RegisteredMember {
   final String studentNo;
   final String status;
   final String? role;
+  final int? groupId;
 
   RegisteredMember({
     required this.id,
@@ -11,6 +12,7 @@ class RegisteredMember {
     required this.studentNo,
     required this.status,
     this.role,
+    this.groupId,
   });
 
   factory RegisteredMember.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class RegisteredMember {
       studentNo: json['studentNo'],
       status: json['status'],
       role: json['role'],
+      groupId: json['groupId'],
     );
   }
 }

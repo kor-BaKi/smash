@@ -12,6 +12,7 @@ import 'free_period_page.dart';
 import 'group_management_page.dart';
 import 'invite_code_page.dart';
 import 'member_home_view.dart';
+import 'member_management_page.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -256,6 +257,19 @@ class _AdminDrawer extends ConsumerWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => const ApplicantPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: '👤',
+                    label: '부원 관리',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MemberManagementPage(),
                         ),
                       );
                     },

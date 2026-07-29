@@ -154,6 +154,7 @@ public class AdminMemberService {
                         .studentNo(user.getStudentNo())
                         .status(user.getStatus().name())
                         .role(user.getRole().name())
+                        .groupId(user.getGroupId())
                         .build())
                 .toList();
     }
