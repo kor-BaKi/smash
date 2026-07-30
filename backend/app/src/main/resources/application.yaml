@@ -24,7 +24,7 @@ springdoc:
 jwt:
   secret: smash-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
   access-expiration: 1800000  # 30분
-  refresh-expiration: 1209600000 # 14일
+  refresh-expiration: 15552000000 # 6개월
 
 logging:
   level:
