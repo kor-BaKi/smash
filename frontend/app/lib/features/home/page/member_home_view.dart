@@ -1,9 +1,13 @@
+import 'package:app/features/home/page/poll_detail_page.dart';
+import 'package:app/features/home/page/poll_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../model/activity_model.dart';
+import '../model/poll_model.dart';
 import '../provider/activity_provider.dart';
+import '../provider/poll_provider.dart';
 import 'activity_detail_dialog.dart';
 import 'carryover_dialog.dart';
 
@@ -21,6 +25,7 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
     // 화면이 처음 그려진 직후 데이터 로드
     Future.microtask(() {
       ref.read(activityProvider.notifier).loadTodayActivities();
+      ref.read(pollProvider.notifier).loadPolls();
     });
   }
 
@@ -77,6 +82,52 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
           const SizedBox(height: 12),
           ...activityState.activities.map(
             (activity) => _ActivityCard(activity: activity),
+          ),
+          ...ref
+              .watch(pollProvider)
+              .polls
+              .where((p) => !p.isExpired)
+              .map((poll) => _PollCard(poll: poll)),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PollListPage()),
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.cardBg,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Row(
+                children: [
+                  Icon(
+                    Icons.how_to_vote,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    '투표 보기',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  Spacer(),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: AppColors.textTertiary,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -434,6 +485,204 @@ class _ActionButton extends StatelessWidget {
             fontSize: 14,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PollCard extends ConsumerWidget {
+  final PollInfo poll;
+
+  const _PollCard({required this.poll});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(pollProvider);
+    final hasVoted = poll.myVotedOptionId != null;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 상단 컬러 밴드 (투표는 보라색으로 구분)
+          Container(height: 5, color: const Color(0xFF7C3AED)),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        poll.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F0FF),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        poll.isAnonymous ? '익명' : '기명',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF7C3AED),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (poll.description != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    poll.description!,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textTertiary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 12),
+
+                // 투표 전: 옵션 버튼
+                if (!hasVoted)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: poll.options.map((option) {
+                      return ElevatedButton(
+                        onPressed: state.isSubmitting
+                            ? null
+                            : () => ref
+                                  .read(pollProvider.notifier)
+                                  .vote(poll.id, option.id),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF7C3AED),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          option.content,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                // 투표 후: 내가 선택한 옵션 + 다시 투표 버튼
+                if (hasVoted) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F0FF),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          size: 16,
+                          color: Color(0xFF7C3AED),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "'${poll.options.firstWhere((o) => o.id == poll.myVotedOptionId).content}'에 투표했어요",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: Color(0xFF5B21B6),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: state.isSubmitting
+                              ? null
+                              : () => ref
+                                    .read(pollProvider.notifier)
+                                    .cancelVote(poll.id),
+                          child: const Text(
+                            '다시 투표',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textTertiary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 4),
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PollDetailPage(pollId: poll.id),
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF7C3AED),
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: const Text(
+                      '투표 결과 보기 ›',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

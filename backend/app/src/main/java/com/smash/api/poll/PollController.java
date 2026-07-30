@@ -52,6 +52,16 @@ public class PollController {
         return ResponseEntity.ok(ApiResponse.success(pollService.vote(userId, pollId, request)));
     }
 
+    // 투표 취소 (재투표 가능)
+    @DeleteMapping("/api/v1/polls/{pollId}/vote")
+    public ResponseEntity<ApiResponse<PollResponse>> cancelVote(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long pollId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(pollService.cancelVote(userId, pollId)));
+    }
+
+
     // 투표 수동 종료 (ADMIN)
     @PatchMapping("/api/v1/polls/{pollId}/close")
     public ResponseEntity<ApiResponse<Void>> close(

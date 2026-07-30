@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/auth/page/signup_page.dart';
-import 'features/auth/provider/auth_provider.dart';
+import 'features/home/provider/auth_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);

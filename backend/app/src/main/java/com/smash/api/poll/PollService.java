@@ -117,6 +117,25 @@ public class PollService {
         return getDetail(userId, pollId);
     }
 
+    @Transactional
+    public PollResponse cancelVote(Long userId, Long pollId) {
+        Poll poll = getPoll(pollId);
+
+        if (poll.isExpired()) {
+            throw new BusinessException("POLL_CLOSED", "종료된 투표는 취소할 수 없습니다.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("RESOURCE_NOT_FOUND", "사용자를 찾을 수 없습니다."));
+
+        if (pollVoteRepository.findByPollAndUser(poll, user).isEmpty()) {
+            throw new BusinessException("NOT_FOUND", "투표한 기록이 없습니다.");
+        }
+
+        pollVoteRepository.deleteByPollAndUser(poll, user);
+        return getDetail(userId, pollId);
+    }
+
     // 투표 수동 종료 (ADMIN)
     @Transactional
     public void close(Long pollId) {
@@ -126,6 +145,8 @@ public class PollService {
         }
         poll.close();
     }
+
+
 
     private Poll getPoll(Long pollId) {
         return pollRepository.findById(pollId)

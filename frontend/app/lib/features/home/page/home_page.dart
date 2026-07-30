@@ -1,9 +1,10 @@
+import 'package:app/features/home/page/poll_list_page.dart';
 import 'package:app/features/home/page/schedule_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../auth/provider/auth_provider.dart';
+import '../provider/auth_provider.dart';
 import 'activity_admin_page.dart';
 import 'applicant_page.dart';
 import 'assignment_page.dart';
@@ -234,6 +235,20 @@ class _AdminDrawer extends ConsumerWidget {
                   horizontal: 10,
                 ),
                 children: [
+                  _sectionLabel('커뮤니티'),
+                  _DrawerItem(
+                    icon: '🗳️',
+                    label: '투표',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PollListPage(),
+                        ),
+                      );
+                    },
+                  ),
                   _sectionLabel('모집 관리'),
                   _DrawerItem(
                     icon: '🎟️',
