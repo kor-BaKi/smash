@@ -226,6 +226,7 @@ InviteCode / FreePeriod / MemberAvailability / RefreshToken
 
 ## 🚀 Development Status
 
+**v1 (완료)**
 - [x] 서비스 기획 및 요구사항 정의
 - [x] User Flow 설계
 - [x] ERD 설계 (8개 테이블)
@@ -235,6 +236,13 @@ InviteCode / FreePeriod / MemberAvailability / RefreshToken
 - [x] 디자인 시스템 적용 (Pretendard, AppTheme)
 - [x] 실서버 배포 (Raspberry Pi + Tailscale Funnel)
 - [x] iOS / Android 배포
+- [x] JUnit5 + Mockito 단위/통합 테스트 (23개)
+
+**v2 (진행 중)**
+- [x] 투표 기능 (임원 생성, 부원 참여/취소, 결과 확인)
+- [x] 부원 관리 화면 (조 확인 및 변경)
+- [x] 가입코드 복사 버튼
+- [ ] TestFlight / 스토어 배포
 
 ---
 
