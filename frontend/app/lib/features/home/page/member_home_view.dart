@@ -1,5 +1,4 @@
-import 'package:app/features/home/page/poll_detail_page.dart';
-import 'package:app/features/home/page/poll_list_page.dart';
+import 'package:app/features/home/page/poll_result_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -88,47 +87,6 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
               .polls
               .where((p) => !p.isExpired)
               .map((poll) => _PollCard(poll: poll)),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const PollListPage()),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Row(
-                children: [
-                  Icon(
-                    Icons.how_to_vote,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    '투표 보기',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  Spacer(),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 14,
-                    color: AppColors.textTertiary,
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -495,10 +453,29 @@ class _PollCard extends ConsumerWidget {
 
   const _PollCard({required this.poll});
 
+  List<List<PollOptionResult>> _groupOptions() {
+    final options = poll.options;
+    final count = options.length;
+    if (count <= 4) return [options];
+    final topCount = count <= 6 ? (count / 2).ceil() : 4;
+    return [options.sublist(0, topCount), options.sublist(topCount)];
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pollProvider);
     final hasVoted = poll.myVotedOptionId != null;
+    final rows = _groupOptions();
+
+    final votedOption = hasVoted
+        ? poll.options.firstWhere((o) => o.id == poll.myVotedOptionId)
+        : null;
+    final votedColor = votedOption != null
+        ? pollOptionColor(
+            votedOption.content,
+            poll.options.indexOf(votedOption),
+          )
+        : AppColors.amber;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -517,8 +494,7 @@ class _PollCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 상단 컬러 밴드 (투표는 보라색으로 구분)
-          Container(height: 5, color: const Color(0xFF7C3AED)),
+          Container(height: 5, color: AppColors.amber),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -542,7 +518,7 @@ class _PollCard extends ConsumerWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF3F0FF),
+                        color: AppColors.amberBg,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
@@ -550,7 +526,7 @@ class _PollCard extends ConsumerWidget {
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF7C3AED),
+                          color: AppColors.amber,
                         ),
                       ),
                     ),
@@ -561,53 +537,73 @@ class _PollCard extends ConsumerWidget {
                   Text(
                     poll.description!,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       color: AppColors.textTertiary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
-                // 투표 전: 옵션 버튼
+                // 투표 전: 선택지 버튼
                 if (!hasVoted)
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: poll.options.map((option) {
-                      return ElevatedButton(
-                        onPressed: state.isSubmitting
-                            ? null
-                            : () => ref
-                                  .read(pollProvider.notifier)
-                                  .vote(poll.id, option.id),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF7C3AED),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          option.content,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
+                  Column(
+                    children: rows.map((row) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: row.asMap().entries.map((entry) {
+                            final option = entry.value;
+                            final isLast = entry.key == row.length - 1;
+                            final color = pollOptionColor(
+                              option.content,
+                              poll.options.indexOf(option),
+                            );
+                            return Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  right: isLast ? 0 : 8,
+                                ),
+                                child: SizedBox(
+                                  height: 44,
+                                  child: ElevatedButton(
+                                    onPressed: state.isSubmitting
+                                        ? null
+                                        : () => ref
+                                              .read(pollProvider.notifier)
+                                              .vote(poll.id, option.id),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: color.withOpacity(
+                                        0.12,
+                                      ),
+                                      foregroundColor: color,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    child: Text(
+                                      option.content,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       );
                     }).toList(),
                   ),
 
-                // 투표 후: 내가 선택한 옵션 + 다시 투표 버튼
+                // 투표 후: 내가 선택한 옵션 + 다시 투표
                 if (hasVoted) ...[
                   Container(
                     width: double.infinity,
@@ -616,24 +612,32 @@ class _PollCard extends ConsumerWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3F0FF),
+                      color: votedColor.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.check_circle,
-                          size: 16,
-                          color: Color(0xFF7C3AED),
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: votedColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check,
+                            size: 13,
+                            color: Colors.white,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            "'${poll.options.firstWhere((o) => o.id == poll.myVotedOptionId).content}'에 투표했어요",
-                            style: const TextStyle(
+                            "'${votedOption!.content}'에 투표했어요",
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
-                              color: Color(0xFF5B21B6),
+                              color: votedColor,
                             ),
                           ),
                         ),
@@ -660,14 +664,12 @@ class _PollCard extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Center(
                   child: TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PollDetailPage(pollId: poll.id),
-                      ),
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (_) => PollResultDialog(pollId: poll.id),
                     ),
                     style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF7C3AED),
+                      foregroundColor: votedColor,
                       padding: EdgeInsets.zero,
                     ),
                     child: const Text(
@@ -686,4 +688,19 @@ class _PollCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+Color pollOptionColor(String content, int index) {
+  if (content.contains('불')) return AppColors.danger;
+  if (content.contains('참')) return AppColors.freeActivity;
+
+  const palette = [
+    AppColors.primary,
+    AppColors.amber,
+    Color(0xFF7C3AED), // 보라
+    Color(0xFF0891B2), // 청록
+    Color(0xFFDB2777), // 핑크
+    Color(0xFF65A30D), // 연두
+  ];
+  return palette[index % palette.length];
 }
