@@ -63,7 +63,7 @@ public class PollController {
 
 
     // 투표 수동 종료 (ADMIN)
-    @PatchMapping("/api/v1/polls/{pollId}/close")
+    @PatchMapping("/api/v1/admin/polls/{pollId}/close")
     public ResponseEntity<ApiResponse<Void>> close(
             @PathVariable Long pollId
     ) {

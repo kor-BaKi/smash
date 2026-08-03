@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../provider/auth_provider.dart';
 import '../provider/poll_provider.dart';
 
 Color pollOptionColor(String content, int index) {
@@ -41,6 +42,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
   Widget build(BuildContext context) {
     final state = ref.watch(pollProvider);
     final poll = state.selectedPoll;
+    final isAdmin = ref.watch(authProvider).user?.isAdmin ?? false;
 
     return Dialog(
       backgroundColor: AppColors.cardBg,
@@ -60,13 +62,68 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      poll.title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.ink,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            poll.title,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ),
+                        if (isAdmin && !poll.isExpired)
+                          TextButton(
+                            onPressed: () async {
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      20,
+                                    ),
+                                  ),
+                                  title: const Text('투표 종료'),
+                                  content: const Text(
+                                    '투표를 종료할까요?\n종료 후에는 되돌릴 수 없습니다.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: const Text('취소'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: const Text(
+                                        '종료',
+                                        style: TextStyle(
+                                          color: AppColors.danger,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirmed == true && context.mounted) {
+                                await ref
+                                    .read(pollProvider.notifier)
+                                    .close(widget.pollId);
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: const Text(
+                              '종료',
+                              style: TextStyle(
+                                color: AppColors.danger,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     if (poll.description != null) ...[
                       const SizedBox(height: 4),

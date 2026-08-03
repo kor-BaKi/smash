@@ -75,15 +75,23 @@ class InviteCodeNotifier extends StateNotifier<InviteCodeState> {
     final current = state.code;
     if (current == null) return;
 
-    print(
-      '=== toggle 호출: current.isActive=${current.isActive}, 보낼 값=${!current.isActive}',
-    ); // 추가
+    // 로컬에서 먼저 토글 (깜빡임 없이 즉시 반영)
+    final optimistic = InviteCode(
+      id: current.id,
+      code: current.code,
+      isActive: !current.isActive,
+    );
+    state = state.copyWith(code: optimistic);
 
     try {
       await InviteCodeApi.toggle(current.id, !current.isActive);
-      await load(); // 최신 상태 다시 조회
+      // 성공하면 그대로 유지 (이미 로컬에서 바뀜)
     } catch (e) {
-      state = state.copyWith(errorMessage: '가입코드 상태 변경에 실패했습니다.');
+      // 실패하면 원래 값으로 되돌림
+      state = state.copyWith(
+        code: current,
+        errorMessage: '가입코드 상태 변경에 실패했습니다.',
+      );
     }
   }
 }
