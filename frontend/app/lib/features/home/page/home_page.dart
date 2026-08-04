@@ -235,7 +235,6 @@ class _AdminDrawer extends ConsumerWidget {
                   horizontal: 10,
                 ),
                 children: [
-                  _sectionLabel('커뮤니티'),
                   _DrawerItem(
                     icon: '🗳️',
                     label: '투표',
@@ -249,7 +248,6 @@ class _AdminDrawer extends ConsumerWidget {
                       );
                     },
                   ),
-                  _sectionLabel('모집 관리'),
                   _DrawerItem(
                     icon: '🎟️',
                     label: '가입코드 관리',
@@ -289,7 +287,6 @@ class _AdminDrawer extends ConsumerWidget {
                       );
                     },
                   ),
-                  _sectionLabel('조 편성'),
                   _DrawerItem(
                     icon: '👥',
                     label: '조 편성 관리',
@@ -316,7 +313,6 @@ class _AdminDrawer extends ConsumerWidget {
                       );
                     },
                   ),
-                  _sectionLabel('활동 운영'),
                   _DrawerItem(
                     icon: '🗓️',
                     label: '정규활동 일정',
