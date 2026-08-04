@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../provider/auth_provider.dart';
+import '../provider/group_management_provider.dart';
 import 'activity_admin_page.dart';
 import 'applicant_page.dart';
 import 'assignment_page.dart';
 import 'availability_page.dart';
+import 'dues_page.dart';
 import 'free_period_page.dart';
 import 'group_management_page.dart';
 import 'invite_code_page.dart';
@@ -22,6 +24,12 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
+
+    final groups = ref.watch(groupManagementProvider).groups;
+    final myGroup = user?.groupId != null
+        ? groups.where((g) => g.id == user!.groupId).toList()
+        : [];
+    final groupLabel = myGroup.isEmpty ? null : myGroup.first.label;
 
     if (user == null) {
       return const Scaffold(body: Center(child: Text('로그인이 필요합니다')));
@@ -51,25 +59,41 @@ class HomePage extends ConsumerWidget {
                         : const SizedBox.shrink(),
                   ),
                   Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.ink,
-                          fontFamily: 'Pretendard',
-                        ),
-                        children: [
-                          const TextSpan(text: '안녕하세요, '),
-                          TextSpan(
-                            text: user.name,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
                             style: const TextStyle(
-                              color: AppColors.primary,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.ink,
+                              fontFamily: 'Pretendard',
+                            ),
+                            children: [
+                              const TextSpan(text: '안녕하세요, '),
+                              TextSpan(
+                                text: user.name,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const TextSpan(text: '님'),
+                            ],
+                          ),
+                        ),
+                        if (groupLabel != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            groupLabel,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textTertiary,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const TextSpan(text: '님'),
                         ],
-                      ),
+                      ],
                     ),
                   ),
                   TextButton(
@@ -235,6 +259,19 @@ class _AdminDrawer extends ConsumerWidget {
                   horizontal: 10,
                 ),
                 children: [
+                  _DrawerItem(
+                    icon: '💰',
+                    label: '회비 관리',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DuesPage(),
+                        ),
+                      );
+                    },
+                  ),
                   _DrawerItem(
                     icon: '🗳️',
                     label: '투표',
