@@ -28,6 +28,13 @@ public class DuesController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    // 납부 취소
+    @DeleteMapping("/api/v1/admin/dues/{userId}")
+    public ResponseEntity<ApiResponse<Void>> cancel(@PathVariable Long userId) {
+        duesService.cancel(userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
     // 전체 초기화
     @DeleteMapping("/api/v1/admin/dues")
     public ResponseEntity<ApiResponse<Void>> reset() {
