@@ -109,6 +109,15 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
     }
   }
 
+  Future<void> cancelParticipation(int activityId) async {
+    try {
+      await ActivityApi.cancelParticipation(activityId);
+      await loadTodayActivities();
+    } catch (e) {
+      state = state.copyWith(errorMessage: '응답 취소에 실패했습니다.');
+    }
+  }
+
   // 활동 상세(투표 결과) 조회 - 추가
   Future<void> loadActivityDetail(int activityId) async {
     state = state.copyWith(isLoadingDetail: true, errorMessage: null);

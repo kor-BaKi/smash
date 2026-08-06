@@ -313,12 +313,27 @@ class _ActivityCard extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          "'${_buttonLabel(activity.myParticipation!.type)}'로 응답했어요",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                            color: AppColors.primaryDeep,
+                        Expanded(
+                          child: Text(
+                            "'${_buttonLabel(activity.myParticipation!.type)}'로 응답했어요",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: AppColors.primaryDeep,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => ref
+                              .read(activityProvider.notifier)
+                              .cancelParticipation(activity.activityId),
+                          child: const Text(
+                            '취소',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textTertiary,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ],
