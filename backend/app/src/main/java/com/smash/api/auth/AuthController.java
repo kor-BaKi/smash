@@ -45,4 +45,14 @@ public class AuthController {
         authService.logout(userId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    @PatchMapping("/api/v1/me/password")
+    public ResponseEntity<ApiResponse<AuthResponse>> changePassword(
+            @AuthenticationPrincipal Long userId,
+            @RequestBody @Valid ChangePasswordRequest request
+    ) {
+        authService.changePassword(userId, request);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
 }

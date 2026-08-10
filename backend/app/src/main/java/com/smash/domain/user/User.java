@@ -85,4 +85,8 @@ public class User {
     public void restorePending() {
         this.status = Status.PENDING;
     }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

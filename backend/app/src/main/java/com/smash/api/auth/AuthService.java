@@ -1,5 +1,5 @@
-package com.smash.api.auth;
 
+package com.smash.api.auth;
 import com.smash.auth.JwtProvider;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.invite.InviteCodeRepository;
@@ -25,7 +25,7 @@ public class AuthService {
     private final InviteCodeRepository inviteCodeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    @Transactional
+
     public AuthResponse signup(SignupRequest request) {
 
         inviteCodeRepository.findByCodeAndIsActiveTrue(request.getCode())
@@ -154,5 +154,24 @@ public class AuthService {
                 .role(user.getRole().name())
                 .groupId(user.getGroupId())
                 .build();
+    }
+
+    // 비밀번호 변경
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "사용자를 찾을 수 없습니다."
+                ));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new BusinessException("INVALID_PASSWORD", "현재 비밀번호가 올바르지 않습니다.");
+        }
+
+        user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+
+
+
+
     }
 }
