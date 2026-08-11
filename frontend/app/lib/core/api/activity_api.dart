@@ -53,4 +53,15 @@ class ActivityApi {
   static Future<void> assignMember(int userId, int groupId) async {
     await _dio.patch('/admin/members/$userId/group', data: groupId);
   }
+
+  // 이동 방법 선택
+  static Future<void> updateTravelType(
+    int activityId,
+    String travelType,
+  ) async {
+    await _dio.patch(
+      '/me/activities/$activityId/travel-type',
+      data: {'travelType': travelType},
+    );
+  }
 }

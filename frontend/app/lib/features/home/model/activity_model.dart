@@ -3,11 +3,13 @@ class ParticipationInfo {
   final int participationId;
   final String type;
   final int? targetActivityId;
+  final String? travelType;
 
   ParticipationInfo({
     required this.participationId,
     required this.type,
     this.targetActivityId,
+    this.travelType,
   });
 
   factory ParticipationInfo.fromJson(Map<String, dynamic> json) {
@@ -15,6 +17,7 @@ class ParticipationInfo {
       participationId: json['participationId'],
       type: json['type'],
       targetActivityId: json['targetActivityId'],
+      travelType: json['travelType'],
     );
   }
 
@@ -22,11 +25,13 @@ class ParticipationInfo {
     int? participationId,
     String? type,
     int? targetActivityId,
+    String? travelType,
   }) {
     return ParticipationInfo(
       participationId: participationId ?? this.participationId,
       type: type ?? this.type,
       targetActivityId: targetActivityId ?? this.targetActivityId,
+      travelType: travelType ?? this.travelType,
     );
   }
 }

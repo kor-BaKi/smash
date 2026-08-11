@@ -2,6 +2,7 @@ import 'package:app/features/home/page/poll_result_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/activity_api.dart';
 import '../../../core/theme/app_theme.dart';
 import '../model/activity_model.dart';
 import '../model/poll_model.dart';
@@ -276,7 +277,18 @@ class _ActivityCard extends ConsumerWidget {
                                     .participate(
                                       activityId: activity.activityId,
                                       type: serverType,
-                                    );
+                                    )
+                                    .then((_) {
+                                      // 참여(ATTEND, FREE_ATTEND)일 때만 이동 방법 팝업
+                                      if (type == 'ATTEND' ||
+                                          type == 'FREE_ATTEND') {
+                                        _showTravelTypeDialog(
+                                          context,
+                                          ref,
+                                          activity.activityId,
+                                        );
+                                      }
+                                    });
                               }
                             },
                           ),
@@ -315,7 +327,11 @@ class _ActivityCard extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            "'${_buttonLabel(activity.myParticipation!.type)}'로 응답했어요",
+                            "'${_buttonLabel(activity.myParticipation!.type)}'로 응답했어요${activity.myParticipation!.travelType == 'TOGETHER'
+                                ? ' · 같이'
+                                : activity.myParticipation!.travelType == 'ALONE'
+                                ? ' · 따로'
+                                : ''}",
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
@@ -323,19 +339,20 @@ class _ActivityCard extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () => ref
-                              .read(activityProvider.notifier)
-                              .cancelParticipation(activity.activityId),
-                          child: const Text(
-                            '취소',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textTertiary,
-                              decoration: TextDecoration.underline,
+                        if (!activity.voteClosed)
+                          GestureDetector(
+                            onTap: () => ref
+                                .read(activityProvider.notifier)
+                                .cancelParticipation(activity.activityId),
+                            child: const Text(
+                              '다시 선택',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textTertiary,
+                                decoration: TextDecoration.underline,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -718,4 +735,72 @@ Color pollOptionColor(String content, int index) {
     Color(0xFF65A30D), // 연두
   ];
   return palette[index % palette.length];
+}
+
+Future<void> _showTravelTypeDialog(
+  BuildContext context,
+  WidgetRef ref,
+  int activityId,
+) async {
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: const Text(
+        '이동 방법을 선택해주세요',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+      ),
+      content: const Text(
+        '정문에서 함께 이동하시나요?',
+        style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
+      ),
+      actions: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await ActivityApi.updateTravelType(activityId, 'TOGETHER');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              '같이 가겠습니다',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await ActivityApi.updateTravelType(activityId, 'ALONE');
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.divider),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              '따로 가겠습니다',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
