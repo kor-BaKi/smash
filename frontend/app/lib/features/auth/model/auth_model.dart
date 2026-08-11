@@ -3,12 +3,14 @@ class UserInfo {
   final String name;
   final String role;
   final int? groupId;
+  final String studentNo;
 
   UserInfo({
     required this.id,
     required this.name,
     required this.role,
     this.groupId,
+    required this.studentNo,
   });
 
   // factory 생성자 -> JSON을 객체로 변환할 때 사용
@@ -18,6 +20,7 @@ class UserInfo {
       name: json['name'],
       role: json['role'],
       groupId: json['groupId'],
+      studentNo: json['studentNo'] ?? '',
     );
   }
   bool get isAdmin => role == 'ADMIN';

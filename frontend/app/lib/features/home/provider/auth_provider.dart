@@ -70,6 +70,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  // 비밀번호 변경
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await AuthApi.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // 앱 시작 시 토큰 확인
   Future<void> checkToken() async {
     final token = await TokenStorage.getAccessToken();

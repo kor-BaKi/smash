@@ -40,4 +40,18 @@ class AuthApi {
     final response = await _dio.get('/me');
     return response.data;
   }
+
+  // 비밀번호 변경
+  static Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _dio.patch(
+      '/me/password',
+      data: {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      },
+    );
+  }
 }
