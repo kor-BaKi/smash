@@ -83,4 +83,24 @@ public class ActivityController {
         activityService.updateActivity(activityId, request);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    // 이동 방법 선택
+    @PatchMapping("/api/v1/me/activities/{activityId}/travel-type")
+    public ResponseEntity<ApiResponse<Void>> updateTravelType(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long activityId,
+            @RequestBody @Valid TravelTypeRequest request
+    ) {
+        activityService.updateTravelType(userId, activityId, request);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 참여자 목록 조회 (ADMIN)
+    @GetMapping("/api/v1/admin/activities/{activityId}/participants")
+    public ResponseEntity<ApiResponse<List<ParticipantResponse>>> getParticipants(
+            @PathVariable Long activityId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(activityService.getParticipants(activityId)));
+    }
+
 }

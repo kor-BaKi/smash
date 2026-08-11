@@ -8,6 +8,7 @@ import com.smash.domain.group.TimeSlot;
 import com.smash.domain.participation.Participation;
 import com.smash.domain.participation.ParticipationRepository;
 import com.smash.domain.participation.ParticipationType;
+import com.smash.domain.participation.TravelType;
 import com.smash.domain.user.User;
 import com.smash.domain.user.UserRepository;
 import com.smash.scheduler.ActivityScheduler;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -289,6 +291,22 @@ public class ActivityService {
         }
     }
 
+    // 이동 방법 (따로 or 같이)
+    @Transactional
+    public void updateTravelType(Long userId, Long activityId, TravelTypeRequest request) {
+        User user = getUser(userId);
+        Activity activity = getActivity(activityId);
+
+        Participation participation = participationRepository
+                .findByActivityAndUser(activity, user)
+                .orElseThrow(() -> new BusinessException(
+                        "NOT_PARTICIPATED", "참여 응답을 먼저 해주세요."
+                ));
+
+        TravelType travelType = TravelType.valueOf(request.getTravelType());
+        participation.updateTravelType(travelType);
+    }
+
 
     // 버튼 분기 판정
     private List<String> resolvedButtons(User user, Activity activity, boolean isMyGroup) {
@@ -307,6 +325,19 @@ public class ActivityService {
         }
 
         return List.of("CARRYOVER", "OTHER_GROUP"); // 본인 조 정규 활동이 아닌 경우 -> 이월 or 타조참
+    }
+
+    @Transactional
+    public List<ParticipantResponse> getParticipants(Long activityId) {
+        Activity activity = getActivity(activityId);
+        List<Participation> participations = participationRepository.findByActivity(activity);
+
+        return participations.stream()
+                .filter(p -> p.getType() != ParticipationType.ABSENT)
+                .sorted(Comparator.comparing(p ->
+                        p.getTravelType() == TravelType.ALONE ? 1 : 0)) // Alone은 맨 아래 정렬
+                .map(ParticipantResponse::of)
+                .toList();
     }
 
 

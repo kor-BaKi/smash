@@ -52,6 +52,11 @@ public class Participation {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // 이동 방법
+    @Column
+    @Enumerated(EnumType.STRING)
+    private TravelType travelType;
+
     @Builder
     public Participation(Activity activity, User user,
                          ParticipationType type, Activity carryoverTarget) {
@@ -64,5 +69,9 @@ public class Participation {
     public void updateType(ParticipationType type, Activity carryoverTarget) { // 부원이 재응답할 때 사용 ex. 참여 -> 불참으로 변경
         this.type = type;
         this.carryoverTarget = carryoverTarget;
+    }
+
+    public void updateTravelType(TravelType travelType) {
+        this.travelType = travelType;
     }
 }
