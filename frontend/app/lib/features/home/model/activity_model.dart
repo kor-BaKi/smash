@@ -17,6 +17,18 @@ class ParticipationInfo {
       targetActivityId: json['targetActivityId'],
     );
   }
+
+  ParticipationInfo copyWith({
+    int? participationId,
+    String? type,
+    int? targetActivityId,
+  }) {
+    return ParticipationInfo(
+      participationId: participationId ?? this.participationId,
+      type: type ?? this.type,
+      targetActivityId: targetActivityId ?? this.targetActivityId,
+    );
+  }
 }
 
 class TodayActivity {
@@ -41,6 +53,25 @@ class TodayActivity {
     this.myParticipation,
     required this.voteClosed,
   });
+
+  TodayActivity copyWith({
+    ParticipationInfo? myParticipation,
+    bool clearParticipation = false,
+  }) {
+    return TodayActivity(
+      activityId: activityId,
+      activityDate: activityDate,
+      groupId: groupId,
+      groupLabel: groupLabel,
+      activityType: activityType,
+      isMyGroup: isMyGroup,
+      availableButtons: availableButtons,
+      myParticipation: clearParticipation
+          ? null
+          : (myParticipation ?? this.myParticipation),
+      voteClosed: voteClosed,
+    );
+  }
 
   factory TodayActivity.fromJson(Map<String, dynamic> json) {
     return TodayActivity(

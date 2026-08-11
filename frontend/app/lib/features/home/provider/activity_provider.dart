@@ -95,26 +95,63 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
     required String type,
     int? targetActivityId,
   }) async {
+    // 낙관적 업데이트 — 서버 응답 전에 로컬 상태 먼저 변경
+    final original = state.activities;
+    state = state.copyWith(
+      activities: state.activities.map((a) {
+        if (a.activityId != activityId) return a;
+        return a.copyWith(
+          myParticipation: ParticipationInfo(
+            participationId: -1, // 임시 ID
+            type: type,
+            targetActivityId: targetActivityId,
+          ),
+        );
+      }).toList(),
+    );
+
     try {
       await ActivityApi.participate(
         activityId: activityId,
         type: type,
         targetActivityId: targetActivityId,
       );
-      // 응답 후 최신 상태로 다시 불러오기
-      await loadTodayActivities();
+      // 성공 후 정확한 서버 데이터로 갱신 (isLoading 없이)
+      final data = await ActivityApi.getTodayActivities();
+      final activities = data
+          .map((json) => TodayActivity.fromJson(json))
+          .toList();
+      state = state.copyWith(activities: activities);
     } catch (e) {
-      print('참여 응답 에러: $e');
-      state = state.copyWith(errorMessage: '참여 응답에 실패했습니다.');
+      // 실패 시 롤백
+      state = state.copyWith(
+        activities: original,
+        errorMessage: '참여 응답에 실패했습니다.',
+      );
     }
   }
 
   Future<void> cancelParticipation(int activityId) async {
+    final original = state.activities;
+    state = state.copyWith(
+      activities: state.activities.map((a) {
+        if (a.activityId != activityId) return a;
+        return a.copyWith(myParticipation: null);
+      }).toList(),
+    );
+
     try {
       await ActivityApi.cancelParticipation(activityId);
-      await loadTodayActivities();
+      final data = await ActivityApi.getTodayActivities();
+      final activities = data
+          .map((json) => TodayActivity.fromJson(json))
+          .toList();
+      state = state.copyWith(activities: activities);
     } catch (e) {
-      state = state.copyWith(errorMessage: '응답 취소에 실패했습니다.');
+      state = state.copyWith(
+        activities: original,
+        errorMessage: '취소에 실패했습니다.',
+      );
     }
   }
 
