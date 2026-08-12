@@ -6,8 +6,12 @@ import '../provider/activity_provider.dart';
 
 class CarryoverDialog extends ConsumerStatefulWidget {
   final int activityId;
-
-  const CarryoverDialog({super.key, required this.activityId});
+  final VoidCallback? onCompleted;
+  const CarryoverDialog({
+    super.key,
+    required this.activityId,
+    this.onCompleted,
+  });
 
   @override
   ConsumerState<CarryoverDialog> createState() => _CarryoverDialogState();
@@ -56,8 +60,11 @@ class _CarryoverDialogState extends ConsumerState<CarryoverDialog> {
                             activityId: widget.activityId,
                             type: 'CARRYOVER',
                             targetActivityId: candidate.targetActivityId,
-                          );
-                      Navigator.of(context).pop();
+                          )
+                          .then((_) {
+                            Navigator.of(context).pop();
+                            widget.onCompleted?.call();
+                          });
                     },
                   );
                 },

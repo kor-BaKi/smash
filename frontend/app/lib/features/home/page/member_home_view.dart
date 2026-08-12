@@ -266,6 +266,12 @@ class _ActivityCard extends ConsumerWidget {
                                   context: context,
                                   builder: (context) => CarryoverDialog(
                                     activityId: activity.activityId,
+                                    onCompleted: () =>
+                                        _showTravelTypeDialog(
+                                          context,
+                                          ref,
+                                          activity.activityId,
+                                        ),
                                   ),
                                 );
                               } else {
@@ -279,9 +285,10 @@ class _ActivityCard extends ConsumerWidget {
                                       type: serverType,
                                     )
                                     .then((_) {
-                                      // 참여(ATTEND, FREE_ATTEND)일 때만 이동 방법 팝업
+                                      // 참여/이월/타조참 모두 이동 방법 팝업
                                       if (type == 'ATTEND' ||
-                                          type == 'FREE_ATTEND') {
+                                          type == 'FREE_ATTEND' ||
+                                          type == 'OTHER_GROUP') {
                                         _showTravelTypeDialog(
                                           context,
                                           ref,
@@ -309,50 +316,128 @@ class _ActivityCard extends ConsumerWidget {
                       color: AppColors.primaryBg,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            size: 13,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            "'${_buttonLabel(activity.myParticipation!.type)}'로 응답했어요${activity.myParticipation!.travelType == 'TOGETHER'
-                                ? ' · 같이'
-                                : activity.myParticipation!.travelType == 'ALONE'
-                                ? ' · 따로'
-                                : ''}",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              color: AppColors.primaryDeep,
-                            ),
-                          ),
-                        ),
-                        if (!activity.voteClosed)
-                          GestureDetector(
-                            onTap: () => ref
-                                .read(activityProvider.notifier)
-                                .cancelParticipation(activity.activityId),
-                            child: const Text(
-                              '다시 선택',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textTertiary,
-                                decoration: TextDecoration.underline,
+                        Row(
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                size: 13,
+                                color: Colors.white,
                               ),
                             ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "'${_buttonLabel(activity.myParticipation!.type)}'로 응답했어요",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  color: AppColors.primaryDeep,
+                                ),
+                              ),
+                            ),
+                            if (!activity.voteClosed)
+                              GestureDetector(
+                                onTap: () => ref
+                                    .read(activityProvider.notifier)
+                                    .cancelParticipation(
+                                      activity.activityId,
+                                    ),
+                                child: const Text(
+                                  '다시 선택',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textTertiary,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        // 이동 방법 선택/변경
+                        if (activity.myParticipation!.type == 'REGULAR' ||
+                            activity.myParticipation!.type ==
+                                'FREE_ATTEND') ...[
+                          const SizedBox(height: 8),
+                          const Divider(
+                            height: 1,
+                            color: AppColors.divider,
                           ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.directions_car_outlined,
+                                size: 14,
+                                color: AppColors.textTertiary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                activity.myParticipation!.travelType ==
+                                        null
+                                    ? '이동 방법을 선택해주세요'
+                                    : activity
+                                              .myParticipation!
+                                              .travelType ==
+                                          'TOGETHER'
+                                    ? '같이 이동'
+                                    : '따로 이동',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color:
+                                      activity
+                                              .myParticipation!
+                                              .travelType ==
+                                          null
+                                      ? AppColors.danger
+                                      : AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: () => _showTravelTypeDialog(
+                                  context,
+                                  ref,
+                                  activity.activityId,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.neutralBg,
+                                    borderRadius: BorderRadius.circular(
+                                      999,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    activity.myParticipation!.travelType ==
+                                            null
+                                        ? '선택하기'
+                                        : '변경',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
