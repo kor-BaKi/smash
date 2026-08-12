@@ -144,37 +144,81 @@ class _DetailBody extends StatelessWidget {
             constraints: const BoxConstraints(maxHeight: 240),
             child: SingleChildScrollView(
               child: Column(
-                children: participants
-                    .map(
-                      (p) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 15,
-                              backgroundColor: AppColors.neutralBg,
-                              child: Text(
-                                p.name.characters.first,
-                                style: const TextStyle(
-                                  color: AppColors.textTertiary,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13,
+                children:
+                    (() {
+                          final sorted = [...participants];
+                          sorted.sort((a, b) {
+                            if (a.travelType == 'ALONE' &&
+                                b.travelType != 'ALONE')
+                              return 1;
+                            if (a.travelType != 'ALONE' &&
+                                b.travelType == 'ALONE')
+                              return -1;
+                            return 0;
+                          });
+                          return sorted;
+                        })()
+                        .map(
+                          (p) => Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6,
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 15,
+                                  backgroundColor: AppColors.neutralBg,
+                                  child: Text(
+                                    p.name.characters.first,
+                                    style: const TextStyle(
+                                      color: AppColors.textTertiary,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 13,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    p.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                if (p.travelType != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: p.travelType == 'TOGETHER'
+                                          ? AppColors.primaryBg
+                                          : AppColors.neutralBg,
+                                      borderRadius: BorderRadius.circular(
+                                        999,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      p.travelType == 'TOGETHER'
+                                          ? '같이'
+                                          : '따로',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: p.travelType == 'TOGETHER'
+                                            ? AppColors.primary
+                                            : AppColors.textTertiary,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                            const SizedBox(width: 10),
-                            Text(
-                              p.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
+                          ),
+                        )
+                        .toList(),
               ),
             ),
           ),

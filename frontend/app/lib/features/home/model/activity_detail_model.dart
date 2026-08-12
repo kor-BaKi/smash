@@ -1,11 +1,20 @@
 class ParticipantInfo {
   final int userId;
   final String name;
+  final String? travelType;
 
-  ParticipantInfo({required this.userId, required this.name});
+  ParticipantInfo({
+    required this.userId,
+    required this.name,
+    this.travelType,
+  });
 
   factory ParticipantInfo.fromJson(Map<String, dynamic> json) {
-    return ParticipantInfo(userId: json['userId'], name: json['name']);
+    return ParticipantInfo(
+      userId: json['userId'],
+      name: json['name'],
+      travelType: json['travelType'],
+    );
   }
 }
 

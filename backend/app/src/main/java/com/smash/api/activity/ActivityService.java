@@ -212,7 +212,10 @@ public class ActivityService {
 
         for (Participation p : participations) {
             ActivityDetailResponse.UserInfo info = ActivityDetailResponse.UserInfo.builder()
-                    .userId(p.getUser().getId()).name(p.getUser().getName()).build();
+                    .userId(p.getUser().getId())
+                    .name(p.getUser().getName())
+                    .travelType(p.getTravelType() == null ? null : p.getTravelType().name())
+                    .build();
 
             switch (p.getType()) {
                 case REGULAR ->  regular.add(info);

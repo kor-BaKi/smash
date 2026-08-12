@@ -54,5 +54,6 @@ public class ActivityDetailResponse {
     public static class UserInfo {
         private Long userId;
         private String name;
+        private String travelType;
     }
 }
