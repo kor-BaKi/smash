@@ -51,6 +51,7 @@ class MemberRegisterNotifier extends StateNotifier<MemberRegisterState> {
       final applicants = data
           .map((json) => RegisteredMember.fromJson(json))
           .toList();
+      applicants.sort((a, b) => a.name.compareTo(b.name));
       state = state.copyWith(
         pendingApplicants: applicants,
         isLoading: false,
@@ -106,21 +107,59 @@ class MemberRegisterNotifier extends StateNotifier<MemberRegisterState> {
 
   // 불합격 처리
   Future<void> reject(int userId) async {
+    final original = state.pendingApplicants;
+    state = state.copyWith(
+      pendingApplicants: state.pendingApplicants
+          .map(
+            (m) => m.id == userId
+                ? RegisteredMember(
+                    id: m.id,
+                    name: m.name,
+                    studentNo: m.studentNo,
+                    status: 'REJECTED',
+                    role: m.role,
+                    groupId: m.groupId,
+                  )
+                : m,
+          )
+          .toList(),
+    );
     try {
       await MemberRegisterApi.reject(userId);
-      await loadPendingApplicants(); // 최신 목록 갱신
     } catch (e) {
-      state = state.copyWith(errorMessage: '불합격 처리에 실패했습니다.');
+      state = state.copyWith(
+        pendingApplicants: original,
+        errorMessage: '불합격 처리에 실패했습니다.',
+      );
     }
   }
 
   // 불합격 취소
   Future<void> restore(int userId) async {
+    final original = state.pendingApplicants;
+    state = state.copyWith(
+      pendingApplicants: state.pendingApplicants
+          .map(
+            (m) => m.id == userId
+                ? RegisteredMember(
+                    id: m.id,
+                    name: m.name,
+                    studentNo: m.studentNo,
+                    status: 'PENDING',
+                    role: m.role,
+                    groupId: m.groupId,
+                  )
+                : m,
+          )
+          .toList(),
+    );
     try {
       await MemberRegisterApi.restore(userId);
-      await loadPendingApplicants(); // 최신 목록 갱신
     } catch (e) {
-      state = state.copyWith(errorMessage: '복구에 실패했습니다.');
+      state = state.copyWith(
+        pendingApplicants: original,
+        errorMessage: '복구에 실패했습니다.',
+      );
     }
   }
 
