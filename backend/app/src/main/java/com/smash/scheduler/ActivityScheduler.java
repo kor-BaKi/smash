@@ -68,7 +68,6 @@ public class ActivityScheduler {
                 .build();
 
         activityRepository.save(activity);
-        // 수정
         log.info("활동 생성: {} {} {}", group.getLabel(), date, type);
     }
 

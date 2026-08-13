@@ -105,3 +105,29 @@ class ActivityDetail {
     );
   }
 }
+
+class ActivityParticipant {
+  final int userId;
+  final String name;
+  final String studentNo;
+  final String participationType;
+  final String? travelType;
+
+  ActivityParticipant({
+    required this.userId,
+    required this.name,
+    required this.studentNo,
+    required this.participationType,
+    this.travelType,
+  });
+
+  factory ActivityParticipant.fromJson(Map<String, dynamic> json) {
+    return ActivityParticipant(
+      userId: json['userId'],
+      name: json['name'],
+      studentNo: json['studentNo'],
+      participationType: json['participationType'],
+      travelType: json['travelType'],
+    );
+  }
+}

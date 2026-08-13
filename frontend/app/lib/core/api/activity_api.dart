@@ -64,4 +64,12 @@ class ActivityApi {
       data: {'travelType': travelType},
     );
   }
+
+  // 참여자 목록 조회 (임원)
+  static Future<List<dynamic>> getParticipants(int activityId) async {
+    final response = await _dio.get(
+      '/admin/activities/$activityId/participants',
+    );
+    return response.data['data'];
+  }
 }

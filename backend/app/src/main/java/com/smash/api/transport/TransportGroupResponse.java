@@ -25,7 +25,7 @@ public class TransportGroupResponse {
     public static TransportGroupResponse of(
             TransportGroup group, List<TransportMember> members
     ) {
-        return TransportGroupResponse.builder()
+        return TransportGroupResponse.builder() // 객체를 JSON으로 변환 ㄴ
                 .groupId(group.getId())
                 .groupNumber(group.getGroupNumber())
                 .members(members.stream()

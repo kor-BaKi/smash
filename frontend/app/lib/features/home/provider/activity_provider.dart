@@ -13,6 +13,7 @@ class ActivityState {
   final bool isLoadingCandidates;
   final ActivityDetail? selectedDetail;
   final bool isLoadingDetail;
+  final List<ActivityParticipant>? participants;
 
   const ActivityState({
     this.activities = const [],
@@ -22,6 +23,7 @@ class ActivityState {
     this.isLoadingCandidates = false,
     this.selectedDetail,
     this.isLoadingDetail = false,
+    this.participants,
   });
 
   ActivityState copyWith({
@@ -32,6 +34,7 @@ class ActivityState {
     bool? isLoadingCandidates,
     ActivityDetail? selectedDetail,
     bool? isLoadingDetail,
+    List<ActivityParticipant>? participants,
   }) {
     return ActivityState(
       activities: activities ?? this.activities,
@@ -41,6 +44,7 @@ class ActivityState {
       isLoadingCandidates: isLoadingCandidates ?? this.isLoadingCandidates,
       selectedDetail: selectedDetail ?? this.selectedDetail,
       isLoadingDetail: isLoadingDetail ?? this.isLoadingDetail,
+      participants: participants ?? this.participants,
     );
   }
 }
@@ -128,6 +132,18 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
         activities: original,
         errorMessage: '참여 응답에 실패했습니다.',
       );
+    }
+  }
+
+  Future<void> loadParticipants(int activityId) async {
+    try {
+      final data = await ActivityApi.getParticipants(activityId);
+      final participants = data
+          .map((json) => ActivityParticipant.fromJson(json))
+          .toList();
+      state = state.copyWith(participants: participants);
+    } catch (e) {
+      state = state.copyWith(errorMessage: '참여자 목록을 불러오지 못했습니다.');
     }
   }
 

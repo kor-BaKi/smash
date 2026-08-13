@@ -1,9 +1,11 @@
+import 'package:app/features/home/page/transport_group_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../model/activity_detail_model.dart';
 import '../provider/activity_provider.dart';
+import '../provider/auth_provider.dart';
 
 class ActivityDetailDialog extends ConsumerStatefulWidget {
   final int activityId;
@@ -53,20 +55,29 @@ class _ActivityDetailDialogState
                 )
               : detail == null
               ? const SizedBox()
-              : _DetailBody(detail: detail),
+              : _DetailBody(
+                  detail: detail,
+                  isAdmin: ref.watch(authProvider).user?.isAdmin ?? false,
+                  activityId: widget.activityId,
+                ),
         ),
       ),
     );
   }
 }
 
-class _DetailBody extends StatelessWidget {
+class _DetailBody extends ConsumerWidget {
   final ActivityDetail detail;
-
-  const _DetailBody({required this.detail});
+  final bool isAdmin;
+  final int activityId;
+  const _DetailBody({
+    required this.detail,
+    required this.isAdmin,
+    required this.activityId,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final total =
         detail.summary.regular +
         detail.summary.carryover +
@@ -223,6 +234,36 @@ class _DetailBody extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 22),
+        if (isAdmin) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        TransportGroupPage(activityId: activityId),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.directions_car, size: 18),
+              label: const Text(
+                '택시 그룹 배정',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(48),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
