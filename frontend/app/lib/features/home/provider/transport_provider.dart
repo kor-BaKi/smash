@@ -77,6 +77,16 @@ class TransportNotifier extends StateNotifier<TransportState> {
       state = state.copyWith(errorMessage: '초기화에 실패했습니다.');
     }
   }
+
+  // 내가 속한 그룹 찾기 (부원)
+  TransportGroupInfo? findMyGroup(int userId) {
+    for (final group in state.groups) {
+      if (group.members.any((m) => m.userId == userId)) {
+        return group;
+      }
+    }
+    return null;
+  }
 }
 
 final transportProvider =

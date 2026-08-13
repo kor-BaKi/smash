@@ -7,7 +7,9 @@ import '../../../core/theme/app_theme.dart';
 import '../model/activity_model.dart';
 import '../model/poll_model.dart';
 import '../provider/activity_provider.dart';
+import '../provider/auth_provider.dart';
 import '../provider/poll_provider.dart';
+import '../provider/transport_provider.dart';
 import 'activity_detail_dialog.dart';
 import 'carryover_dialog.dart';
 
@@ -437,6 +439,17 @@ class _ActivityCard extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          // 이동 방법 선택/변경 박스 아래에 추가
+                          if (activity.myParticipation != null &&
+                              (activity.myParticipation!.type ==
+                                      'REGULAR' ||
+                                  activity.myParticipation!.type ==
+                                      'FREE_ATTEND')) ...[
+                            const SizedBox(height: 8),
+                            _MyTransportGroup(
+                              activityId: activity.activityId,
+                            ),
+                          ],
                         ],
                       ],
                     ),
@@ -888,4 +901,134 @@ Future<void> _showTravelTypeDialog(
       ],
     ),
   );
+}
+
+class _MyTransportGroup extends ConsumerStatefulWidget {
+  final int activityId;
+
+  const _MyTransportGroup({required this.activityId});
+
+  @override
+  ConsumerState<_MyTransportGroup> createState() =>
+      _MyTransportGroupState();
+}
+
+class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref
+          .read(transportProvider.notifier)
+          .loadGroups(widget.activityId),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userId = ref.watch(authProvider).user?.id;
+    final transportState = ref.watch(transportProvider);
+
+    if (userId == null) return const SizedBox();
+
+    final myGroup = ref
+        .read(transportProvider.notifier)
+        .findMyGroup(userId);
+
+    if (myGroup == null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.neutralBg,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Row(
+          children: [
+            Icon(
+              Icons.directions_car_outlined,
+              size: 14,
+              color: AppColors.textTertiary,
+            ),
+            SizedBox(width: 8),
+            Text(
+              '택시 그룹 배정 대기 중',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textTertiary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primaryBg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.directions_car,
+                size: 14,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${myGroup.groupNumber}호차',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${myGroup.members.length}명',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textTertiary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: myGroup.members.map((m) {
+              final isMe = m.userId == userId;
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: isMe ? AppColors.primary : AppColors.neutralBg,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  m.name,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isMe ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
 }
