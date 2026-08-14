@@ -1,0 +1,284 @@
+package com.smash.api.application;
+
+import com.smash.common.exception.BusinessException;
+import com.smash.domain.application.*;
+import com.smash.domain.availability.MemberAvailability;
+import com.smash.domain.availability.MemberAvailabilityRepository;
+import com.smash.domain.group.DayOfWeek;
+import com.smash.domain.group.Group;
+import com.smash.domain.group.GroupRepository;
+import com.smash.domain.group.TimeSlot;
+import com.smash.domain.user.Role;
+import com.smash.domain.user.Status;
+import com.smash.domain.user.User;
+import com.smash.domain.user.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ApplicationService {
+
+    private final ApplicationFormRepository formRepository;
+    private final FormQuestionRepository questionRepository;
+    private final ApplicationRepository applicationRepository;
+    private final ApplicationAnswerRepository answerRepository;
+    private final UserRepository userRepository;
+    private final MemberAvailabilityRepository availabilityRepository;
+    private final GroupRepository groupRepository;
+
+    // 폼 관리 (ADMIN)
+
+    // 폼 생성
+    @Transactional
+    public ApplicationFormResponse createForm(ApplicationFormRequest request) {
+        ApplicationForm form = formRepository.save(
+                ApplicationForm.builder()
+                        .isActive(false).startDate(request.getStartDate()).endDate(request.getEndDate()).build()
+        );
+
+        return ApplicationFormResponse.of(form, List.of()); // List.of() = 빈 리스트 반환
+    }
+
+    // 현재 폼 조회
+    @Transactional(readOnly = true)
+    public ApplicationFormResponse getForm() {
+        ApplicationForm form = getLatestForm();
+        List<FormQuestion> questions = questionRepository.findByFormOrderByOrderIndex(form);
+        return ApplicationFormResponse.of(form, questions);
+    }
+
+    // 폼 활성 / 비활성 토글
+    @Transactional
+    public void toggleForm(boolean isActive) {
+        ApplicationForm form = getLatestForm();
+        form.toggle(isActive);
+    }
+
+    // 폼 기간 수정
+    @Transactional
+    public void updateFormPeriod(ApplicationFormRequest request) {
+        ApplicationForm form = getLatestForm();
+        form.updatePeriod(request.getStartDate(), request.getEndDate());
+    }
+
+    // 질문 관리 (ADMIN)
+
+    // 질문 추가
+    @Transactional
+    public ApplicationFormResponse addQuestion(FormQuestionRequest request) {
+        ApplicationForm form = getLatestForm();
+        List<FormQuestion> existing = questionRepository.findByFormOrderByOrderIndex(form);
+
+        questionRepository.save(
+                FormQuestion.builder()
+                        .form(form)
+                        .content(request.getContent())
+                        .questionType(QuestionType.valueOf(request.getQuestionType()))
+                        .isRequired(request.isRequired())
+                        .orderIndex(existing.size()) // 맨 마지막에 추가
+                        .build()
+        );
+
+        List<FormQuestion> updated = questionRepository.findByFormOrderByOrderIndex(form);
+        return ApplicationFormResponse.of(form, updated);
+    }
+
+    // 질문 삭제
+    @Transactional
+    public ApplicationFormResponse deleteQuestion(Long questionId) {
+        FormQuestion question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 질문입니다."
+                ));
+        questionRepository.delete(question);
+
+        ApplicationForm form = question.getForm();
+        // 순서 재정렬
+        List<FormQuestion> remaining = questionRepository.findByFormOrderByOrderIndex(form);
+        for (int i = 0; i < remaining.size(); i++) {
+            remaining.get(i).update(
+                    remaining.get(i).getContent(),
+                    remaining.get(i).isRequired(),
+                    i
+            );
+        }
+
+        return ApplicationFormResponse.of(form, remaining);
+    }
+
+    // 질문 순서 변경
+    @Transactional
+    public ApplicationFormResponse reorderQuestions(List<Long> questionIds) {
+        for (int i = 0; i < questionIds.size(); i++) {
+            FormQuestion question = questionRepository.findById(questionIds.get(i))
+                    .orElseThrow(() -> new BusinessException(
+                            "RESOURCE_NOT_FOUND", "존재하지 않는 질문입니다."
+                    ));
+            question.update(question.getContent(), question.isRequired(), i);
+        }
+        ApplicationForm form = getLatestForm();
+        List<FormQuestion> updated = questionRepository.findByFormOrderByOrderIndex(form);
+        return ApplicationFormResponse.of(form, updated);
+    }
+
+    // 지원서 (웹 폼)
+
+    // 현재 활성 폼 조회 (웹 폼용)
+    @Transactional
+    public ApplicationFormResponse getActiveForm() {
+        ApplicationForm form = getLatestForm();
+        if (!form.isActive()) {
+            throw new BusinessException("FORM_NOT_ACTIVE", "현재 지원 기간이 아닙니다.");
+        }
+        List<FormQuestion> questions = questionRepository.findByFormOrderByOrderIndex(form);
+        return ApplicationFormResponse.of(form, questions);
+    }
+
+    // 지원서 제출
+    @Transactional
+    public void submit(ApplicationSubmitRequest request) {
+        ApplicationForm form = getLatestForm();
+
+        if (!form.isActive()) {
+            throw new BusinessException("FORM_NOT_ACTIVE", "현재 지원 기간이 아닙니다.");
+        }
+
+        // 중복 지원 방지
+        if (applicationRepository.existsByFormAndStudentNo(form, request.getStudentNo())) {
+            throw new BusinessException("ALREADY_APPLIED", "이미 지원한 학번입니다.");
+        }
+
+        // 희망 활동 시간 저장
+        String availabilities = request.getAvailabilities().stream()
+                .map(a -> a.getDayOfWeek().name() + ":" + a.getTimeSlot().name())
+                .collect(Collectors.joining(","));
+
+        // 지원서 저장
+        Application application = applicationRepository.save(
+                Application.builder()
+                        .form(form)
+                        .name(request.getName())
+                        .studentNo(request.getStudentNo())
+                        .department(request.getDepartment())
+                        .phone(request.getPhone())
+                        .availabilities(availabilities)
+                        .build()
+        );
+
+        // 답변 저장
+        if (request.getAnswer() != null) {
+            for (ApplicationSubmitRequest.AnswerRequest answerRequest : request.getAnswer()) {
+                FormQuestion question = questionRepository.findById(answerRequest.getQuestionId())
+                        .orElseThrow(() -> new BusinessException("RESOURCE_NOT_FOUND", "존재하지 않는 질문입니다."));
+                answerRepository.save(
+                        ApplicationAnswer.builder()
+                                .application(application)
+                                .question(question)
+                                .answer(answerRequest.getAnswer())
+                                .build()
+                );
+            }
+        }
+    }
+
+    // 지원서 관리 (ADMIN)
+
+    // 지원서 목록 조회
+    @Transactional
+    public List<ApplicationResponse> getApplications() {
+        ApplicationForm form = getLatestForm();
+        return applicationRepository.findByFormOrderByCreatedAtDesc(form)
+                .stream()
+                .map(ApplicationResponse::ofSimple)
+                .toList();
+    }
+
+    // 지원서 상세 조회
+    @Transactional
+    public ApplicationResponse getApplication(Long applicationId) {
+        Application application = getApplicationById(applicationId);
+        List<ApplicationAnswer> answers = answerRepository.findByApplicationOrderByQuestionOrderIndex(application);
+        return ApplicationResponse.of(application, answers);
+    }
+
+    // 합격 처리
+    @Transactional
+    public void accept(Long applicationId) {
+        Application application = getApplicationById(applicationId);
+
+        // 중복 확인
+        if (userRepository.existsByStudentNo(application.getStudentNo())) {
+            throw new BusinessException("ALREADY_EXISTS", "이미 등록된 학번입니다.");
+        }
+
+        application.accept();
+
+        // users 테이블 자동 등록 (PENDING)
+        User newUser = userRepository.save(
+                User.builder()
+                        .name(application.getName())
+                        .studentNo(application.getStudentNo())
+                        .department(application.getDepartment())
+                        .phone(application.getPhone())
+                        .role(Role.MEMBER)
+                        .status(Status.PENDING)
+                        .build()
+        );
+
+        // member_availability 자동 등록
+        String[] pairs = application.getAvailabilities().split(",");
+        for (String pair : pairs) {
+            String[] parts = pair.split(":");
+            DayOfWeek dayOfWeek = DayOfWeek.valueOf(parts[0]);
+            TimeSlot timeSlot = TimeSlot.valueOf(parts[1]);
+
+            Group group = groupRepository
+                    .findByDayOfWeekAndTimeSlot(dayOfWeek, timeSlot)
+                    .orElseThrow(() -> new BusinessException(
+                            "RESOURCE_NOT_FOUND", "해당 조가 존재하지 않습니다."));
+
+            availabilityRepository.save(
+                    MemberAvailability.builder()
+                            .user(newUser)
+                            .group(group)
+                            .build()
+            );
+        }
+    }
+
+    // 불합격 처리
+    @Transactional
+    public void reject(Long applicationId) {
+        Application application = getApplicationById(applicationId);
+        application.reject();
+    }
+
+    // 메모 수정
+    @Transactional
+    public void updateMemo(Long applicationId, String memo) {
+        Application application = getApplicationById(applicationId);
+        application.updateMemo(memo);
+    }
+
+    private Application getApplicationById(Long applicationId) {
+        return applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 지원서입니다."
+                ));
+    }
+
+    private ApplicationForm getLatestForm() {
+        return formRepository.findTopByOrderByCreatedAtDesc()
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "지원 폼이 존재하지 않습니다."
+                ));
+    }
+
+
+}

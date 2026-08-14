@@ -55,10 +55,16 @@ public class AssignmentController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @GetMapping("/api/v1/amdin/members/unassigned")
+    @GetMapping("/api/v1/admin/members/unassigned")
     public ResponseEntity<ApiResponse<List<AssignmentPreviewResponse.UnassignedItem>>> getUnassigned() {
         return ResponseEntity.ok(ApiResponse.success(
                 assignmentService.getUnassignedMembers()
         ));
+    }
+
+    @DeleteMapping("/api/v1/admin/availability")
+    public ResponseEntity<ApiResponse<Void>> resetAll() {
+        assignmentService.resetAllAvailability();
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

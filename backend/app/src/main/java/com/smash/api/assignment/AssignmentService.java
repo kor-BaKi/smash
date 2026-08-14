@@ -244,4 +244,9 @@ public class AssignmentService {
                         .build())
                 .toList();
     }
+
+    @Transactional
+    public void resetAllAvailability() {
+        availabilityRepository.deleteAll();
+    }
 }

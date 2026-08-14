@@ -11,10 +11,4 @@ class SmashApplicationTests {
 	void contextLoads() {
 	}
 
-	@Test
-	void generatePassword() {
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		System.out.println(encoder.encode("Smash123!"));
-	}
-
 }
