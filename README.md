@@ -25,6 +25,8 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 | **조 배정** | 수동 작성 및 수작업 공유 | **가능 요일 기반 자동 배정 알고리즘** |
 | **출석 집계** | 엑셀 수기 관리 및 누락 위험 | **이월 시스템 자동 계산 및 시각화** |
 | **공지/투표** | 단체 채팅방 텍스트 공지 | **앱 내 실시간 투표 기능** |
+| **이동 조율** | 카카오톡으로 수동 파악 | **같이/따로 선택 + 택시 그룹 자동 배정** |
+| **신입 모집** | 구글 폼 + 수동 등록 | **웹 지원 폼 + 합격 시 자동 등록** |
 | **정보 접근성** | 운영진만 확인 가능 | **부원 본인의 활동 내역 직접 확인** |
 
 ---
@@ -34,6 +36,7 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 ### 🗳️ 일일 활동 투표 시스템
 - 매일 오전 9시 스케줄러가 당일 활동을 자동 생성 (Spring Scheduler)
 - 부원은 정규참여 / 이월 / 타조참여 / 불참 중 선택
+- 참여 선택 시 이동 방법(같이/따로) 추가 선택
 - 시간대별 투표 마감 자동 처리 (1-3시 조 → 13:00, 3-5시 조 → 15:00)
 - 서버 시작 시 당일 활동 누락 방지 (`@PostConstruct`)
 
@@ -42,10 +45,20 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 - 이월 대상 후보 자동 계산 및 충족 여부 집계
 - 이월 취소 시 기록 삭제 및 자동 복구
 
+### 🚕 이동 조율 시스템 (v2)
+- 활동 참여 시 이동 방법 선택 (같이/따로)
+- 투표 결과에서 이동 방법 구분 표시 (따로 가는 사람 하단 정렬)
+- 임원 전용 택시 그룹 배정 화면
+  - 상단 호차 카드 선택 → 하단 명단에서 탭하여 즉시 배정
+  - 정원 4명 제한, 호차 변경 시 확인 다이얼로그
+  - 배정 완료 후 재진입 시 기존 배정 유지
+- 부원 홈 화면에서 내 호차 및 동승자 확인
+
 ### 👥 조 편성 및 자동 배정
 - 부원의 가능 요일을 수집해 그리디 알고리즘으로 조 자동 배정
 - 배정 미리보기 → 개별 수동 조정 → 확정의 3단계 프로세스
 - 미배정자 개별 수동 배정 지원
+- 학기 초 전체 희망 요일 초기화 기능
 
 ### 🏖️ 자유활동 기간 관리
 - 시험기간 등 자유활동 기간을 다건 등록/삭제 가능
@@ -63,18 +76,33 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 ### 🗳️ 일반 투표 시스템 (v2)
 - 임원이 회식/MT/자체대회 등 자유 주제로 투표 생성
 - 익명/기명, 마감 시간 설정 또는 수동 종료 선택 가능
-- 선택지별 색상 자동 배정 (참→초록, 불→빨강, 나머지→팔레트)
+- 진행 중 / 종료된 투표 탭 구분
 - 투표 취소 후 재투표 지원
-
-### 👤 부원 관리 (v2)
-- 전체 부원 목록 조회 및 조 변경
-- 이름/학번 실시간 검색
 
 ### 💰 회비 관리 (v2)
 - 조별 탭으로 부원 납부 현황 확인
-- 체크박스로 납부/취소 처리 (낙관적 업데이트로 즉시 반영)
+- 체크박스로 납부/취소 처리 (낙관적 업데이트)
 - 전체 납부 진행률 시각화
 - 학기 종료 시 전체 초기화 지원
+
+### 📋 동아리 지원 폼 시스템 (v2)
+- 임원이 앱에서 질문 추가/삭제/순서 변경
+- 지원 기간 설정 (시작일시 ~ 마감일시)
+- 웹 지원 폼 (단일 HTML, 인증 불필요)
+  - 고정 항목: 이름, 학번, 학과, 전화번호, 희망 활동 시간
+  - 커스텀 질문: 임원이 추가한 질문들 (TEXT/MULTILINE/SELECT)
+  - QR코드로 접근 가능
+- 중복 지원 방지 (학번 기준)
+- 임원 전용 지원서 목록/상세 조회
+- 합격 처리 시 users 테이블 자동 등록 + member_availability 자동 등록
+- 불합격 처리, 메모 기능
+- 엑셀 내보내기 (예정)
+
+### ⚙️ 설정 페이지 (v2)
+- 내 정보 확인 (이름, 학번)
+- 비밀번호 변경 (영문/숫자/특수문자 8자 이상)
+- 앱 버전 정보
+- 로그아웃
 
 ---
 
@@ -104,6 +132,7 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 ```mermaid
 flowchart LR
     APP[Flutter App\niOS / Android]
+    WEB[웹 지원 폼\nHTML]
     FUNNEL[Tailscale Funnel\nHTTPS]
     API[Spring Boot API\nRaspberry Pi]
     SEC[Spring Security\nJWT]
@@ -111,6 +140,7 @@ flowchart LR
     SCHED[Spring Scheduler\n매일 오전 9시]
 
     APP -->|REST API| FUNNEL
+    WEB -->|REST API| FUNNEL
     FUNNEL --> API
     API --> SEC
     API --> DB
@@ -134,7 +164,9 @@ smash/
 │       │   ├── schedule/
 │       │   ├── assignment/
 │       │   ├── poll/
-│       │   └── dues/
+│       │   ├── dues/
+│       │   ├── transport/
+│       │   └── application/
 │       ├── domain/            # Entity, Repository
 │       │   ├── user/
 │       │   ├── activity/
@@ -144,6 +176,8 @@ smash/
 │       │   ├── availability/
 │       │   ├── poll/
 │       │   ├── dues/
+│       │   ├── transport/
+│       │   ├── application/
 │       │   └── token/
 │       ├── scheduler/         # ActivityScheduler
 │       ├── auth/              # JwtProvider, Filter
@@ -163,7 +197,7 @@ smash/
 
 ---
 
-## 🗄 ERD (13개 테이블)
+## 🗄 ERD (19개 테이블)
 
 ```
 User ──── Participation ──── Activity ──── Group
@@ -171,6 +205,12 @@ User ──── Participation ──── Activity ──── Group
            └── CarryoverTarget             └── ActivitySchedule
 
 Poll ──── PollOption ──── PollVote
+
+TransportGroup ──── TransportMember
+
+ApplicationForm ──── FormQuestion
+Application ──── ApplicationAnswer
+
 DuesPayment
 InviteCode / FreePeriod / MemberAvailability / RefreshToken
 ```
@@ -182,9 +222,9 @@ InviteCode / FreePeriod / MemberAvailability / RefreshToken
 ### 공통 (하단 바)
 | 탭 | 내용 |
 | --- | --- |
-| 홈 | 오늘 활동 카드 + 진행 중인 투표 카드 |
+| 홈 | 오늘 활동 카드 (이동방법 선택/내 호차 확인) + 진행 중인 투표 카드 |
 | 투표 | 진행 중 / 종료된 투표 탭 구분 |
-| 더보기 | 추후 확장 예정 |
+| 더보기 | 설정 페이지 연결 |
 
 ### 임원 전용 (Drawer)
 | 메뉴 | 기능 |
@@ -199,6 +239,9 @@ InviteCode / FreePeriod / MemberAvailability / RefreshToken
 | 출석 현황 | 조별/미달자/타조참 3탭 대시보드 |
 | 부원 관리 | 전체 부원 조 확인 및 변경 |
 | 회비 관리 | 조별 납부 현황, 체크박스 처리, 초기화 |
+| 택시 그룹 배정 | 호차 카드 선택 후 탭 배정, 정원 4명 |
+| 지원 폼 관리 | 질문 추가/삭제/순서 변경, 기간 설정 |
+| 지원서 목록 | 지원서 확인, 합격/불합격 처리, 메모 |
 
 ---
 
@@ -208,6 +251,17 @@ InviteCode / FreePeriod / MemberAvailability / RefreshToken
 - **DB**: MariaDB (MySQL 호환, JDBC mariadb-java-client 사용)
 - **외부 공개**: Tailscale Funnel (HTTPS, Let's Encrypt 인증서 자동 발급)
 - **자동 시작**: systemd 서비스로 서버 재부팅 시 자동 실행
+- **배포 방법**:
+  ```bash
+  # 맥에서
+  git push origin main
+
+  # 라즈베리파이에서
+  ~/deploy.sh
+  ```
+- **iOS 배포**: Xcode Personal Team으로 기기 직접 설치 (7일 주기 갱신)
+- **Android 배포**: APK 파일 직접 공유
+
 ---
 
 ## 🐛 주요 트러블슈팅
@@ -234,13 +288,19 @@ InviteCode / FreePeriod / MemberAvailability / RefreshToken
 **원인**: ARM 아키텍처의 Debian 저장소는 MySQL 대신 MariaDB를 제공  
 **해결**: `mariadb-server` 설치, JDBC URL `jdbc:mysql` → `jdbc:mariadb`, 드라이버 `mysql-connector-j` → `mariadb-java-client`로 교체
 
+### Enum 충돌 — java.time.DayOfWeek vs 커스텀 DayOfWeek
+**문제**: 지원 폼 제출 시 `"MON"` 값이 Java 표준 `DayOfWeek`로 역직렬화되어 파싱 실패  
+**원인**: `java.time.DayOfWeek`는 `MONDAY`, `TUESDAY` 형태를 사용하는데, SMASH의 커스텀 `DayOfWeek`는 `MON`, `TUE` 형태를 사용  
+**해결**: `AvailabilityRequest`의 import를 `java.time.DayOfWeek` → `com.smash.domain.group.DayOfWeek`로 변경
+
 ---
 
 ## 🔮 Future Plan
 
-- Push Notification (투표 마감 1시간 전, 회비 미납자 알림)
+- Push Notification (투표 마감 1시간 전, 회비 미납자, 신규 지원자 알림)
+- 택시비 정산 기능 (결제자가 계좌/금액 입력 → N빵 자동 계산)
+- 웹 지원 폼 완성 (QR코드, 엑셀 내보내기, 웹 관리자 페이지)
 - 운영 통계 Dashboard
-- 자동 조 배정 알고리즘 고도화
 - TestFlight / 스토어 배포
 - CI/CD 파이프라인 구축 (GitHub Actions)
 
@@ -258,7 +318,7 @@ InviteCode / FreePeriod / MemberAvailability / RefreshToken
 - [x] 디자인 시스템 적용 (Pretendard, AppTheme)
 - [x] 실서버 배포 (Raspberry Pi + Tailscale Funnel)
 - [x] iOS / Android 배포
-- [x] JUnit5 + Mockito 단위/통합 테스트 (23개)
+- [x] JUnit5 + Mockito 단위/통합 테스트 (25개)
 - [x] N+1 문제 해결 (@EntityGraph + IN 쿼리)
 
 **v2 (진행 중)**
@@ -266,9 +326,13 @@ InviteCode / FreePeriod / MemberAvailability / RefreshToken
 - [x] 부원 관리 화면 (조 확인 및 변경, 검색)
 - [x] 회비 관리 (조별 납부 현황, 체크박스 처리, 초기화)
 - [x] 가입코드 복사 버튼
-- [x] 하단 탭 바 (홈/투표/더보기)
-- [x] 테이블 13개, API 50개, 테스트 25개
-- [ ] Push Notification (투표 마감, 회비 알림)
+- [x] 하단 탭 바 (홈/투표/더보기, 플로팅 타원형)
+- [x] 이동 조율 시스템 (같이/따로 선택, 택시 그룹 배정, 내 호차 확인)
+- [x] 설정 페이지 (내 정보, 비밀번호 변경, 앱 버전, 로그아웃)
+- [x] 동아리 지원 폼 백엔드 (폼/질문 관리, 지원서 제출/조회/합격처리)
+- [x] 테이블 19개, API 71개, 테스트 25개
+- [ ] 웹 지원 폼 (QR코드, 엑셀 내보내기)
+- [ ] Push Notification
 - [ ] TestFlight / 스토어 배포
 
 ---
