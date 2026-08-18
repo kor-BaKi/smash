@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMASH 동아리 지원서</title>
+  <style>
+    /* ── 토큰 ── */
+    :root {
+      --bg: #F7F8FA;
+      --card: #FFFFFF;
+      --primary: #3D7BF5;
+      --primary-light: #EBF1FF;
+      --ink: #1A1D23;
+      --sub: #5A6170;
+      --border: #E2E6ED;
+      --danger: #E84646;
+      --success: #27AE60;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+
+    /* ── 헤더 ── */
+    .header {
+      background: var(--primary);
+      color: #fff;
+      padding: 40px 24px 32px;
+      text-align: center;
+    }
+    .header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 14px;
+      opacity: 0.85;
+      line-height: 1.6;
+    }
+    .deadline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 16px;
+    }
+
+    /* ── 컨테이너 ── */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 18px;
+    }
+
+    /* ── 폼 요소 ── */
+    .field {
+      margin-bottom: 18px;
+    }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 7px;
+    }
+    label .required {
+      color: var(--danger);
+      margin-left: 3px;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 15px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+
+    /* ── 희망 시간 체크박스 ── */
+    .time-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .time-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .time-item:hover { border-color: var(--primary); }
+    .time-item.selected {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+    .time-item input[type="checkbox"] {
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .time-item .time-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .time-item .time-sub {
+      font-size: 11px;
+      color: var(--sub);
+      margin-top: 1px;
+    }
+
+    /* ── 제출 버튼 ── */
+    .submit-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 17px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      margin-top: 8px;
+      font-family: inherit;
+    }
+    .submit-btn:hover { opacity: 0.92; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ── 상태 메시지 ── */
+    .status-box {
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .status-box.error {
+      background: #FFF0F0;
+      color: var(--danger);
+      border: 1px solid #FFD0D0;
+    }
+    .status-box.success {
+      background: #F0FFF4;
+      color: var(--success);
+      border: 1px solid #C3E6CB;
+    }
+
+    /* ── 성공 화면 ── */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 60px 24px;
+    }
+    .success-screen .icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+    .success-screen h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .success-screen p {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.7;
+    }
+
+    /* ── 로딩 ── */
+    .loading {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--sub);
+      font-size: 14px;
+    }
+
+    /* ── 마감 화면 ── */
+    .closed-screen {
+      display: none;
+      text-align: center;
+      padding: 60px 24px;
+    }
+    .closed-screen .icon { font-size: 50px; margin-bottom: 16px; }
+    .closed-screen h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .closed-screen p { font-size: 14px; color: var(--sub); }
+  </style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="badge">🏸 SMASH 배드민턴 동아리</div>
+  <h1>동아리 지원서</h1>
+  <p>아래 정보를 빠짐없이 작성해주세요.<br>모든 항목은 필수입니다.</p>
+  <div class="deadline-badge" id="deadlineBadge" style="display:none">
+    ⏰ 마감 <span id="deadlineText"></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 로딩 -->
+  <div class="loading" id="loadingView">폼 정보를 불러오는 중...</div>
+
+  <!-- 마감 화면 -->
+  <div class="closed-screen" id="closedScreen">
+    <div class="icon">🔒</div>
+    <h2>지원이 마감되었습니다</h2>
+    <p>지원 기간이 종료되었습니다.<br>다음 기회를 이용해주세요.</p>
+  </div>
+
+  <!-- 폼 -->
+  <div id="formView" style="display:none">
+    <div class="status-box" id="statusBox"></div>
+
+    <!-- 기본 정보 -->
+    <div class="card">
+      <div class="card-title">기본 정보</div>
+
+      <div class="field">
+        <label>이름 <span class="required">*</span></label>
+        <input type="text" id="name" placeholder="홍길동" />
+      </div>
+      <div class="field">
+        <label>학번 <span class="required">*</span></label>
+        <input type="text" id="studentNo" placeholder="2026012345" />
+      </div>
+      <div class="field">
+        <label>학과 <span class="required">*</span></label>
+        <input type="text" id="department" placeholder="디지털보안학과" />
+      </div>
+      <div class="field">
+        <label>전화번호 <span class="required">*</span></label>
+        <input type="tel" id="phone" placeholder="010-1234-5678" />
+      </div>
+    </div>
+
+    <!-- 희망 활동 시간 -->
+    <div class="card">
+      <div class="card-title">희망 활동 시간</div>
+      <div class="field">
+        <label>참여 가능한 요일과 시간을 선택해주세요 <span class="required">*</span></label>
+        <div class="time-grid" id="timeGrid">
+          <!-- JS로 동적 생성 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 커스텀 질문 -->
+    <div id="customQuestions"></div>
+
+    <!-- 제출 -->
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">지원서 제출하기</button>
+  </div>
+
+  <!-- 성공 화면 -->
+  <div class="success-screen" id="successScreen">
+    <div class="icon">🎉</div>
+    <h2>지원서가 제출되었습니다!</h2>
+    <p>지원해주셔서 감사합니다.<br>검토 후 개별적으로 연락드리겠습니다.</p>
+  </div>
+
+</div>
+
+<script>
+  // ── 설정 ──
+  const BASE_URL = 'https://baki.tailbdb322.ts.net/api/v1';
+
+  // 희망 시간 옵션
+  const TIME_OPTIONS = [
+    { dayOfWeek: 'MON', timeSlot: 'SLOT_13_15', label: '월요일', sub: '오후 1시 ~ 3시' },
+    { dayOfWeek: 'MON', timeSlot: 'SLOT_15_17', label: '월요일', sub: '오후 3시 ~ 5시' },
+    { dayOfWeek: 'TUE', timeSlot: 'SLOT_13_15', label: '화요일', sub: '오후 1시 ~ 3시' },
+    { dayOfWeek: 'TUE', timeSlot: 'SLOT_15_17', label: '화요일', sub: '오후 3시 ~ 5시' },
+    { dayOfWeek: 'WED', timeSlot: 'SLOT_13_15', label: '수요일', sub: '오후 1시 ~ 3시' },
+    { dayOfWeek: 'WED', timeSlot: 'SLOT_15_17', label: '수요일', sub: '오후 3시 ~ 5시' },
+    { dayOfWeek: 'THU', timeSlot: 'SLOT_13_15', label: '목요일', sub: '오후 1시 ~ 3시' },
+    { dayOfWeek: 'THU', timeSlot: 'SLOT_15_17', label: '목요일', sub: '오후 3시 ~ 5시' },
+    { dayOfWeek: 'FRI', timeSlot: 'SLOT_13_15', label: '금요일', sub: '오후 1시 ~ 3시' },
+    { dayOfWeek: 'FRI', timeSlot: 'SLOT_15_17', label: '금요일', sub: '오후 3시 ~ 5시' },
+  ];
+
+  let formData = null;
+
+  // ── 폼 로드 ──
+  async function loadForm() {
+    try {
+      const res = await fetch(`${BASE_URL}/application-form`);
+      const json = await res.json();
+
+      if (!json.success) {
+        showClosed();
+        return;
+      }
+
+      formData = json.data;
+
+      // 마감일 표시
+      if (formData.endDate) {
+        const end = new Date(formData.endDate);
+        document.getElementById('deadlineText').textContent =
+          `${end.getFullYear()}.${String(end.getMonth()+1).padStart(2,'0')}.${String(end.getDate()).padStart(2,'0')} ${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
+        document.getElementById('deadlineBadge').style.display = 'inline-flex';
+      }
+
+      // 희망 시간 체크박스 생성
+      const grid = document.getElementById('timeGrid');
+      TIME_OPTIONS.forEach((opt, i) => {
+        const item = document.createElement('label');
+        item.className = 'time-item';
+        item.innerHTML = `
+          <input type="checkbox" id="time_${i}"
+            data-day="${opt.dayOfWeek}" data-slot="${opt.timeSlot}" />
+          <div>
+            <div class="time-label">${opt.label}</div>
+            <div class="time-sub">${opt.sub}</div>
+          </div>
+        `;
+        item.addEventListener('change', (e) => {
+          if (e.target.checked) item.classList.add('selected');
+          else item.classList.remove('selected');
+        });
+        grid.appendChild(item);
+      });
+
+      // 커스텀 질문 생성
+      const container = document.getElementById('customQuestions');
+      if (formData.questions && formData.questions.length > 0) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<div class="card-title">추가 질문</div>`;
+
+        formData.questions.forEach(q => {
+          const field = document.createElement('div');
+          field.className = 'field';
+
+          let inputHtml = '';
+          if (q.questionType === 'TEXT') {
+            inputHtml = `<input type="text" id="q_${q.id}" placeholder="답변을 입력해주세요" />`;
+          } else if (q.questionType === 'MULTILINE') {
+            inputHtml = `<textarea id="q_${q.id}" placeholder="답변을 입력해주세요" rows="4"></textarea>`;
+          } else if (q.questionType === 'SELECT') {
+            inputHtml = `<input type="text" id="q_${q.id}" placeholder="답변을 입력해주세요" />`;
+          }
+
+          field.innerHTML = `
+            <label>${q.content}${q.isRequired ? '<span class="required"> *</span>' : ''}</label>
+            ${inputHtml}
+          `;
+          card.appendChild(field);
+        });
+
+        container.appendChild(card);
+      }
+
+      // 폼 표시
+      document.getElementById('loadingView').style.display = 'none';
+      document.getElementById('formView').style.display = 'block';
+
+    } catch (e) {
+      showClosed();
+    }
+  }
+
+  // ── 제출 ──
+  async function submitForm() {
+    const btn = document.getElementById('submitBtn');
+    const statusBox = document.getElementById('statusBox');
+
+    // 기본 정보 수집
+    const name = document.getElementById('name').value.trim();
+    const studentNo = document.getElementById('studentNo').value.trim();
+    const department = document.getElementById('department').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+
+    // 희망 시간 수집
+    const availabilities = [];
+    document.querySelectorAll('#timeGrid input[type="checkbox"]:checked').forEach(cb => {
+      availabilities.push({
+        dayOfWeek: cb.dataset.day,
+        timeSlot: cb.dataset.slot
+      });
+    });
+
+    // 유효성 검사
+    if (!name || !studentNo || !department || !phone) {
+      showError('기본 정보를 모두 입력해주세요.');
+      return;
+    }
+    if (availabilities.length === 0) {
+      showError('희망 활동 시간을 1개 이상 선택해주세요.');
+      return;
+    }
+
+    // 커스텀 질문 답변 수집
+    const answers = [];
+    if (formData.questions) {
+      for (const q of formData.questions) {
+        const el = document.getElementById(`q_${q.id}`);
+        const answer = el ? el.value.trim() : '';
+        if (q.isRequired && !answer) {
+          showError(`'${q.content}' 항목을 입력해주세요.`);
+          return;
+        }
+        if (answer) {
+          answers.push({ questionId: q.id, answer });
+        }
+      }
+    }
+
+    // 제출
+    btn.disabled = true;
+    btn.textContent = '제출 중...';
+    statusBox.style.display = 'none';
+
+    try {
+      const res = await fetch(`${BASE_URL}/applications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, studentNo, department, phone, availabilities, answers })
+      });
+      const json = await res.json();
+
+      if (json.success) {
+        document.getElementById('formView').style.display = 'none';
+        document.getElementById('successScreen').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const msg = json.error?.code === 'ALREADY_APPLIED'
+          ? '이미 지원한 학번입니다.'
+          : json.error?.message || '제출에 실패했습니다. 다시 시도해주세요.';
+        showError(msg);
+        btn.disabled = false;
+        btn.textContent = '지원서 제출하기';
+      }
+    } catch (e) {
+      showError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+      btn.disabled = false;
+      btn.textContent = '지원서 제출하기';
+    }
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('statusBox');
+    box.className = 'status-box error';
+    box.textContent = '⚠️ ' + msg;
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function showClosed() {
+    document.getElementById('loadingView').style.display = 'none';
+    document.getElementById('closedScreen').style.display = 'block';
+  }
+
+  // 시작
+  loadForm();
+</script>
+</body>
+</html>
+EOF
+echo "완료"
