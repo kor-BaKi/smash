@@ -13,7 +13,6 @@ import com.smash.domain.user.Status;
 import com.smash.domain.user.User;
 import com.smash.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
@@ -182,8 +181,8 @@ public class ApplicationService {
         );
 
         // 답변 저장
-        if (request.getAnswer() != null) {
-            for (ApplicationSubmitRequest.AnswerRequest answerRequest : request.getAnswer()) {
+        if (request.getAnswers() != null) {
+            for (ApplicationSubmitRequest.AnswerRequest answerRequest : request.getAnswers()) {
                 FormQuestion question = questionRepository.findById(answerRequest.getQuestionId())
                         .orElseThrow(() -> new BusinessException("RESOURCE_NOT_FOUND", "존재하지 않는 질문입니다."));
                 answerRepository.save(
