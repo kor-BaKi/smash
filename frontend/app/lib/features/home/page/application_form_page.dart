@@ -129,7 +129,9 @@ class _ApplicationFormPageState
                         ? optionsController.text.trim()
                         : null,
                   );
-                  ref.read(applicationProvider.notifier).load();
+                  ref
+                      .read(applicationProvider.notifier)
+                      .load(showLoading: false);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('질문이 추가되었습니다.')),
@@ -184,7 +186,7 @@ class _ApplicationFormPageState
     if (confirmed == true) {
       try {
         await ApplicationApi.deleteQuestion(questionId);
-        ref.read(applicationProvider.notifier).load();
+        ref.read(applicationProvider.notifier).load(showLoading: false);
         if (mounted) {
           ScaffoldMessenger.of(
             context,
@@ -214,7 +216,7 @@ class _ApplicationFormPageState
       await ApplicationApi.reorderQuestions(
         reordered.map((q) => q.id).toList(),
       );
-      ref.read(applicationProvider.notifier).load();
+      ref.read(applicationProvider.notifier).load(showLoading: false);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -324,7 +326,9 @@ class _ApplicationFormPageState
                     startDate?.toIso8601String(),
                     endDate?.toIso8601String(),
                   );
-                  ref.read(applicationProvider.notifier).load();
+                  ref
+                      .read(applicationProvider.notifier)
+                      .load(showLoading: false);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('기간이 설정되었습니다.')),

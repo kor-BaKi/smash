@@ -45,6 +45,7 @@ class _ApplicationDetailPageState
         _isLoading = false;
       });
     } catch (e) {
+      print('detail error: $e');
       setState(() => _isLoading = false);
     }
   }

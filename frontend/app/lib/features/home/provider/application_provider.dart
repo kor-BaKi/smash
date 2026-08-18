@@ -39,8 +39,10 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
   ApplicationNotifier() : super(const ApplicationState());
 
   // 폼 + 지원서 목록 로드
-  Future<void> load() async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
+  Future<void> load({bool showLoading = true}) async {
+    if (showLoading) {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+    }
     try {
       final formData = await ApplicationApi.getForm();
       final listData = await ApplicationApi.getApplications();
