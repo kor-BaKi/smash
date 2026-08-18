@@ -25,6 +25,7 @@ class _ApplicationFormPageState
   Future<void> _showAddQuestionDialog() async {
     final contentController = TextEditingController();
     String questionType = 'TEXT';
+    final optionsController = TextEditingController();
     bool isRequired = true;
 
     await showDialog(
@@ -75,6 +76,24 @@ class _ApplicationFormPageState
                 onChanged: (val) =>
                     setDialogState(() => questionType = val!),
               ),
+              if (questionType == 'SELECT') ...[
+                const SizedBox(height: 12),
+                const Text(
+                  '선택지 (쉼표로 구분)',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: optionsController,
+                  decoration: const InputDecoration(
+                    hintText: '예: 있음, 없음, 모름',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -106,6 +125,9 @@ class _ApplicationFormPageState
                     contentController.text.trim(),
                     questionType,
                     isRequired,
+                    options: questionType == 'SELECT'
+                        ? optionsController.text.trim()
+                        : null,
                   );
                   ref.read(applicationProvider.notifier).load();
                   if (mounted) {

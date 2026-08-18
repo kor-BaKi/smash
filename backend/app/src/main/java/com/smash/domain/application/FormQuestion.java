@@ -33,13 +33,21 @@ public class FormQuestion {
     @Column(nullable = false)
     private int orderIndex; // 질문 순서 -> orderIndex : 0 -> 첫 번째 질문, 1 -> 두 번째 질문 ...
 
+    @Column
+    private String options; // "있음,없음,모름"
+
+    public void updateOptions(String options) {
+        this.options = options;
+    }
+
     @Builder
-    public FormQuestion(ApplicationForm form, String content, QuestionType questionType, boolean isRequired, int orderIndex) {
+    public FormQuestion(ApplicationForm form, String content, QuestionType questionType, boolean isRequired, int orderIndex, String options) {
         this.form = form;
         this.content = content;
         this.questionType = questionType;
         this.isRequired = isRequired;
         this.orderIndex = orderIndex;
+        this.options = options;
     }
 
     public void update(String content, boolean isRequired, int orderIndex) { // 질문 수정 메서드

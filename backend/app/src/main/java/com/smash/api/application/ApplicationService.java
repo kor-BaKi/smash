@@ -91,6 +91,7 @@ public class ApplicationService {
                         .questionType(QuestionType.valueOf(request.getQuestionType()))
                         .isRequired(request.isRequired())
                         .orderIndex(existing.size()) // 맨 마지막에 추가
+                        .options(request.getOptions())
                         .build()
         );
 

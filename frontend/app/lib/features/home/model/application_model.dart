@@ -32,6 +32,7 @@ class QuestionInfo {
   final String questionType;
   final bool isRequired;
   final int orderIndex;
+  final String? options;
 
   QuestionInfo({
     required this.id,
@@ -39,6 +40,7 @@ class QuestionInfo {
     required this.questionType,
     required this.isRequired,
     required this.orderIndex,
+    this.options,
   });
 
   factory QuestionInfo.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,7 @@ class QuestionInfo {
       questionType: json['questionType'],
       isRequired: json['isRequired'],
       orderIndex: json['orderIndex'],
+      options: json['options'],
     );
   }
 }

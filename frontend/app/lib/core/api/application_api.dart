@@ -53,8 +53,9 @@ class ApplicationApi {
   static Future<Map<String, dynamic>> addQuestion(
     String content,
     String questionType,
-    bool isRequired,
-  ) async {
+    bool isRequired, {
+    String? options,
+  }) async {
     final response = await _dio.post(
       '/admin/application-form/questions',
       data: {
@@ -62,6 +63,7 @@ class ApplicationApi {
         'questionType': questionType,
         'isRequired': isRequired,
         'orderIndex': 0,
+        if (options != null && options.isNotEmpty) 'options': options,
       },
     );
     return response.data['data'];

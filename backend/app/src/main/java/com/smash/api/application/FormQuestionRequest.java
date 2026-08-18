@@ -16,4 +16,6 @@ public class FormQuestionRequest {
     private boolean isRequired;
 
     private int orderIndex;
+
+    private String options;
 }

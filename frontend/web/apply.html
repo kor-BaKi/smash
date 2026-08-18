@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SMASH 동아리 지원서</title>
   <style>
-    /* ── 토큰 ── */
     :root {
       --bg: #F7F8FA;
       --card: #FFFFFF;
@@ -19,9 +18,7 @@
       --radius: 14px;
       --radius-sm: 8px;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', sans-serif;
       background: var(--bg);
@@ -29,8 +26,6 @@
       min-height: 100vh;
       padding: 0 0 60px;
     }
-
-    /* ── 헤더 ── */
     .header {
       background: var(--primary);
       color: #fff;
@@ -47,16 +42,8 @@
       letter-spacing: 0.08em;
       margin-bottom: 14px;
     }
-    .header h1 {
-      font-size: 26px;
-      font-weight: 800;
-      margin-bottom: 8px;
-    }
-    .header p {
-      font-size: 14px;
-      opacity: 0.85;
-      line-height: 1.6;
-    }
+    .header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+    .header p { font-size: 14px; opacity: 0.85; line-height: 1.6; }
     .deadline-badge {
       display: inline-flex;
       align-items: center;
@@ -69,15 +56,7 @@
       font-weight: 600;
       margin-top: 16px;
     }
-
-    /* ── 컨테이너 ── */
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 24px 16px;
-    }
-
-    /* ── 카드 ── */
+    .container { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
     .card {
       background: var(--card);
       border-radius: var(--radius);
@@ -93,13 +72,8 @@
       letter-spacing: 0.06em;
       margin-bottom: 18px;
     }
-
-    /* ── 폼 요소 ── */
-    .field {
-      margin-bottom: 18px;
-    }
+    .field { margin-bottom: 18px; }
     .field:last-child { margin-bottom: 0; }
-
     label {
       display: block;
       font-size: 14px;
@@ -107,11 +81,7 @@
       color: var(--ink);
       margin-bottom: 7px;
     }
-    label .required {
-      color: var(--danger);
-      margin-left: 3px;
-    }
-
+    label .required { color: var(--danger); margin-left: 3px; }
     input[type="text"],
     input[type="tel"],
     textarea {
@@ -128,22 +98,36 @@
     }
     input[type="text"]:focus,
     input[type="tel"]:focus,
-    textarea:focus {
-      border-color: var(--primary);
-      background: #fff;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-      line-height: 1.6;
-    }
-
-    /* ── 희망 시간 체크박스 ── */
-    .time-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    textarea:focus { border-color: var(--primary); background: #fff; }
+    textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+    /* 라디오 버튼 스타일 */
+    .radio-group { display: flex; flex-direction: column; gap: 10px; }
+    .radio-item {
+      display: flex;
+      align-items: center;
       gap: 10px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
     }
+    .radio-item:hover { border-color: var(--primary); }
+    .radio-item.selected {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+    .radio-item input[type="radio"] {
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .radio-item span { font-size: 14px; font-weight: 600; color: var(--ink); }
+    /* 희망 시간 체크박스 */
+    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .time-item {
       display: flex;
       align-items: center;
@@ -157,10 +141,7 @@
       user-select: none;
     }
     .time-item:hover { border-color: var(--primary); }
-    .time-item.selected {
-      background: var(--primary-light);
-      border-color: var(--primary);
-    }
+    .time-item.selected { background: var(--primary-light); border-color: var(--primary); }
     .time-item input[type="checkbox"] {
       accent-color: var(--primary);
       width: 16px;
@@ -168,18 +149,8 @@
       cursor: pointer;
       flex-shrink: 0;
     }
-    .time-item .time-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ink);
-    }
-    .time-item .time-sub {
-      font-size: 11px;
-      color: var(--sub);
-      margin-top: 1px;
-    }
-
-    /* ── 제출 버튼 ── */
+    .time-item .time-label { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .time-item .time-sub { font-size: 11px; color: var(--sub); margin-top: 1px; }
     .submit-btn {
       width: 100%;
       background: var(--primary);
@@ -196,12 +167,7 @@
     }
     .submit-btn:hover { opacity: 0.92; }
     .submit-btn:active { transform: scale(0.98); }
-    .submit-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* ── 상태 메시지 ── */
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .status-box {
       border-radius: var(--radius);
       padding: 16px 20px;
@@ -210,52 +176,13 @@
       margin-bottom: 16px;
       display: none;
     }
-    .status-box.error {
-      background: #FFF0F0;
-      color: var(--danger);
-      border: 1px solid #FFD0D0;
-    }
-    .status-box.success {
-      background: #F0FFF4;
-      color: var(--success);
-      border: 1px solid #C3E6CB;
-    }
-
-    /* ── 성공 화면 ── */
-    .success-screen {
-      display: none;
-      text-align: center;
-      padding: 60px 24px;
-    }
-    .success-screen .icon {
-      font-size: 60px;
-      margin-bottom: 20px;
-    }
-    .success-screen h2 {
-      font-size: 22px;
-      font-weight: 800;
-      margin-bottom: 10px;
-    }
-    .success-screen p {
-      font-size: 14px;
-      color: var(--sub);
-      line-height: 1.7;
-    }
-
-    /* ── 로딩 ── */
-    .loading {
-      text-align: center;
-      padding: 80px 24px;
-      color: var(--sub);
-      font-size: 14px;
-    }
-
-    /* ── 마감 화면 ── */
-    .closed-screen {
-      display: none;
-      text-align: center;
-      padding: 60px 24px;
-    }
+    .status-box.error { background: #FFF0F0; color: var(--danger); border: 1px solid #FFD0D0; }
+    .success-screen { display: none; text-align: center; padding: 60px 24px; }
+    .success-screen .icon { font-size: 60px; margin-bottom: 20px; }
+    .success-screen h2 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    .success-screen p { font-size: 14px; color: var(--sub); line-height: 1.7; }
+    .loading { text-align: center; padding: 80px 24px; color: var(--sub); font-size: 14px; }
+    .closed-screen { display: none; text-align: center; padding: 60px 24px; }
     .closed-screen .icon { font-size: 50px; margin-bottom: 16px; }
     .closed-screen h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
     .closed-screen p { font-size: 14px; color: var(--sub); }
@@ -263,7 +190,6 @@
 </head>
 <body>
 
-<!-- 헤더 -->
 <div class="header">
   <div class="badge">🏸 SMASH 배드민턴 동아리</div>
   <h1>동아리 지원서</h1>
@@ -274,25 +200,20 @@
 </div>
 
 <div class="container">
-
-  <!-- 로딩 -->
   <div class="loading" id="loadingView">폼 정보를 불러오는 중...</div>
 
-  <!-- 마감 화면 -->
   <div class="closed-screen" id="closedScreen">
     <div class="icon">🔒</div>
     <h2>지원이 마감되었습니다</h2>
     <p>지원 기간이 종료되었습니다.<br>다음 기회를 이용해주세요.</p>
   </div>
 
-  <!-- 폼 -->
   <div id="formView" style="display:none">
     <div class="status-box" id="statusBox"></div>
 
     <!-- 기본 정보 -->
     <div class="card">
       <div class="card-title">기본 정보</div>
-
       <div class="field">
         <label>이름 <span class="required">*</span></label>
         <input type="text" id="name" placeholder="홍길동" />
@@ -311,38 +232,31 @@
       </div>
     </div>
 
-    <!-- 희망 활동 시간 -->
+    <!-- 커스텀 질문 (희망 활동 시간보다 먼저) -->
+    <div id="customQuestions"></div>
+
+    <!-- 희망 활동 시간 (맨 아래) -->
     <div class="card">
       <div class="card-title">희망 활동 시간</div>
       <div class="field">
         <label>참여 가능한 요일과 시간을 선택해주세요 <span class="required">*</span></label>
-        <div class="time-grid" id="timeGrid">
-          <!-- JS로 동적 생성 -->
-        </div>
+        <div class="time-grid" id="timeGrid"></div>
       </div>
     </div>
 
-    <!-- 커스텀 질문 -->
-    <div id="customQuestions"></div>
-
-    <!-- 제출 -->
     <button class="submit-btn" id="submitBtn" onclick="submitForm()">지원서 제출하기</button>
   </div>
 
-  <!-- 성공 화면 -->
   <div class="success-screen" id="successScreen">
     <div class="icon">🎉</div>
     <h2>지원서가 제출되었습니다!</h2>
     <p>지원해주셔서 감사합니다.<br>검토 후 개별적으로 연락드리겠습니다.</p>
   </div>
-
 </div>
 
 <script>
-  // ── 설정 ──
   const BASE_URL = 'https://baki.tailbdb322.ts.net/api/v1';
 
-  // 희망 시간 옵션
   const TIME_OPTIONS = [
     { dayOfWeek: 'MON', timeSlot: 'SLOT_13_15', label: '월요일', sub: '오후 1시 ~ 3시' },
     { dayOfWeek: 'MON', timeSlot: 'SLOT_15_17', label: '월요일', sub: '오후 3시 ~ 5시' },
@@ -358,16 +272,12 @@
 
   let formData = null;
 
-  // ── 폼 로드 ──
   async function loadForm() {
     try {
       const res = await fetch(`${BASE_URL}/application-form`);
       const json = await res.json();
 
-      if (!json.success) {
-        showClosed();
-        return;
-      }
+      if (!json.success) { showClosed(); return; }
 
       formData = json.data;
 
@@ -384,19 +294,30 @@
       if (formData.questions && formData.questions.length > 0) {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = ``;
 
         formData.questions.forEach(q => {
           const field = document.createElement('div');
           field.className = 'field';
-
           let inputHtml = '';
+
           if (q.questionType === 'TEXT') {
             inputHtml = `<input type="text" id="q_${q.id}" placeholder="답변을 입력해주세요" />`;
           } else if (q.questionType === 'MULTILINE') {
             inputHtml = `<textarea id="q_${q.id}" placeholder="답변을 입력해주세요" rows="4"></textarea>`;
           } else if (q.questionType === 'SELECT') {
-            inputHtml = `<input type="text" id="q_${q.id}" placeholder="답변을 입력해주세요" />`;
+            if (q.options) {
+              const opts = q.options.split(',');
+              const radioItems = opts.map(opt => `
+                <label class="radio-item" onclick="selectRadio(this, 'q_${q.id}', '${opt.trim()}')">
+                  <input type="radio" name="q_${q.id}" value="${opt.trim()}" />
+                  <span>${opt.trim()}</span>
+                </label>
+              `).join('');
+              inputHtml = `<div class="radio-group">${radioItems}</div>
+                           <input type="hidden" id="q_${q.id}" />`;
+            } else {
+              inputHtml = `<input type="text" id="q_${q.id}" placeholder="답변을 입력해주세요" />`;
+            }
           }
 
           field.innerHTML = `
@@ -429,7 +350,6 @@
         grid.appendChild(item);
       });
 
-      // 폼 표시
       document.getElementById('loadingView').style.display = 'none';
       document.getElementById('formView').style.display = 'block';
 
@@ -438,53 +358,49 @@
     }
   }
 
-  // ── 제출 ──
+  // 라디오 버튼 선택
+  function selectRadio(labelEl, questionId, value) {
+    // 같은 그룹의 모든 라디오 아이템 스타일 초기화
+    labelEl.closest('.radio-group').querySelectorAll('.radio-item')
+      .forEach(el => el.classList.remove('selected'));
+    labelEl.classList.add('selected');
+    // hidden input에 값 저장
+    document.getElementById(questionId).value = value;
+  }
+
   async function submitForm() {
     const btn = document.getElementById('submitBtn');
     const statusBox = document.getElementById('statusBox');
 
-    // 기본 정보 수집
     const name = document.getElementById('name').value.trim();
     const studentNo = document.getElementById('studentNo').value.trim();
     const department = document.getElementById('department').value.trim();
     const phone = document.getElementById('phone').value.trim();
 
-    // 희망 시간 수집
     const availabilities = [];
     document.querySelectorAll('#timeGrid input[type="checkbox"]:checked').forEach(cb => {
-      availabilities.push({
-        dayOfWeek: cb.dataset.day,
-        timeSlot: cb.dataset.slot
-      });
+      availabilities.push({ dayOfWeek: cb.dataset.day, timeSlot: cb.dataset.slot });
     });
 
-    // 유효성 검사
     if (!name || !studentNo || !department || !phone) {
-      showError('기본 정보를 모두 입력해주세요.');
-      return;
+      showError('기본 정보를 모두 입력해주세요.'); return;
     }
     if (availabilities.length === 0) {
-      showError('희망 활동 시간을 1개 이상 선택해주세요.');
-      return;
+      showError('희망 활동 시간을 1개 이상 선택해주세요.'); return;
     }
 
-    // 커스텀 질문 답변 수집
     const answers = [];
     if (formData.questions) {
       for (const q of formData.questions) {
         const el = document.getElementById(`q_${q.id}`);
         const answer = el ? el.value.trim() : '';
         if (q.isRequired && !answer) {
-          showError(`'${q.content}' 항목을 입력해주세요.`);
-          return;
+          showError(`'${q.content}' 항목을 입력해주세요.`); return;
         }
-        if (answer) {
-          answers.push({ questionId: q.id, answer });
-        }
+        if (answer) answers.push({ questionId: q.id, answer });
       }
     }
 
-    // 제출
     btn.disabled = true;
     btn.textContent = '제출 중...';
     statusBox.style.display = 'none';
@@ -529,7 +445,6 @@
     document.getElementById('closedScreen').style.display = 'block';
   }
 
-  // 시작
   loadForm();
 </script>
 </body>

@@ -15,10 +15,12 @@ public class ApplicationFormResponse {
     private LocalDateTime startDate; // 지원 시작일
     private LocalDateTime endDate;   // 지원 마감일
     private List<QuestionResponse> questions; // 임원이 만든 질문 목록
+    private String options;
 
     public Long getId() { return id; }
     public LocalDateTime getStartDate() { return startDate; }
     public LocalDateTime getEndDate() { return endDate; }
+    public String getOptions() { return options; }
     public List<QuestionResponse> getQuestions() { return questions; }
 
     @JsonProperty("isActive")
@@ -31,11 +33,13 @@ public class ApplicationFormResponse {
         private String questionType; // TEXT, MULTILINE, SELECT
         private boolean isRequired;  // [필수 여부] isRequired == true → 미입력 시 제출 불가
         private int orderIndex;    // 질문 순서 (0, 1, 2...)
+        private String options; // 선택형
 
         public Long getId() { return id; }
         public String getContent() { return content; }
         public String getQuestionType() { return questionType; }
         public int getOrderIndex() { return orderIndex; }
+        public String getOptions() { return options; }
 
         @JsonProperty("isRequired")
         public boolean isRequired() { return isRequired; }
@@ -56,6 +60,7 @@ public class ApplicationFormResponse {
                                 .questionType(q.getQuestionType().name())
                                 .isRequired(q.isRequired())
                                 .orderIndex(q.getOrderIndex())
+                                .options(q.getOptions())
                                 .build())
                         .toList())
                 .build();
