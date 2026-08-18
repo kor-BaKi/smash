@@ -313,7 +313,7 @@ public class ApplicationService {
             // 헤더 행 생성
             Row headerRow = sheet.createRow(0);
             int col = 0;
-            String[] fixedHeaders = {"이름", "학번", "학과", "전화번호", "희망 활동 시간", "상태", "지원일"};
+            String[] fixedHeaders = {"이름", "학번", "학과", "전화번호"};
             for (String header : fixedHeaders) {
                 Cell cell = headerRow.createCell(col++);
                 cell.setCellValue(header);
@@ -326,6 +326,11 @@ public class ApplicationService {
                 cell.setCellStyle(headerStyle);
             }
 
+            // 희망 활동 시간 헤더
+            Cell timeCell = headerRow.createCell(col++);
+            timeCell.setCellValue("희망 활동 시간");
+            timeCell.setCellStyle(headerStyle);
+
             // 데이터 행 생성
             int rowNum = 1;
             for (Application app : applications) {
@@ -336,12 +341,6 @@ public class ApplicationService {
                 row.createCell(c++).setCellValue(app.getStudentNo());
                 row.createCell(c++).setCellValue(app.getDepartment());
                 row.createCell(c++).setCellValue(app.getPhone());
-                row.createCell(c++).setCellValue(
-                        formatAvailabilities(app.getAvailabilities()));
-                row.createCell(c++).setCellValue(
-                        formatStatus(app.getStatus().name()));
-                row.createCell(c++).setCellValue(
-                        app.getCreatedAt().toString().substring(0, 10));
 
                 // 커스텀 질문 답변
                 List<ApplicationAnswer> answers =
@@ -355,6 +354,9 @@ public class ApplicationService {
                     row.createCell(c++).setCellValue(
                             answerMap.getOrDefault(q.getId(), ""));
                 }
+
+                row.createCell(c++).setCellValue(
+                        formatAvailabilities(app.getAvailabilities()));
             }
 
             // 열 너비 자동 조정

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_file_saver/flutter_file_saver.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:typed_data';
 
+import '../../../core/api/application_api.dart';
 import '../../../core/theme/app_theme.dart';
 import '../model/application_model.dart';
 import '../provider/application_provider.dart';
@@ -91,6 +94,11 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
                 ),
               ],
             ),
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: '엑셀 내보내기',
+            onPressed: _downloadExcel,
+          ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -152,6 +160,30 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
               ],
             ),
     );
+  }
+
+  Future<void> _downloadExcel() async {
+    try {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('엑셀 파일을 준비 중입니다...')));
+      final bytes = await ApplicationApi.exportToExcel();
+      await FlutterFileSaver().writeFileAsBytes(
+        fileName: 'applications.xlsx',
+        bytes: Uint8List.fromList(bytes),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('엑셀 파일이 저장되었습니다.')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('다운로드에 실패했습니다.')));
+      }
+    }
   }
 }
 

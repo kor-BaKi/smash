@@ -97,4 +97,13 @@ class ApplicationApi {
       data: questionIds,
     );
   }
+
+  // 엑셀 내보내기
+  static Future<List<int>> exportToExcel() async {
+    final response = await _dio.get(
+      '/admin/applications/export',
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return response.data as List<int>;
+  }
 }
