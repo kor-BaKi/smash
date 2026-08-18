@@ -20,14 +20,14 @@ public class ApplicationResponse {
     private String status;
     private String memo;
     private LocalDateTime createdAt;
-    private List<AnswerResponse> answer;
+    private List<AnswerResponse> answers;
 
     @Builder
     @Getter
     public static class AnswerResponse {
         private Long questionId;
         private String questionContent;
-        private String answer;
+        private String answers;
     }
 
     // 상세 조회용 (답변 포함)
@@ -44,11 +44,11 @@ public class ApplicationResponse {
                 .status(application.getStatus().name())
                 .memo(application.getMemo())
                 .createdAt(application.getCreatedAt())
-                .answer(answers.stream()
+                .answers(answers.stream()
                         .map(a -> AnswerResponse.builder()
                                 .questionId(a.getQuestion().getId())
                                 .questionContent(a.getQuestion().getContent())
-                                .answer(a.getAnswer())
+                                .answers(a.getAnswer())
                                 .build())
                         .toList())
                 .build();

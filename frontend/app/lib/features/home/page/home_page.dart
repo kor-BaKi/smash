@@ -9,6 +9,7 @@ import '../provider/auth_provider.dart';
 import '../provider/group_management_provider.dart';
 import 'activity_admin_page.dart';
 import 'applicant_page.dart';
+import 'application_list_page.dart';
 import 'assignment_page.dart';
 import 'availability_page.dart';
 import 'dues_page.dart';
@@ -310,6 +311,19 @@ class _AdminDrawer extends ConsumerWidget {
                               child: const Text('닫기'),
                             ),
                           ],
+                        ),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: '📋',
+                    label: '지원서 관리',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ApplicationListPage(),
                         ),
                       );
                     },
