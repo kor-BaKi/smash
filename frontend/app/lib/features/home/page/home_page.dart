@@ -2,6 +2,7 @@ import 'package:app/features/home/page/poll_list_page.dart';
 import 'package:app/features/home/page/schedule_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../provider/auth_provider.dart';
@@ -259,6 +260,60 @@ class _AdminDrawer extends ConsumerWidget {
                   horizontal: 10,
                 ),
                 children: [
+                  _DrawerItem(
+                    icon: '📋',
+                    label: '지원 폼 QR코드',
+                    onTap: () {
+                      Navigator.pop(context);
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          title: const Text(
+                            '지원 폼 QR코드',
+                            style: TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'QR코드를 스캔하면 지원 폼으로 연결됩니다.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textTertiary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 20),
+                              QrImageView(
+                                data:
+                                    'https://baki.tailbdb322.ts.net/apply.html',
+                                version: QrVersions.auto,
+                                size: 220,
+                                backgroundColor: Colors.white,
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'baki.tailbdb322.ts.net/apply.html',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textTertiary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('닫기'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                   _DrawerItem(
                     icon: '💰',
                     label: '회비 관리',
