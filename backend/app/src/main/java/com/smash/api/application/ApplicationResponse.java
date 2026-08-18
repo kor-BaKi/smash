@@ -27,7 +27,7 @@ public class ApplicationResponse {
     public static class AnswerResponse {
         private Long questionId;
         private String questionContent;
-        private String answers;
+        private String answer;
     }
 
     // 상세 조회용 (답변 포함)
@@ -48,7 +48,7 @@ public class ApplicationResponse {
                         .map(a -> AnswerResponse.builder()
                                 .questionId(a.getQuestion().getId())
                                 .questionContent(a.getQuestion().getContent())
-                                .answers(a.getAnswer())
+                                .answer(a.getAnswer())
                                 .build())
                         .toList())
                 .build();
