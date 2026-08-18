@@ -66,4 +66,11 @@ public class AdminMemberController {
         return ResponseEntity.ok(ApiResponse.success(
                 adminMemberService.getGroupMembers(groupId)));
     }
+
+    // 지원자 삭제
+    @DeleteMapping("/api/v1/admin/members/{userId}")
+    public ResponseEntity<ApiResponse<Void>> deleteMember(@PathVariable Long userId) {
+        adminMemberService.deleteMember(userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

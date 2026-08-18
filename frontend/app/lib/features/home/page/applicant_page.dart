@@ -123,7 +123,7 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                           fontFamily: 'Pretendard',
                         ),
                         children: [
-                          const TextSpan(text: '대기 '),
+                          const TextSpan(text: '등록 '),
                           TextSpan(
                             text: '$pendingCount',
                             style: const TextStyle(
@@ -202,12 +202,25 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                                         ),
                                       )
                                     else
-                                      _CircleActionButton(
-                                        icon: Icons.close,
-                                        bg: AppColors.dangerBg,
-                                        fg: AppColors.danger,
-                                        onTap: () =>
-                                            _confirmReject(member),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _CircleActionButton(
+                                            icon: Icons.close,
+                                            bg: AppColors.dangerBg,
+                                            fg: AppColors.danger,
+                                            onTap: () =>
+                                                _confirmReject(member),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          _CircleActionButton(
+                                            icon: Icons.delete_outline,
+                                            bg: AppColors.neutralBg,
+                                            fg: AppColors.textTertiary,
+                                            onTap: () =>
+                                                _confirmDelete(member),
+                                          ),
+                                        ],
                                       ),
                                   ],
                                 ),
@@ -216,30 +229,42 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                           ),
                         ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => const _RegisterTextDialog(),
-                      );
-                    },
-                    icon: const Icon(Icons.list_alt, size: 18),
-                    label: const Text('붙여넣기로 대량 등록'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(52),
-                      side: const BorderSide(color: AppColors.divider),
-                      foregroundColor: AppColors.textSecondary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
     );
+  }
+
+  Future<void> _confirmDelete(member) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text('지원자 삭제'),
+        content: Text(
+          '${member.name}(${member.studentNo})님을 삭제할까요?\n복구할 수 없습니다.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              '삭제',
+              style: TextStyle(color: AppColors.danger),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref
+          .read(memberRegisterProvider.notifier)
+          .deleteMember(member.id);
+    }
   }
 }
 
@@ -283,110 +308,188 @@ class _RegisterTextDialog extends ConsumerStatefulWidget {
 }
 
 class _RegisterTextDialogState extends ConsumerState<_RegisterTextDialog> {
-  final _controller = TextEditingController();
+  final _nameController = TextEditingController();
+  final _studentNoController = TextEditingController();
+  final _departmentController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   @override
   void dispose() {
-    _controller.dispose();
+    _nameController.dispose();
+    _studentNoController.dispose();
+    _departmentController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
+    if (_nameController.text.trim().isEmpty ||
+        _studentNoController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('이름과 학번은 필수입니다.')));
+      return;
+    }
+
     await ref
         .read(memberRegisterProvider.notifier)
-        .registerFromText(_controller.text);
+        .registerMember(
+          name: _nameController.text.trim(),
+          studentNo: _studentNoController.text.trim(),
+          department: _departmentController.text.trim(),
+          phone: _phoneController.text.trim(),
+        );
 
-    final state = ref.read(memberRegisterProvider);
-    if (state.lastResult != null && mounted) {
+    if (mounted) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${state.lastResult!.successCount} / ${state.lastResult!.totalRequested}명 등록 완료'
-            '${state.lastResult!.failed.isEmpty ? '' : ' (실패 ${state.lastResult!.failed.length}명)'}',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('등록되었습니다.')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(memberRegisterProvider);
-
     return Dialog(
       backgroundColor: AppColors.cardBg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '지원자 등록',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 14),
-            const Text(
-              '엑셀에서 이름, 학번 두 열을 선택해\n그대로 복사(Ctrl+C)해서 붙여넣으세요.',
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.textTertiary,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _controller,
-              maxLines: 8,
-              decoration: const InputDecoration(
-                hintText: '김철수    20259001\n이영희    20259002',
-              ),
-            ),
-            if (state.errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  state.errorMessage!,
-                  style: const TextStyle(
-                    color: AppColors.danger,
-                    fontSize: 13,
-                  ),
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 40,
+      ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '지원자 등록',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('취소'),
+              const SizedBox(height: 20),
+              _Field(
+                label: '이름',
+                required: true,
+                controller: _nameController,
+                hint: '홍길동',
+              ),
+              const SizedBox(height: 12),
+              _Field(
+                label: '학번',
+                required: true,
+                controller: _studentNoController,
+                hint: '2026012345',
+              ),
+              const SizedBox(height: 12),
+              _Field(
+                label: '학과',
+                controller: _departmentController,
+                hint: '디지털보안학과',
+              ),
+              const SizedBox(height: 12),
+              _Field(
+                label: '전화번호',
+                controller: _phoneController,
+                hint: '010-1234-5678',
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('취소'),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: state.isSubmitting ? null : _submit,
-                    child: state.isSubmitting
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text('등록'),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        '등록',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _Field extends StatelessWidget {
+  final String label;
+  final bool required;
+  final TextEditingController controller;
+  final String hint;
+  final TextInputType keyboardType;
+
+  const _Field({
+    required this.label,
+    this.required = false,
+    required this.controller,
+    required this.hint,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (required)
+              const Text(
+                ' *',
+                style: TextStyle(color: AppColors.danger, fontSize: 13),
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: AppColors.textTertiary),
+            filled: true,
+            fillColor: AppColors.scaffoldBg,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

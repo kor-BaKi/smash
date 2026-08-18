@@ -105,6 +105,25 @@ class MemberRegisterNotifier extends StateNotifier<MemberRegisterState> {
     }
   }
 
+  Future<void> registerMember({
+    required String name,
+    required String studentNo,
+    String? department,
+    String? phone,
+  }) async {
+    try {
+      await MemberRegisterApi.registerOne(
+        name: name,
+        studentNo: studentNo,
+        department: department,
+        phone: phone,
+      );
+      await loadPendingApplicants();
+    } catch (e) {
+      state = state.copyWith(errorMessage: '등록에 실패했습니다.');
+    }
+  }
+
   // 불합격 처리
   Future<void> reject(int userId) async {
     final original = state.pendingApplicants;
@@ -176,6 +195,24 @@ class MemberRegisterNotifier extends StateNotifier<MemberRegisterState> {
       state = state.copyWith(
         isLoading: false,
         errorMessage: '부원 목록을 불러오지 못했습니다.',
+      );
+    }
+  }
+
+  // 지원자 삭제
+  Future<void> deleteMember(int userId) async {
+    final original = state.pendingApplicants;
+    state = state.copyWith(
+      pendingApplicants: state.pendingApplicants
+          .where((m) => m.id != userId)
+          .toList(),
+    );
+    try {
+      await MemberRegisterApi.deleteMember(userId);
+    } catch (e) {
+      state = state.copyWith(
+        pendingApplicants: original,
+        errorMessage: '삭제에 실패했습니다.',
       );
     }
   }

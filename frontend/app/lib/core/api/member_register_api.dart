@@ -64,4 +64,9 @@ class MemberRegisterApi {
     final response = await _dio.get('/admin/groups/$groupId/members');
     return response.data['data'];
   }
+
+  // 지원자 삭제
+  static Future<void> deleteMember(int userId) async {
+    await _dio.delete('/admin/members/$userId');
+  }
 }

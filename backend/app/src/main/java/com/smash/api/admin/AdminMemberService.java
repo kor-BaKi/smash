@@ -2,6 +2,7 @@ package com.smash.api.admin;
 
 import com.smash.api.auth.MemberRegisterRequest;
 import com.smash.api.auth.MemberRegisterResponse;
+import com.smash.common.exception.BusinessException;
 import com.smash.domain.user.Role;
 import com.smash.domain.user.Status;
 import com.smash.domain.user.User;
@@ -172,5 +173,13 @@ public class AdminMemberService {
                         .role(user.getRole().name())
                         .build())
                 .toList();
+    }
+
+    @Transactional
+    public void deleteMember(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 부원입니다."));
+        userRepository.delete(user);
     }
 }

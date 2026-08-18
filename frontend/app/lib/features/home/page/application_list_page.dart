@@ -1,12 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_file_saver/flutter_file_saver.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:typed_data';
 
 import '../../../core/api/application_api.dart';
 import '../../../core/theme/app_theme.dart';
 import '../model/application_model.dart';
 import '../provider/application_provider.dart';
+import 'applicant_page.dart';
 import 'application_detail_page.dart';
 
 class ApplicationListPage extends ConsumerStatefulWidget {
@@ -67,6 +69,15 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
         .toList();
 
     return Scaffold(
+      // Scaffold에 floatingActionButton 추가
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ApplicantPage()),
+        ).then((_) => ref.read(applicationProvider.notifier).load()),
+        child: const Icon(Icons.person_add_outlined, color: Colors.white),
+      ),
       backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
         title: const Text('지원서 관리'),

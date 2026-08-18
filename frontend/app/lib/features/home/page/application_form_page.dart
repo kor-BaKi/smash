@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/api/application_api.dart';
 import '../../../core/theme/app_theme.dart';
@@ -227,6 +228,8 @@ class _ApplicationFormPageState
   }
 
   Future<void> _showPeriodDialog(ApplicationFormInfo form) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     DateTime? startDate = form.startDate != null
         ? DateTime.parse(form.startDate!)
         : null;
@@ -259,7 +262,7 @@ class _ApplicationFormPageState
                 ),
                 subtitle: Text(
                   startDate != null
-                      ? '${startDate!.year}.${startDate!.month.toString().padLeft(2, '0')}.${startDate!.day.toString().padLeft(2, '0')}'
+                      ? '${startDate!.year}.${startDate!.month.toString().padLeft(2, '0')}.${startDate!.day.toString().padLeft(2, '0')} ${startDate!.hour.toString().padLeft(2, '0')}:${startDate!.minute.toString().padLeft(2, '0')}'
                       : '미설정',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
@@ -268,14 +271,30 @@ class _ApplicationFormPageState
                 ),
                 trailing: const Icon(Icons.calendar_today, size: 18),
                 onTap: () async {
-                  final picked = await showDatePicker(
+                  final pickedDate = await showDatePicker(
                     context: context,
                     initialDate: startDate ?? DateTime.now(),
                     firstDate: DateTime(2020),
                     lastDate: DateTime(2030),
                   );
-                  if (picked != null) {
-                    setDialogState(() => startDate = picked);
+                  if (pickedDate != null && context.mounted) {
+                    final pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(
+                        startDate ?? DateTime.now(),
+                      ),
+                    );
+                    if (pickedTime != null) {
+                      setDialogState(
+                        () => startDate = DateTime(
+                          pickedDate.year,
+                          pickedDate.month,
+                          pickedDate.day,
+                          pickedTime.hour,
+                          pickedTime.minute,
+                        ),
+                      );
+                    }
                   }
                 },
               ),
@@ -291,7 +310,7 @@ class _ApplicationFormPageState
                 ),
                 subtitle: Text(
                   endDate != null
-                      ? '${endDate!.year}.${endDate!.month.toString().padLeft(2, '0')}.${endDate!.day.toString().padLeft(2, '0')}'
+                      ? '${endDate!.year}.${endDate!.month.toString().padLeft(2, '0')}.${endDate!.day.toString().padLeft(2, '0')} ${endDate!.hour.toString().padLeft(2, '0')}:${endDate!.minute.toString().padLeft(2, '0')}'
                       : '미설정',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
@@ -300,14 +319,30 @@ class _ApplicationFormPageState
                 ),
                 trailing: const Icon(Icons.calendar_today, size: 18),
                 onTap: () async {
-                  final picked = await showDatePicker(
+                  final pickedDate = await showDatePicker(
                     context: context,
                     initialDate: endDate ?? DateTime.now(),
                     firstDate: DateTime(2020),
                     lastDate: DateTime(2030),
                   );
-                  if (picked != null) {
-                    setDialogState(() => endDate = picked);
+                  if (pickedDate != null && context.mounted) {
+                    final pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(
+                        endDate ?? DateTime.now(),
+                      ),
+                    );
+                    if (pickedTime != null) {
+                      setDialogState(
+                        () => endDate = DateTime(
+                          pickedDate.year,
+                          pickedDate.month,
+                          pickedDate.day,
+                          pickedTime.hour,
+                          pickedTime.minute,
+                        ),
+                      );
+                    }
                   }
                 },
               ),
@@ -329,11 +364,9 @@ class _ApplicationFormPageState
                   ref
                       .read(applicationProvider.notifier)
                       .load(showLoading: false);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('기간이 설정되었습니다.')),
-                    );
-                  }
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(content: Text('기간이 설정되었습니다.')),
+                  );
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -366,6 +399,57 @@ class _ApplicationFormPageState
       appBar: AppBar(
         title: const Text('지원 폼 관리'),
         actions: [
+          // QR코드 버튼 추가
+          IconButton(
+            icon: const Icon(Icons.qr_code),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                title: const Text(
+                  '지원 폼 QR코드',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'QR코드를 스캔하면 지원 폼으로 연결됩니다.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textTertiary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    QrImageView(
+                      data: 'https://baki.tailbdb322.ts.net/apply.html',
+                      version: QrVersions.auto,
+                      size: 220,
+                      backgroundColor: Colors.white,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'baki.tailbdb322.ts.net/apply.html',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('닫기'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // 질문 추가 버튼
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _showAddQuestionDialog,
