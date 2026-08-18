@@ -3,6 +3,7 @@ package com.smash.api.admin;
 import com.smash.api.auth.MemberRegisterRequest;
 import com.smash.api.auth.MemberRegisterResponse;
 import com.smash.common.exception.BusinessException;
+import com.smash.domain.availability.MemberAvailabilityRepository;
 import com.smash.domain.user.Role;
 import com.smash.domain.user.Status;
 import com.smash.domain.user.User;
@@ -19,6 +20,7 @@ import java.util.List;
 public class AdminMemberService {
 
     private final UserRepository userRepository;
+    private final MemberAvailabilityRepository availabilityRepository;
 
     // A-1. 단건 등록
     @Transactional
@@ -180,6 +182,8 @@ public class AdminMemberService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(
                         "RESOURCE_NOT_FOUND", "존재하지 않는 부원입니다."));
+        // 연관 데이터 먼저 삭제 (외래 키 제약)
+        availabilityRepository.deleteByUser(user);
         userRepository.delete(user);
     }
 }
