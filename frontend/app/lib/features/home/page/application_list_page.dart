@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../model/application_model.dart';
 import '../provider/application_provider.dart';
 import 'application_detail_page.dart';
 
@@ -155,7 +156,7 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
 }
 
 class _ApplicationTabView extends StatelessWidget {
-  final List applications;
+  final List<ApplicationInfo> applications;
 
   const _ApplicationTabView({required this.applications});
 
