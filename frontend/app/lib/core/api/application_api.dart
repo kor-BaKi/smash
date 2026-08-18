@@ -76,4 +76,23 @@ class ApplicationApi {
     );
     return response.data['data'];
   }
+
+  // 폼 기간 수정
+  static Future<void> updatePeriod(
+    String? startDate,
+    String? endDate,
+  ) async {
+    await _dio.patch(
+      '/admin/application-form/period',
+      data: {'startDate': startDate, 'endDate': endDate},
+    );
+  }
+
+  // 질문 순서 변경
+  static Future<void> reorderQuestions(List<int> questionIds) async {
+    await _dio.patch(
+      '/admin/application-form/questions/order',
+      data: questionIds,
+    );
+  }
 }

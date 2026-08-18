@@ -379,32 +379,12 @@
         document.getElementById('deadlineBadge').style.display = 'inline-flex';
       }
 
-      // 희망 시간 체크박스 생성
-      const grid = document.getElementById('timeGrid');
-      TIME_OPTIONS.forEach((opt, i) => {
-        const item = document.createElement('label');
-        item.className = 'time-item';
-        item.innerHTML = `
-          <input type="checkbox" id="time_${i}"
-            data-day="${opt.dayOfWeek}" data-slot="${opt.timeSlot}" />
-          <div>
-            <div class="time-label">${opt.label}</div>
-            <div class="time-sub">${opt.sub}</div>
-          </div>
-        `;
-        item.addEventListener('change', (e) => {
-          if (e.target.checked) item.classList.add('selected');
-          else item.classList.remove('selected');
-        });
-        grid.appendChild(item);
-      });
-
       // 커스텀 질문 생성
       const container = document.getElementById('customQuestions');
       if (formData.questions && formData.questions.length > 0) {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<div class="card-title">추가 질문</div>`;
+        card.innerHTML = ``;
 
         formData.questions.forEach(q => {
           const field = document.createElement('div');
@@ -428,6 +408,26 @@
 
         container.appendChild(card);
       }
+
+      // 희망 시간 체크박스 생성
+      const grid = document.getElementById('timeGrid');
+      TIME_OPTIONS.forEach((opt, i) => {
+        const item = document.createElement('label');
+        item.className = 'time-item';
+        item.innerHTML = `
+          <input type="checkbox" id="time_${i}"
+            data-day="${opt.dayOfWeek}" data-slot="${opt.timeSlot}" />
+          <div>
+            <div class="time-label">${opt.label}</div>
+            <div class="time-sub">${opt.sub}</div>
+          </div>
+        `;
+        item.addEventListener('change', (e) => {
+          if (e.target.checked) item.classList.add('selected');
+          else item.classList.remove('selected');
+        });
+        grid.appendChild(item);
+      });
 
       // 폼 표시
       document.getElementById('loadingView').style.display = 'none';
@@ -534,5 +534,3 @@
 </script>
 </body>
 </html>
-EOF
-echo "완료"

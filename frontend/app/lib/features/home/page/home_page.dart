@@ -9,6 +9,7 @@ import '../provider/auth_provider.dart';
 import '../provider/group_management_provider.dart';
 import 'activity_admin_page.dart';
 import 'applicant_page.dart';
+import 'application_form_page.dart';
 import 'application_list_page.dart';
 import 'assignment_page.dart';
 import 'availability_page.dart';
@@ -261,6 +262,19 @@ class _AdminDrawer extends ConsumerWidget {
                   horizontal: 10,
                 ),
                 children: [
+                  _DrawerItem(
+                    icon: '⚙️',
+                    label: '지원 폼 관리',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ApplicationFormPage(),
+                        ),
+                      );
+                    },
+                  ),
                   _DrawerItem(
                     icon: '📋',
                     label: '지원 폼 QR코드',
