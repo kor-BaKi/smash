@@ -16,6 +16,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -280,5 +289,114 @@ public class ApplicationService {
                 ));
     }
 
+    // 엑셀 내보내기
+    public byte[] exportToExcel() {
+        ApplicationForm form = getLatestForm();
+        List<Application> applications =
+                applicationRepository.findByFormOrderByCreatedAtDesc(form);
+        List<FormQuestion> questions =
+                questionRepository.findByFormOrderByOrderIndex(form);
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet("지원서 목록");
+
+            // 헤더 스타일
+            XSSFCellStyle headerStyle = workbook.createCellStyle();
+            headerStyle.setFillForegroundColor(new XSSFColor(new byte[]{(byte)61, (byte)123, (byte)245}, null));
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            XSSFFont headerFont = workbook.createFont();
+            headerFont.setColor(IndexedColors.WHITE.getIndex());
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            // 헤더 행 생성
+            Row headerRow = sheet.createRow(0);
+            int col = 0;
+            String[] fixedHeaders = {"이름", "학번", "학과", "전화번호", "희망 활동 시간", "상태", "지원일"};
+            for (String header : fixedHeaders) {
+                Cell cell = headerRow.createCell(col++);
+                cell.setCellValue(header);
+                cell.setCellStyle(headerStyle);
+            }
+            // 커스텀 질문 헤더
+            for (FormQuestion q : questions) {
+                Cell cell = headerRow.createCell(col++);
+                cell.setCellValue(q.getContent());
+                cell.setCellStyle(headerStyle);
+            }
+
+            // 데이터 행 생성
+            int rowNum = 1;
+            for (Application app : applications) {
+                Row row = sheet.createRow(rowNum++);
+                int c = 0;
+
+                row.createCell(c++).setCellValue(app.getName());
+                row.createCell(c++).setCellValue(app.getStudentNo());
+                row.createCell(c++).setCellValue(app.getDepartment());
+                row.createCell(c++).setCellValue(app.getPhone());
+                row.createCell(c++).setCellValue(
+                        formatAvailabilities(app.getAvailabilities()));
+                row.createCell(c++).setCellValue(
+                        formatStatus(app.getStatus().name()));
+                row.createCell(c++).setCellValue(
+                        app.getCreatedAt().toString().substring(0, 10));
+
+                // 커스텀 질문 답변
+                List<ApplicationAnswer> answers =
+                        answerRepository.findByApplicationOrderByQuestionOrderIndex(app);
+                Map<Long, String> answerMap = answers.stream()
+                        .collect(Collectors.toMap(
+                                a -> a.getQuestion().getId(),
+                                ApplicationAnswer::getAnswer
+                        ));
+                for (FormQuestion q : questions) {
+                    row.createCell(c++).setCellValue(
+                            answerMap.getOrDefault(q.getId(), ""));
+                }
+            }
+
+            // 열 너비 자동 조정
+            for (int i = 0; i < col; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            return out.toByteArray();
+
+        } catch (IOException e) {
+            throw new BusinessException("SERVER_ERROR", "엑셀 파일 생성에 실패했습니다.");
+        }
+    }
+
+    private String formatAvailabilities(String availabilities) {
+        if (availabilities == null) return "";
+        Map<String, String> dayMap = Map.of(
+                "MON", "월", "TUE", "화", "WED", "수",
+                "THU", "목", "FRI", "금"
+        );
+        Map<String, String> slotMap = Map.of(
+                "SLOT_13_15", "1-3시",
+                "SLOT_15_17", "3-5시"
+        );
+        return Arrays.stream(availabilities.split(","))
+                .map(pair -> {
+                    String[] parts = pair.split(":");
+                    return dayMap.getOrDefault(parts[0], parts[0]) + " "
+                            + slotMap.getOrDefault(parts[1], parts[1]);
+                })
+                .collect(Collectors.joining(", "));
+    }
+
+    private String formatStatus(String status) {
+        return switch (status) {
+            case "PENDING" -> "미처리";
+            case "ACCEPTED" -> "합격";
+            case "REJECTED" -> "불합격";
+            default -> status;
+        };
+    }
 
 }

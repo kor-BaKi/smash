@@ -3,6 +3,7 @@ package com.smash.api.application;
 import com.smash.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -135,6 +136,18 @@ public class ApplicationController {
             @RequestParam String memo) {
         applicationService.updateMemo(applicationId, memo);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 엑셀 내보내기
+    @GetMapping("/api/v1/admin/applications/export")
+    public ResponseEntity<byte[]> exportToExcel() {
+        byte[] excel = applicationService.exportToExcel();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"applications.xlsx\"")
+                .header(HttpHeaders.CONTENT_TYPE,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                .body(excel);
     }
 }
 
