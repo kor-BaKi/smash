@@ -332,21 +332,7 @@ class _ApplicationDetailPageState
           const SizedBox(height: 20),
 
           // 합격/불합격 버튼
-          if (d.status == 'PENDING') ...[
-            ElevatedButton(
-              onPressed: _accept,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.freeActivity,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(52),
-                elevation: 0,
-              ),
-              child: const Text(
-                '합격 처리',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
-            const SizedBox(height: 10),
+          if (d.status == 'PENDING' || d.status == 'ACCEPTED') ...[
             OutlinedButton(
               onPressed: _reject,
               style: OutlinedButton.styleFrom(
@@ -359,30 +345,16 @@ class _ApplicationDetailPageState
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
-          ] else if (d.status == 'ACCEPTED') ...[
-            OutlinedButton(
-              onPressed: _reject,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.danger,
-                side: const BorderSide(color: AppColors.danger),
-                minimumSize: const Size.fromHeight(52),
-              ),
-              child: const Text(
-                '불합격으로 변경',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
           ] else if (d.status == 'REJECTED') ...[
-            ElevatedButton(
-              onPressed: _accept,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.freeActivity,
-                foregroundColor: Colors.white,
+            OutlinedButton(
+              onPressed: _cancelReject,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primary),
                 minimumSize: const Size.fromHeight(52),
-                elevation: 0,
               ),
               child: const Text(
-                '합격으로 변경',
+                '불합격 취소',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
@@ -413,6 +385,69 @@ class _ApplicationDetailPageState
         return Icons.cancel;
       default:
         return Icons.pending;
+    }
+  }
+
+  Future<void> _cancelReject() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text('불합격 취소'),
+        content: Text('${_detail?.name}님의 불합격을 취소하고 미처리로 되돌릴까요?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              '확인',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref
+          .read(applicationProvider.notifier)
+          .cancelReject(widget.applicationId);
+      setState(
+        () => _detail = ApplicationInfo.fromJson({
+          'id': _detail!.id,
+          'name': _detail!.name,
+          'studentNo': _detail!.studentNo,
+          'department': _detail!.department,
+          'phone': _detail!.phone,
+          'availabilities': _detail!.availabilities,
+          'status': 'PENDING',
+          'memo': _detail!.memo,
+          'createdAt': _detail!.createdAt,
+          'answers':
+              _detail!.answers
+                  ?.map(
+                    (a) => {
+                      'questionId': a.questionId,
+                      'questionContent': a.questionContent,
+                      'answer': a.answer,
+                    },
+                  )
+                  .toList() ??
+              [],
+        }),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('불합격이 취소되었습니다.')));
+      }
     }
   }
 }

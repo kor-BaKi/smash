@@ -289,6 +289,56 @@ public class ApplicationService {
                 ));
     }
 
+    // 전체 합격 처리
+    @Transactional
+    public void acceptAll() {
+        ApplicationForm form = getLatestForm();
+        List<Application> pendingApplications = applicationRepository
+                .findByFormOrderByCreatedAtDesc(form)
+                .stream()
+                .filter(a -> a.getStatus() == ApplicationStatus.PENDING)
+                .toList();
+
+        for (Application application : pendingApplications) {
+            if (userRepository.existsByStudentNo(application.getStudentNo())) {
+                continue; // 이미 등록된 학번은 스킵
+            }
+            application.accept();
+            User newUser = userRepository.save(
+                    User.builder()
+                            .name(application.getName())
+                            .studentNo(application.getStudentNo())
+                            .department(application.getDepartment())
+                            .phone(application.getPhone())
+                            .role(Role.MEMBER)
+                            .status(Status.PENDING)
+                            .build()
+            );
+            String[] pairs = application.getAvailabilities().split(",");
+            for (String pair : pairs) {
+                String[] parts = pair.split(":");
+                DayOfWeek dayOfWeek = DayOfWeek.valueOf(parts[0]);
+                TimeSlot timeSlot = TimeSlot.valueOf(parts[1]);
+                Group group = groupRepository
+                        .findByDayOfWeekAndTimeSlot(dayOfWeek, timeSlot)
+                        .orElseThrow(() -> new BusinessException(
+                                "RESOURCE_NOT_FOUND", "해당 조가 존재하지 않습니다."));
+                availabilityRepository.save(
+                        MemberAvailability.builder()
+                                .user(newUser)
+                                .group(group)
+                                .build()
+                );
+            }
+        }
+    }
+
+    @Transactional
+    public void cancelReject(Long applicationId) {
+        Application application = getApplicationById(applicationId);
+        application.cancelReject();
+    }
+
     // 엑셀 내보내기
     public byte[] exportToExcel() {
         ApplicationForm form = getLatestForm();
@@ -391,14 +441,4 @@ public class ApplicationService {
                 })
                 .collect(Collectors.joining(", "));
     }
-
-    private String formatStatus(String status) {
-        return switch (status) {
-            case "PENDING" -> "미처리";
-            case "ACCEPTED" -> "합격";
-            case "REJECTED" -> "불합격";
-            default -> status;
-        };
-    }
-
 }

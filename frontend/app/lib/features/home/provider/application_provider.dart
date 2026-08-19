@@ -126,6 +126,48 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
+  // 전체 합격 처리
+  Future<void> acceptAll() async {
+    try {
+      await ApplicationApi.acceptAll();
+      await load(showLoading: false);
+    } catch (e) {
+      state = state.copyWith(errorMessage: '전체 합격 처리에 실패했습니다.');
+    }
+  }
+
+  // 불합격 취소 (낙관적 업데이트)
+  Future<void> cancelReject(int applicationId) async {
+    final original = state.applications;
+    state = state.copyWith(
+      applications: state.applications
+          .map(
+            (a) => a.id == applicationId
+                ? ApplicationInfo.fromJson({
+                    'id': a.id,
+                    'name': a.name,
+                    'studentNo': a.studentNo,
+                    'department': a.department,
+                    'phone': a.phone,
+                    'availabilities': a.availabilities,
+                    'status': 'PENDING',
+                    'memo': a.memo,
+                    'createdAt': a.createdAt,
+                  })
+                : a,
+          )
+          .toList(),
+    );
+    try {
+      await ApplicationApi.cancelReject(applicationId);
+    } catch (e) {
+      state = state.copyWith(
+        applications: original,
+        errorMessage: '불합격 취소에 실패했습니다.',
+      );
+    }
+  }
+
   // 메모 수정
   Future<void> updateMemo(int applicationId, String memo) async {
     try {

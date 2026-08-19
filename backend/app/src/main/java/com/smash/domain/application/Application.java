@@ -53,6 +53,8 @@ public class Application { // 지원서
         this.status = ApplicationStatus.PENDING; // PENDING으로 초기화
     }
 
+    public void cancelReject() { this.status = ApplicationStatus.PENDING; }
+
     @Builder
     public Application(ApplicationForm form, String name, String studentNo, String department, String phone, String availabilities) {
         this.form = form;

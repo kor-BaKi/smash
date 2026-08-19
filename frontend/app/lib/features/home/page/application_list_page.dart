@@ -162,7 +162,10 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      _ApplicationTabView(applications: pending),
+                      _ApplicationTabView(
+                        applications: pending,
+                        showAcceptAll: true,
+                      ),
                       _ApplicationTabView(applications: accepted),
                       _ApplicationTabView(applications: rejected),
                     ],
@@ -198,13 +201,18 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
   }
 }
 
-class _ApplicationTabView extends StatelessWidget {
+// _ApplicationTabView 위젯에서 미처리 탭일 때만 버튼 표시
+class _ApplicationTabView extends ConsumerWidget {
   final List<ApplicationInfo> applications;
+  final bool showAcceptAll;
 
-  const _ApplicationTabView({required this.applications});
+  const _ApplicationTabView({
+    required this.applications,
+    this.showAcceptAll = false,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (applications.isEmpty) {
       return const Center(
         child: Text(
@@ -214,111 +222,184 @@ class _ApplicationTabView extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      itemCount: applications.length,
-      itemBuilder: (context, index) {
-        final app = applications[index];
-        return GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ApplicationDetailPage(applicationId: app.id),
-            ),
-          ),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.cardBg,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: _statusColor(
-                    app.status,
-                  ).withOpacity(0.15),
-                  child: Text(
-                    app.name.characters.first,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: _statusColor(app.status),
-                    ),
+    return Column(
+      children: [
+        if (showAcceptAll)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _confirmAcceptAll(context, ref),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.freeActivity,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: Text(
+                  '미처리 ${applications.length}명 전체 합격',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            itemCount: applications.length,
+            itemBuilder: (context, index) {
+              final app = applications[index];
+              return GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ApplicationDetailPage(applicationId: app.id),
+                  ),
+                ),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBg,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            app.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: _statusColor(
+                          app.status,
+                        ).withOpacity(0.15),
+                        child: Text(
+                          app.name.characters.first,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: _statusColor(app.status),
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  app.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _statusColor(
+                                      app.status,
+                                    ).withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(
+                                      999,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    app.statusLabel,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: _statusColor(app.status),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            decoration: BoxDecoration(
-                              color: _statusColor(
-                                app.status,
-                              ).withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              app.statusLabel,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: _statusColor(app.status),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${app.studentNo} · ${app.department}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textTertiary,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        '${app.studentNo} · ${app.department}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textTertiary,
+                            if (app.memo != null &&
+                                app.memo!.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '📝 ${app.memo}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textTertiary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      if (app.memo != null && app.memo!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          '📝 ${app.memo}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textTertiary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: AppColors.textTertiary,
+                      ),
                     ],
                   ),
                 ),
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 14,
-                  color: AppColors.textTertiary,
-                ),
-              ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _confirmAcceptAll(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text('전체 합격 처리'),
+        content: Text('미처리 ${applications.length}명을 모두 합격 처리할까요?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              '전체 합격',
+              style: TextStyle(
+                color: AppColors.freeActivity,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
+    if (confirmed == true) {
+      await ref.read(applicationProvider.notifier).acceptAll();
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('전체 합격 처리되었습니다.')));
+      }
+    }
   }
 
   Color _statusColor(String status) {

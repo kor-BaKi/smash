@@ -33,6 +33,16 @@ class ApplicationApi {
     await _dio.patch('/admin/applications/$id/reject');
   }
 
+  // 전체 합격 처리
+  static Future<void> acceptAll() async {
+    await _dio.patch('/admin/applications/accept-all');
+  }
+
+  // 불합격 취소
+  static Future<void> cancelReject(int id) async {
+    await _dio.patch('/admin/applications/$id/cancel-reject');
+  }
+
   // 메모 수정
   static Future<void> updateMemo(int id, String memo) async {
     await _dio.patch(

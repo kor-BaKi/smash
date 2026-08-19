@@ -129,6 +129,21 @@ public class ApplicationController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    // 전체 합격 처리
+    @PatchMapping("/api/v1/admin/applications/accept-all")
+    public ResponseEntity<ApiResponse<Void>> acceptAll() {
+        applicationService.acceptAll();
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 불합격 취소 (미처리로 복구)
+    @PatchMapping("/api/v1/admin/applications/{applicationId}/cancel-reject")
+    public ResponseEntity<ApiResponse<Void>> cancelReject(
+            @PathVariable Long applicationId) {
+        applicationService.cancelReject(applicationId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
     // 메모 수정
     @PatchMapping("/api/v1/admin/applications/{applicationId}/memo")
     public ResponseEntity<ApiResponse<Void>> updateMemo(
