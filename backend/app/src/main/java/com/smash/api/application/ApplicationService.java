@@ -39,6 +39,7 @@ public class ApplicationService {
     private final UserRepository userRepository;
     private final MemberAvailabilityRepository availabilityRepository;
     private final GroupRepository groupRepository;
+    private final ApplicationMemoRepository memoRepository;
 
     // 폼 관리 (ADMIN)
 
@@ -209,11 +210,14 @@ public class ApplicationService {
     }
 
     // 지원서 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public ApplicationResponse getApplication(Long applicationId) {
         Application application = getApplicationById(applicationId);
-        List<ApplicationAnswer> answers = answerRepository.findByApplicationOrderByQuestionOrderIndex(application);
-        return ApplicationResponse.of(application, answers);
+        List<ApplicationAnswer> answers =
+                answerRepository.findByApplicationOrderByQuestionOrderIndex(application);
+        List<ApplicationMemo> memos =
+                memoRepository.findByApplicationOrderByCreatedAtAsc(application);
+        return ApplicationResponse.of(application, answers, memos);
     }
 
     // 합격 처리
@@ -287,6 +291,25 @@ public class ApplicationService {
                 .orElseThrow(() -> new BusinessException(
                         "RESOURCE_NOT_FOUND", "지원 폼이 존재하지 않습니다."
                 ));
+    }
+
+    // 메모 추가
+    @Transactional
+    public void addMemo(Long applicationId, String content, User admin) {
+        Application application = getApplicationById(applicationId);
+        memoRepository.save(
+                ApplicationMemo.builder()
+                        .application(application)
+                        .admin(admin)
+                        .content(content)
+                        .build()
+        );
+    }
+
+    // 메모 삭제
+    @Transactional
+    public void deleteMemo(Long memoId) {
+        memoRepository.deleteById(memoId);
     }
 
     // 전체 합격 처리

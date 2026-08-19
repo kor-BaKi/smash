@@ -2,6 +2,7 @@ package com.smash.api.application;
 
 import com.smash.domain.application.Application;
 import com.smash.domain.application.ApplicationAnswer;
+import com.smash.domain.application.ApplicationMemo;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -21,6 +22,7 @@ public class ApplicationResponse {
     private String memo;
     private LocalDateTime createdAt;
     private List<AnswerResponse> answers;
+    private List<MemoResponse> memos;
 
     @Builder
     @Getter
@@ -31,9 +33,11 @@ public class ApplicationResponse {
     }
 
     // 상세 조회용 (답변 포함)
+    // 상세 조회용 (답변 + 메모 포함)
     public static ApplicationResponse of(
-            Application application, List<ApplicationAnswer> answers
-    ) {
+            Application application,
+            List<ApplicationAnswer> answers,
+            List<ApplicationMemo> memos) {
         return ApplicationResponse.builder()
                 .id(application.getId())
                 .name(application.getName())
@@ -51,6 +55,9 @@ public class ApplicationResponse {
                                 .answer(a.getAnswer())
                                 .build())
                         .toList())
+                .memos(memos.stream()
+                        .map(MemoResponse::of)
+                        .toList())
                 .build();
     }
 
@@ -67,6 +74,24 @@ public class ApplicationResponse {
                 .memo(application.getMemo())
                 .createdAt(application.getCreatedAt())
                 .build();
+    }
+
+    @Getter
+    @Builder
+    public static class MemoResponse {
+        private Long id;
+        private String adminName;
+        private String content;
+        private String createdAt;
+
+        public static MemoResponse of(ApplicationMemo memo) {
+            return MemoResponse.builder()
+                    .id(memo.getId())
+                    .adminName(memo.getAdmin().getName())
+                    .content(memo.getContent())
+                    .createdAt(memo.getCreatedAt().toString().substring(0, 16))
+                    .build();
+        }
     }
 
     /*

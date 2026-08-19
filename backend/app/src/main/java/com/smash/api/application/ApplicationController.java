@@ -1,10 +1,14 @@
 package com.smash.api.application;
 
+import com.smash.common.exception.BusinessException;
 import com.smash.common.response.ApiResponse;
+import com.smash.domain.user.User;
+import com.smash.domain.user.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +19,7 @@ import java.util.Map;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+    private final UserRepository userRepository;
 
 
     // 폼 관리 (ADMIN)
@@ -151,6 +156,27 @@ public class ApplicationController {
             @PathVariable Long applicationId,
             @RequestParam String memo) {
         applicationService.updateMemo(applicationId, memo);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 메모 추가
+    @PostMapping("/api/v1/admin/applications/{applicationId}/memos")
+    public ResponseEntity<ApiResponse<Void>> addMemo(
+            @PathVariable Long applicationId,
+            @RequestParam String content,
+            @AuthenticationPrincipal Long userId) {
+        User admin = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 유저입니다."));
+        applicationService.addMemo(applicationId, content, admin);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 메모 삭제
+    @DeleteMapping("/api/v1/admin/applications/memos/{memoId}")
+    public ResponseEntity<ApiResponse<Void>> deleteMemo(
+            @PathVariable Long memoId) {
+        applicationService.deleteMemo(memoId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 

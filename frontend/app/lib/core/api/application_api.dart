@@ -52,6 +52,19 @@ class ApplicationApi {
     );
   }
 
+  // 메모 추가
+  static Future<void> addMemo(int applicationId, String content) async {
+    await _dio.post(
+      '/admin/applications/$applicationId/memos',
+      queryParameters: {'content': content},
+    );
+  }
+
+  // 메모 삭제
+  static Future<void> deleteMemo(int memoId) async {
+    await _dio.delete('/admin/applications/memos/$memoId');
+  }
+
   // 폼 활성/비활성 토글
   static Future<void> toggleForm(bool isActive) async {
     await _dio.patch(

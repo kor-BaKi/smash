@@ -66,6 +66,7 @@ class ApplicationInfo {
   final String? memo;
   final String createdAt;
   final List<AnswerInfo>? answers;
+  final List<MemoInfo>? memos;
 
   ApplicationInfo({
     required this.id,
@@ -78,6 +79,7 @@ class ApplicationInfo {
     this.memo,
     required this.createdAt,
     this.answers,
+    this.memos,
   });
 
   factory ApplicationInfo.fromJson(Map<String, dynamic> json) {
@@ -94,6 +96,11 @@ class ApplicationInfo {
       answers: json['answers'] != null
           ? (json['answers'] as List)
                 .map((e) => AnswerInfo.fromJson(e))
+                .toList()
+          : null,
+      memos: json['memos'] != null
+          ? (json['memos'] as List)
+                .map((e) => MemoInfo.fromJson(e))
                 .toList()
           : null,
     );
@@ -148,6 +155,29 @@ class AnswerInfo {
       questionId: json['questionId'],
       questionContent: json['questionContent'],
       answer: json['answer'],
+    );
+  }
+}
+
+class MemoInfo {
+  final int id;
+  final String adminName;
+  final String content;
+  final String createdAt;
+
+  MemoInfo({
+    required this.id,
+    required this.adminName,
+    required this.content,
+    required this.createdAt,
+  });
+
+  factory MemoInfo.fromJson(Map<String, dynamic> json) {
+    return MemoInfo(
+      id: json['id'],
+      adminName: json['adminName'],
+      content: json['content'],
+      createdAt: json['createdAt'],
     );
   }
 }

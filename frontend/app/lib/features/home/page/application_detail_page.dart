@@ -20,7 +20,8 @@ class _ApplicationDetailPageState
     extends ConsumerState<ApplicationDetailPage> {
   ApplicationInfo? _detail;
   bool _isLoading = true;
-  final TextEditingController _memoController = TextEditingController();
+
+  final TextEditingController _newMemoController = TextEditingController();
 
   @override
   void initState() {
@@ -30,7 +31,7 @@ class _ApplicationDetailPageState
 
   @override
   void dispose() {
-    _memoController.dispose();
+    _newMemoController.dispose();
     super.dispose();
   }
 
@@ -42,7 +43,6 @@ class _ApplicationDetailPageState
       print('detail data: $data');
       setState(() {
         _detail = ApplicationInfo.fromJson(data);
-        _memoController.text = _detail?.memo ?? '';
         _isLoading = false;
       });
     } catch (e) {
@@ -179,14 +179,45 @@ class _ApplicationDetailPageState
     }
   }
 
-  Future<void> _saveMemo() async {
-    await ref
-        .read(applicationProvider.notifier)
-        .updateMemo(widget.applicationId, _memoController.text.trim());
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('메모가 저장되었습니다.')));
+  Future<void> _addMemo() async {
+    if (_newMemoController.text.trim().isEmpty) return;
+    try {
+      await ApplicationApi.addMemo(
+        widget.applicationId,
+        _newMemoController.text.trim(),
+      );
+      _newMemoController.clear();
+      FocusScope.of(context).unfocus();
+      await _loadDetail();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('메모가 추가되었습니다.')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('메모 추가에 실패했습니다.')));
+      }
+    }
+  }
+
+  Future<void> _deleteMemo(int memoId) async {
+    try {
+      await ApplicationApi.deleteMemo(memoId);
+      await _loadDetail();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('메모가 삭제되었습니다.')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('메모 삭제에 실패했습니다.')));
+      }
     }
   }
 
@@ -203,166 +234,245 @@ class _ApplicationDetailPageState
 
     final d = _detail!;
 
-    return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
-      appBar: AppBar(title: Text('${d.name} 지원서')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // 상태 카드
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: _statusColor(d.status).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: _statusColor(d.status).withOpacity(0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _statusIcon(d.status),
-                  color: _statusColor(d.status),
-                  size: 20,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: AppColors.scaffoldBg,
+        appBar: AppBar(title: Text('${d.name} 지원서')),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // 상태 카드
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _statusColor(d.status).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: _statusColor(d.status).withOpacity(0.3),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  d.statusLabel,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _statusIcon(d.status),
                     color: _statusColor(d.status),
+                    size: 20,
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  d.createdAt.substring(0, 10),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // 기본 정보
-          _InfoCard(
-            title: '기본 정보',
-            children: [
-              _InfoRow(label: '이름', value: d.name),
-              _InfoRow(label: '학번', value: d.studentNo),
-              _InfoRow(label: '학과', value: d.department),
-              _InfoRow(label: '전화번호', value: d.phone),
-              _InfoRow(
-                label: '희망 활동 시간',
-                value: d.availabilitiesFormatted,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // 답변
-          if (d.answers != null && d.answers!.isNotEmpty)
-            _InfoCard(
-              title: '질문 답변',
-              children: d.answers!
-                  .map(
-                    (a) => _InfoRow(
-                      label: a.questionContent,
-                      value: a.answer,
-                      multiLine: true,
+                  const SizedBox(width: 8),
+                  Text(
+                    d.statusLabel,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      color: _statusColor(d.status),
                     ),
-                  )
-                  .toList(),
-            ),
-
-          const SizedBox(height: 12),
-
-          // 메모
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.cardBg,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '임원 메모',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textTertiary,
                   ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _memoController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: '메모를 입력해주세요',
-                    hintStyle: const TextStyle(
+                  const Spacer(),
+                  Text(
+                    d.createdAt.substring(0, 10),
+                    style: const TextStyle(
+                      fontSize: 12,
                       color: AppColors.textTertiary,
                     ),
-                    filled: true,
-                    fillColor: AppColors.scaffoldBg,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: _saveMemo,
-                    child: const Text('메모 저장'),
-                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 기본 정보
+            _InfoCard(
+              title: '기본 정보',
+              children: [
+                _InfoRow(label: '이름', value: d.name),
+                _InfoRow(label: '학번', value: d.studentNo),
+                _InfoRow(label: '학과', value: d.department),
+                _InfoRow(label: '전화번호', value: d.phone),
+                _InfoRow(
+                  label: '희망 활동 시간',
+                  value: d.availabilitiesFormatted,
                 ),
               ],
             ),
-          ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
-          // 합격/불합격 버튼
-          if (d.status == 'PENDING' || d.status == 'ACCEPTED') ...[
-            OutlinedButton(
-              onPressed: _reject,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.danger,
-                side: const BorderSide(color: AppColors.danger),
-                minimumSize: const Size.fromHeight(52),
+            // 답변
+            if (d.answers != null && d.answers!.isNotEmpty)
+              _InfoCard(
+                title: '질문 답변',
+                children: d.answers!
+                    .map(
+                      (a) => _InfoRow(
+                        label: a.questionContent,
+                        value: a.answer,
+                        multiLine: true,
+                      ),
+                    )
+                    .toList(),
               ),
-              child: const Text(
-                '불합격 처리',
-                style: TextStyle(fontWeight: FontWeight.w700),
+
+            const SizedBox(height: 12),
+
+            // 메모
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.cardBg,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '임원 메모',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 메모 목록 (타임라인)
+                  if (d.memos != null && d.memos!.isNotEmpty)
+                    ...d.memos!.map(
+                      (memo) => Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.scaffoldBg,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  memo.adminName,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  memo.createdAt,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textTertiary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () => _deleteMemo(memo.id),
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 14,
+                                    color: AppColors.textTertiary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              memo.content,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 8),
+
+                  // 새 메모 입력
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _newMemoController,
+                          decoration: InputDecoration(
+                            hintText: '메모를 입력해주세요',
+                            hintStyle: const TextStyle(
+                              color: AppColors.textTertiary,
+                            ),
+                            filled: true,
+                            fillColor: AppColors.scaffoldBg,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: _addMemo,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.send,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ] else if (d.status == 'REJECTED') ...[
-            OutlinedButton(
-              onPressed: _cancelReject,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
-                minimumSize: const Size.fromHeight(52),
+
+            const SizedBox(height: 20),
+
+            // 합격/불합격 버튼
+            if (d.status == 'PENDING' || d.status == 'ACCEPTED') ...[
+              OutlinedButton(
+                onPressed: _reject,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.danger,
+                  side: const BorderSide(color: AppColors.danger),
+                  minimumSize: const Size.fromHeight(52),
+                ),
+                child: const Text(
+                  '불합격 처리',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
-              child: const Text(
-                '불합격 취소',
-                style: TextStyle(fontWeight: FontWeight.w700),
+            ] else if (d.status == 'REJECTED') ...[
+              OutlinedButton(
+                onPressed: _cancelReject,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  minimumSize: const Size.fromHeight(52),
+                ),
+                child: const Text(
+                  '불합격 취소',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
-            ),
+            ],
+
+            const SizedBox(height: 40),
           ],
-
-          const SizedBox(height: 40),
-        ],
+        ),
       ),
     );
   }
