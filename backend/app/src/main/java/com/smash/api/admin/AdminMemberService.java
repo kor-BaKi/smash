@@ -4,6 +4,7 @@ import com.smash.api.auth.MemberRegisterRequest;
 import com.smash.api.auth.MemberRegisterResponse;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.availability.MemberAvailabilityRepository;
+import com.smash.domain.group.Group;
 import com.smash.domain.group.GroupRepository;
 import com.smash.domain.user.*;
 import lombok.RequiredArgsConstructor;
