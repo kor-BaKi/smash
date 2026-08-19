@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     int countByGroupId(Long groupId);
 
-    @Query("SELECT u FROM User u WHERE u.groupId IS NULL AND u.status = 'ACTIVE' AND u.deletedAt IS NULL")
+    @Query("SELECT u FROM User u WHERE u.groupId IS NULL AND (u.status = 'ACTIVE' OR u.status = 'PENDING') AND u.deletedAt IS NULL")
     List<User> findUnassignedMembers();
 
     List<User> findByGroupId(Long groupId);
