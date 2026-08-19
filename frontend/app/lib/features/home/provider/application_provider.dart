@@ -127,12 +127,14 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
   }
 
   // 전체 합격 처리
-  Future<void> acceptAll() async {
+  Future<Map<String, dynamic>> acceptAll() async {
     try {
-      await ApplicationApi.acceptAll();
+      final result = await ApplicationApi.acceptAll();
       await load(showLoading: false);
+      return result;
     } catch (e) {
       state = state.copyWith(errorMessage: '전체 합격 처리에 실패했습니다.');
+      return {};
     }
   }
 

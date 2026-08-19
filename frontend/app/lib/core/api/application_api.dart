@@ -34,8 +34,9 @@ class ApplicationApi {
   }
 
   // 전체 합격 처리
-  static Future<void> acceptAll() async {
-    await _dio.patch('/admin/applications/accept-all');
+  static Future<Map<String, dynamic>> acceptAll() async {
+    final response = await _dio.patch('/admin/applications/accept-all');
+    return response.data['data'];
   }
 
   // 불합격 취소

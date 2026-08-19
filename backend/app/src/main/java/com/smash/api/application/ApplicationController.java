@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -131,9 +132,9 @@ public class ApplicationController {
 
     // 전체 합격 처리
     @PatchMapping("/api/v1/admin/applications/accept-all")
-    public ResponseEntity<ApiResponse<Void>> acceptAll() {
-        applicationService.acceptAll();
-        return ResponseEntity.ok(ApiResponse.success(null));
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> acceptAll() {
+        return ResponseEntity.ok(ApiResponse.success(
+                applicationService.acceptAll()));
     }
 
     // 불합격 취소 (미처리로 복구)

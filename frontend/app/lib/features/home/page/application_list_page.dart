@@ -393,11 +393,22 @@ class _ApplicationTabView extends ConsumerWidget {
       ),
     );
     if (confirmed == true) {
-      await ref.read(applicationProvider.notifier).acceptAll();
+      final result = await ref
+          .read(applicationProvider.notifier)
+          .acceptAll();
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('전체 합격 처리되었습니다.')));
+        final accepted = result['accepted'] ?? 0;
+        final skipped = result['skipped'] ?? 0;
+        String msg = '$accepted명 합격 처리되었습니다.';
+        if (skipped > 0) {
+          msg += '\n($skipped명은 이미 등록된 학번으로 users 등록 제외)';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     }
   }

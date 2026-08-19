@@ -291,7 +291,7 @@ public class ApplicationService {
 
     // 전체 합격 처리
     @Transactional
-    public void acceptAll() {
+    public Map<String, Integer> acceptAll() {
         ApplicationForm form = getLatestForm();
         List<Application> pendingApplications = applicationRepository
                 .findByFormOrderByCreatedAtDesc(form)
@@ -299,38 +299,20 @@ public class ApplicationService {
                 .filter(a -> a.getStatus() == ApplicationStatus.PENDING)
                 .toList();
 
+        int accepted = 0;
+        int skipped = 0;
+
         for (Application application : pendingApplications) {
-            if (userRepository.existsByStudentNo(application.getStudentNo())) {
-                continue; // 이미 등록된 학번은 스킵
-            }
             application.accept();
-            User newUser = userRepository.save(
-                    User.builder()
-                            .name(application.getName())
-                            .studentNo(application.getStudentNo())
-                            .department(application.getDepartment())
-                            .phone(application.getPhone())
-                            .role(Role.MEMBER)
-                            .status(Status.PENDING)
-                            .build()
-            );
-            String[] pairs = application.getAvailabilities().split(",");
-            for (String pair : pairs) {
-                String[] parts = pair.split(":");
-                DayOfWeek dayOfWeek = DayOfWeek.valueOf(parts[0]);
-                TimeSlot timeSlot = TimeSlot.valueOf(parts[1]);
-                Group group = groupRepository
-                        .findByDayOfWeekAndTimeSlot(dayOfWeek, timeSlot)
-                        .orElseThrow(() -> new BusinessException(
-                                "RESOURCE_NOT_FOUND", "해당 조가 존재하지 않습니다."));
-                availabilityRepository.save(
-                        MemberAvailability.builder()
-                                .user(newUser)
-                                .group(group)
-                                .build()
-                );
+            if (!userRepository.existsByStudentNo(application.getStudentNo())) {
+                registerUser(application);
+                accepted++;
+            } else {
+                skipped++;
             }
         }
+
+        return Map.of("accepted", accepted, "skipped", skipped);
     }
 
     @Transactional
@@ -440,5 +422,34 @@ public class ApplicationService {
                             + slotMap.getOrDefault(parts[1], parts[1]);
                 })
                 .collect(Collectors.joining(", "));
+    }
+
+    private void registerUser(Application application) {
+        User newUser = userRepository.save(
+                User.builder()
+                        .name(application.getName())
+                        .studentNo(application.getStudentNo())
+                        .department(application.getDepartment())
+                        .phone(application.getPhone())
+                        .role(Role.MEMBER)
+                        .status(Status.PENDING)
+                        .build()
+        );
+        String[] pairs = application.getAvailabilities().split(",");
+        for (String pair : pairs) {
+            String[] parts = pair.split(":");
+            DayOfWeek dayOfWeek = DayOfWeek.valueOf(parts[0]);
+            TimeSlot timeSlot = TimeSlot.valueOf(parts[1]);
+            Group group = groupRepository
+                    .findByDayOfWeekAndTimeSlot(dayOfWeek, timeSlot)
+                    .orElseThrow(() -> new BusinessException(
+                            "RESOURCE_NOT_FOUND", "해당 조가 존재하지 않습니다."));
+            availabilityRepository.save(
+                    MemberAvailability.builder()
+                            .user(newUser)
+                            .group(group)
+                            .build()
+            );
+        }
     }
 }
