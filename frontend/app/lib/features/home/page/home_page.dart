@@ -10,7 +10,9 @@ import 'application_form_page.dart';
 import 'application_list_page.dart';
 import 'availability_page.dart';
 import 'dues_page.dart';
-import 'free_periodw.dart';
+import 'free_period_page.dart';
+import 'invite_code_page.dart';
+import 'member_home_view.dart';
 import 'member_management_page.dart';
 
 class HomePage extends ConsumerWidget {

@@ -282,40 +282,42 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Text('소속된 부원이 없습니다.'),
                   )
-                : Column(
-                    children: state.selectedGroupMembers
-                        .map(
-                          (m) => Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 6,
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor: AppColors.primaryBg,
-                                  child: Text(
-                                    m.name.substring(0, 1),
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  m.name,
+                : SizedBox(
+                    height: 500, // 최대 높이 제한
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: state.selectedGroupMembers.length,
+                      itemBuilder: (context, index) {
+                        final m = state.selectedGroupMembers[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 15,
+                                backgroundColor: AppColors.primaryBg,
+                                child: Text(
+                                  m.name.substring(0, 1),
                                   style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                m.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
-                        )
-                        .toList(),
+                        );
+                      },
+                    ),
                   ),
             const SizedBox(height: 18),
             SizedBox(
