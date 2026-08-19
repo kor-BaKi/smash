@@ -4,10 +4,8 @@ import com.smash.api.auth.MemberRegisterRequest;
 import com.smash.api.auth.MemberRegisterResponse;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.availability.MemberAvailabilityRepository;
-import com.smash.domain.user.Role;
-import com.smash.domain.user.Status;
-import com.smash.domain.user.User;
-import com.smash.domain.user.UserRepository;
+import com.smash.domain.group.GroupRepository;
+import com.smash.domain.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +19,8 @@ public class AdminMemberService {
 
     private final UserRepository userRepository;
     private final MemberAvailabilityRepository availabilityRepository;
+    private final MemberNoteRepository memberNoteRepository;
+    private final GroupRepository groupRepository;
 
     // A-1. 단건 등록
     @Transactional
@@ -185,5 +185,56 @@ public class AdminMemberService {
         // 연관 데이터 먼저 삭제 (외래 키 제약)
         availabilityRepository.deleteByUser(user);
         userRepository.delete(user);
+    }
+
+    // 부원 상세 조회
+    @Transactional(readOnly = true)
+    public MemberDetailResponse getMember(Long userId, Long adminId) {
+        User member = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 부원입니다."));
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 임원입니다."));
+        Group group = member.getGroupId() != null
+                ? groupRepository.findById(member.getGroupId()).orElse(null)
+                : null;
+        List<MemberNote> notes =
+                memberNoteRepository.findByMemberAndAdminOrderByCreatedAtAsc(
+                        member, admin);
+        return MemberDetailResponse.of(member, group, notes);
+    }
+
+    // 권한 변경
+    @Transactional
+    public void changeRole(Long userId, String role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 부원입니다."));
+        user.changeRole(Role.valueOf(role));
+    }
+
+    // 개인 메모 추가
+    @Transactional
+    public void addNote(Long memberId, Long adminId, String content) {
+        User member = userRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 부원입니다."));
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 임원입니다."));
+        memberNoteRepository.save(
+                MemberNote.builder()
+                        .member(member)
+                        .admin(admin)
+                        .content(content)
+                        .build()
+        );
+    }
+
+    // 개인 메모 삭제
+    @Transactional
+    public void deleteNote(Long noteId) {
+        memberNoteRepository.deleteById(noteId);
     }
 }

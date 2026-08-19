@@ -69,4 +69,31 @@ class MemberRegisterApi {
   static Future<void> deleteMember(int userId) async {
     await _dio.delete('/admin/members/$userId');
   }
+
+  // 부원 상세 조회
+  static Future<Map<String, dynamic>> getMember(int userId) async {
+    final response = await _dio.get('/admin/members/$userId');
+    return response.data['data'];
+  }
+
+  // 권한 변경
+  static Future<void> changeRole(int userId, String role) async {
+    await _dio.patch(
+      '/admin/members/$userId/role',
+      queryParameters: {'role': role},
+    );
+  }
+
+  // 개인 메모 추가
+  static Future<void> addNote(int userId, String content) async {
+    await _dio.post(
+      '/admin/members/$userId/notes',
+      queryParameters: {'content': content},
+    );
+  }
+
+  // 개인 메모 삭제
+  static Future<void> deleteNote(int noteId) async {
+    await _dio.delete('/admin/members/notes/$noteId');
+  }
 }

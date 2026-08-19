@@ -6,6 +6,7 @@ import com.smash.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -71,6 +72,42 @@ public class AdminMemberController {
     @DeleteMapping("/api/v1/admin/members/{userId}")
     public ResponseEntity<ApiResponse<Void>> deleteMember(@PathVariable Long userId) {
         adminMemberService.deleteMember(userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 부원 상세 조회
+    @GetMapping("/api/v1/admin/members/{userId}")
+    public ResponseEntity<ApiResponse<MemberDetailResponse>> getMember(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal Long adminId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                adminMemberService.getMember(userId, adminId)));
+    }
+
+    // 권한 변경
+    @PatchMapping("/api/v1/admin/members/{userId}/role")
+    public ResponseEntity<ApiResponse<Void>> changeRole(
+            @PathVariable Long userId,
+            @RequestParam String role) {
+        adminMemberService.changeRole(userId, role);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 개인 메모 추가
+    @PostMapping("/api/v1/admin/members/{userId}/notes")
+    public ResponseEntity<ApiResponse<Void>> addNote(
+            @PathVariable Long userId,
+            @RequestParam String content,
+            @AuthenticationPrincipal Long adminId) {
+        adminMemberService.addNote(userId, adminId, content);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 개인 메모 삭제
+    @DeleteMapping("/api/v1/admin/members/notes/{noteId}")
+    public ResponseEntity<ApiResponse<Void>> deleteNote(
+            @PathVariable Long noteId) {
+        adminMemberService.deleteNote(noteId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

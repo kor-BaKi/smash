@@ -9,6 +9,7 @@ import '../provider/group_management_provider.dart';
 import '../provider/member_register_provider.dart';
 import 'assignment_page.dart';
 import 'group_management_page.dart';
+import 'member_detail_dialog.dart';
 
 class MemberManagementPage extends ConsumerStatefulWidget {
   const MemberManagementPage({super.key});
@@ -131,86 +132,92 @@ class _MemberManagementPageState
                           final groupLabel = group.isEmpty
                               ? '미배정'
                               : group.first.label;
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
+                          return GestureDetector(
+                            onTap: () => showDialog(
+                              context: context,
+                              builder: (_) =>
+                                  MemberDetailDialog(userId: member.id),
                             ),
-                            decoration: BoxDecoration(
-                              color: AppColors.cardBg,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        member.name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        member.studentNo,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.textTertiary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => _showGroupPicker(
-                                    context,
-                                    member,
-                                    groupState.groups,
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: member.groupId == null
-                                          ? AppColors.amberBg
-                                          : AppColors.primaryBg,
-                                      borderRadius: BorderRadius.circular(
-                                        8,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.cardBg,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          groupLabel,
-                                          style: TextStyle(
-                                            fontSize: 12,
+                                          member.name,
+                                          style: const TextStyle(
                                             fontWeight: FontWeight.w700,
-                                            color: member.groupId == null
-                                                ? AppColors.amber
-                                                : AppColors.primary,
+                                            fontSize: 15,
                                           ),
                                         ),
-                                        const SizedBox(width: 4),
-                                        Icon(
-                                          Icons.edit,
-                                          size: 12,
-                                          color: member.groupId == null
-                                              ? AppColors.amber
-                                              : AppColors.primary,
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          member.studentNo,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.textTertiary,
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                  GestureDetector(
+                                    onTap: () => _showGroupPicker(
+                                      context,
+                                      member,
+                                      groupState.groups,
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: member.groupId == null
+                                            ? AppColors.amberBg
+                                            : AppColors.primaryBg,
+                                        borderRadius:
+                                            BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            groupLabel,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: member.groupId == null
+                                                  ? AppColors.amber
+                                                  : AppColors.primary,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Icon(
+                                            Icons.edit,
+                                            size: 12,
+                                            color: member.groupId == null
+                                                ? AppColors.amber
+                                                : AppColors.primary,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
