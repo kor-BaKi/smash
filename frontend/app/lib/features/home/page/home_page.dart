@@ -8,13 +8,9 @@ import '../provider/group_management_provider.dart';
 import 'activity_admin_page.dart';
 import 'application_form_page.dart';
 import 'application_list_page.dart';
-import 'assignment_page.dart';
 import 'availability_page.dart';
 import 'dues_page.dart';
-import 'free_period_page.dart';
-import 'group_management_page.dart';
-import 'invite_code_page.dart';
-import 'member_home_view.dart';
+import 'free_periodw.dart';
 import 'member_management_page.dart';
 
 class HomePage extends ConsumerWidget {
@@ -320,32 +316,6 @@ class _AdminDrawer extends ConsumerWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => const MemberManagementPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: '👥',
-                    label: '조 편성 관리',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const GroupManagementPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: '⚡',
-                    label: '자동 배정',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AssignmentPage(),
                         ),
                       );
                     },
