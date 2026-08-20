@@ -299,7 +299,7 @@ invite_code / free_period / refresh_token
 ### 품질 개선
 - **UI/UX 다듬기** (전반적인 디자인 일관성 개선)
 - **버그 수정** 및 엣지 케이스 처리
-- **테스트 커버리지 확대** (현재 25개 → 목표 50개+)
+- **테스트 커버리지 확대** (현재 43개 → 목표 50개+)
 ---
  
 ## Development Status
@@ -324,9 +324,10 @@ invite_code / free_period / refresh_token
 - [x] 지원서 메모 타임라인
 - [x] 부원 상세 다이얼로그 (정보/조변경/권한변경/개인메모)
 - [x] Drawer 메뉴 정리 (13개 → 8개)
-- [x] 테이블 21개, API 81개, 테스트 25개
+- [x] 테이블 21개, API 81개, 테스트 43개
 
 **v3 (예정)**
+- [ ] 게시판 추가
 - [ ] AWS 마이그레이션
 - [ ] CI/CD 파이프라인
 - [ ] Push Notification
