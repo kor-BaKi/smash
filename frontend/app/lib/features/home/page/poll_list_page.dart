@@ -227,6 +227,20 @@ class _PollTabView extends ConsumerWidget {
                                 color: AppColors.textTertiary,
                               ),
                             ),
+                            const SizedBox(width: 12),
+                            const Icon(
+                              Icons.access_time,
+                              size: 14,
+                              color: AppColors.textTertiary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              poll.createdAt.substring(0, 10),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textTertiary,
+                              ),
+                            ),
                             if (poll.myVotedOptionId != null) ...[
                               const SizedBox(width: 12),
                               const Icon(

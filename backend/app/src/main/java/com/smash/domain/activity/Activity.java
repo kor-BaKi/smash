@@ -73,7 +73,7 @@ public class Activity {
         return today.isAfter(this.activityDate) ||
                 (today.equals(this.activityDate) &&
                         LocalTime.now().isAfter(closeTime));
-//        return false;
+//        return false;grep -n "createdAt\|closedAt\|Text\|subtitle" ~/Desktop/project/smash/frontend/app/lib/features/home/page/poll_list_page.dart | head -20
     }
 
 }

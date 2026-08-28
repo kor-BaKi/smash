@@ -50,7 +50,7 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
         onRefresh: () =>
             ref.read(activityProvider.notifier).loadTodayActivities(),
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
           children: [
             Text(
               '오늘 활동 · $dateLabel',
@@ -71,7 +71,7 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
       onRefresh: () =>
           ref.read(activityProvider.notifier).loadTodayActivities(),
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
         children: [
           Text(
             '오늘 활동 · $dateLabel',
@@ -674,7 +674,28 @@ class _PollCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                const SizedBox(height: 14),
+                // 날짜 정보 추가
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.access_time,
+                      size: 12,
+                      color: AppColors.textTertiary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      poll.closedAt != null
+                          ? '${poll.createdAt.substring(0, 10)} ~ ${poll.closedAt!.substring(0, 16).replaceAll('T', ' ')}'
+                          : poll.createdAt.substring(0, 10),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
 
                 // 투표 전: 선택지 버튼
                 if (!hasVoted)
