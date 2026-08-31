@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/assignment_api.dart';
@@ -22,6 +23,10 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
   Map<String, dynamic>? _detail;
   bool _isLoading = true;
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _departmentController =
+      TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  bool _isEditing = false;
 
   @override
   void initState() {
@@ -32,7 +37,76 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
   @override
   void dispose() {
     _noteController.dispose();
+    _departmentController.dispose();
+    _phoneController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveInfo() async {
+    try {
+      await MemberRegisterApi.updateMemberInfo(
+        widget.userId,
+        department: _departmentController.text.trim(),
+        phone: _phoneController.text.trim(),
+      );
+      await _loadDetail();
+      setState(() => _isEditing = false);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('정보가 수정되었습니다.')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('수정에 실패했습니다.')));
+      }
+    }
+  }
+
+  Future<void> _deleteMember() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text('부원 탈퇴'),
+        content: Text('${_detail!['name']}님을 탈퇴 처리할까요?\n모든 데이터가 삭제됩니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              '탈퇴',
+              style: TextStyle(color: AppColors.danger),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      try {
+        await MemberRegisterApi.deleteMember(widget.userId);
+        if (mounted) {
+          Navigator.of(context).pop();
+          ref.read(memberRegisterProvider.notifier).loadAllMembers();
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('탈퇴 처리되었습니다.')));
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('탈퇴 처리에 실패했습니다.')));
+        }
+      }
+    }
   }
 
   Future<void> _loadDetail() async {
@@ -41,6 +115,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
       setState(() {
         _detail = data;
         _isLoading = false;
+        _departmentController.text = data['department'] ?? '';
+        _phoneController.text = data['phone'] ?? '';
       });
     } catch (e) {
       setState(() => _isLoading = false);
@@ -247,6 +323,22 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                           ),
                         ),
                         IconButton(
+                          icon: Icon(
+                            _isEditing ? Icons.check : Icons.edit_outlined,
+                            color: AppColors.primary,
+                          ),
+                          onPressed: _isEditing
+                              ? _saveInfo
+                              : () => setState(() => _isEditing = true),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.person_remove_outlined,
+                            color: AppColors.danger,
+                          ),
+                          onPressed: _deleteMember,
+                        ),
+                        IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
@@ -258,14 +350,36 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                     const SizedBox(height: 16),
 
                     // 기본 정보
-                    _InfoRow(
-                      label: '학과',
-                      value: _detail!['department'] ?? '-',
+                    _CopyableInfoRow(
+                      label: '이름',
+                      value: _detail!['name'] ?? '-',
                     ),
-                    _InfoRow(
-                      label: '전화번호',
-                      value: _detail!['phone'] ?? '-',
+                    _CopyableInfoRow(
+                      label: '학번',
+                      value: _detail!['studentNo'] ?? '-',
                     ),
+
+                    if (_isEditing) ...[
+                      _EditableInfoRow(
+                        label: '학과',
+                        controller: _departmentController,
+                      ),
+                      const SizedBox(height: 8),
+                      _EditableInfoRow(
+                        label: '전화번호',
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ] else ...[
+                      _CopyableInfoRow(
+                        label: '학과',
+                        value: _detail!['department'] ?? '-',
+                      ),
+                      _CopyableInfoRow(
+                        label: '전화번호',
+                        value: _detail!['phone'] ?? '-',
+                      ),
+                    ],
 
                     const SizedBox(height: 12),
 
@@ -527,6 +641,103 @@ class _InfoRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CopyableInfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _CopyableInfoRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 60,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textTertiary,
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onLongPress: () {
+                Clipboard.setData(ClipboardData(text: value));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('복사되었습니다.')));
+              },
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EditableInfoRow extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final TextInputType keyboardType;
+
+  const _EditableInfoRow({
+    required this.label,
+    required this.controller,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 60,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textTertiary,
+            ),
+          ),
+        ),
+        Expanded(
+          child: TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.scaffoldBg,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+            ),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

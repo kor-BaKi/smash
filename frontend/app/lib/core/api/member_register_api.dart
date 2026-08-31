@@ -96,4 +96,19 @@ class MemberRegisterApi {
   static Future<void> deleteNote(int noteId) async {
     await _dio.delete('/admin/members/notes/$noteId');
   }
+
+  // 부원 정보 수정
+  static Future<void> updateMemberInfo(
+    int userId, {
+    String? department,
+    String? phone,
+  }) async {
+    await _dio.patch(
+      '/admin/members/$userId/info',
+      data: {
+        if (department != null) 'department': department,
+        if (phone != null) 'phone': phone,
+      },
+    );
+  }
 }

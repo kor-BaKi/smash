@@ -110,4 +110,13 @@ public class AdminMemberController {
         adminMemberService.deleteNote(noteId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    // 부원 정보 수정
+    @PatchMapping("/api/v1/admin/members/{userId}/info")
+    public ResponseEntity<ApiResponse<Void>> updateMemberInfo(
+            @PathVariable Long userId,
+            @RequestBody UpdateMemberInfoRequest request) {
+        adminMemberService.updateMemberInfo(userId, request);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

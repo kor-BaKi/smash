@@ -238,4 +238,13 @@ public class AdminMemberService {
     public void deleteNote(Long noteId) {
         memberNoteRepository.deleteById(noteId);
     }
+
+    // 부원 정보 수정
+    @Transactional
+    public void updateMemberInfo(Long userId, UpdateMemberInfoRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 부원입니다."));
+        user.updateInfo(request.getDepartment(), request.getPhone());
+    }
 }

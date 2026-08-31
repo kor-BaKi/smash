@@ -93,4 +93,9 @@ public class User {
     public void changeRole(Role role) {
         this.role = role;
     }
+
+    public void updateInfo(String department, String phone) {
+        if (department != null) this.department = department;
+        if (phone != null) this.phone = phone;
+    }
 }
