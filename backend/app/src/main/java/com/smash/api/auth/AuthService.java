@@ -26,6 +26,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
 
 
+    @Transactional
     public AuthResponse signup(SignupRequest request) {
 
         inviteCodeRepository.findByCodeAndIsActiveTrue(request.getCode())
