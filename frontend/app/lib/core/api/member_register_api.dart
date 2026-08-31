@@ -111,4 +111,17 @@ class MemberRegisterApi {
       },
     );
   }
+
+  // 부조장 지정
+  static Future<void> assignViceLeader(int groupId, int userId) async {
+    await _dio.patch(
+      '/admin/groups/$groupId/vice-leader',
+      data: {'viceLeaderUserId': userId},
+    );
+  }
+
+  // 부조장 해제
+  static Future<void> removeViceLeader(int groupId) async {
+    await _dio.delete('/admin/groups/$groupId/vice-leader');
+  }
 }

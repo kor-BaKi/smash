@@ -4,6 +4,7 @@ class GroupDetail {
   final String timeSlot;
   final String label;
   final int? leaderUserId;
+  final int? viceLeaderUserId;
   final int memberCount;
 
   GroupDetail({
@@ -12,6 +13,7 @@ class GroupDetail {
     required this.timeSlot,
     required this.label,
     this.leaderUserId,
+    this.viceLeaderUserId,
     required this.memberCount,
   });
 
@@ -22,6 +24,7 @@ class GroupDetail {
       timeSlot: json['timeSlot'],
       label: json['label'],
       leaderUserId: json['leaderUserId'],
+      viceLeaderUserId: json['viceLeaderUserId'],
       memberCount: json['memberCount'],
     );
   }

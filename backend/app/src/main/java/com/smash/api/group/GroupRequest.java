@@ -31,4 +31,10 @@ public class GroupRequest {
         private Long leaderUserId;
     }
 
+    @Getter
+    public static class ViceLeaderRequest {
+        @NotNull(message = "부조장 userId를 입력해주세요.")
+        private Long viceLeaderUserId;
+    }
+
 }

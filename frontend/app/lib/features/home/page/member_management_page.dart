@@ -8,7 +8,6 @@ import '../model/member_register_model.dart';
 import '../provider/group_management_provider.dart';
 import '../provider/member_register_provider.dart';
 import 'assignment_page.dart';
-import 'group_management_page.dart';
 import 'member_detail_dialog.dart';
 
 class MemberManagementPage extends ConsumerStatefulWidget {
@@ -45,15 +44,6 @@ class _MemberManagementPageState
   Widget build(BuildContext context) {
     final memberState = ref.watch(memberRegisterProvider);
     final groupState = ref.watch(groupManagementProvider);
-
-    // 디버그용
-    print('=== groups: ${groupState.groups.length}');
-    print('=== allMembers: ${memberState.allMembers.length}');
-    if (memberState.allMembers.isNotEmpty) {
-      print(
-        '=== first member groupId: ${memberState.allMembers.first.groupId}',
-      );
-    }
 
     final filtered = memberState.allMembers
         .where(
@@ -226,7 +216,7 @@ class _MemberManagementPageState
             ],
           ),
           // 탭2: 조 편성
-          const GroupManagementPage(),
+          const _GroupOverviewTab(),
           // 탭3: 자동 배정
           const AssignmentPage(),
         ],
@@ -290,6 +280,223 @@ class _MemberManagementPageState
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GroupOverviewTab extends ConsumerWidget {
+  const _GroupOverviewTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final groupState = ref.watch(groupManagementProvider);
+    final memberState = ref.watch(memberRegisterProvider);
+
+    if (groupState.isLoading || memberState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // groupId로 멤버 그룹핑
+    final Map<int, List<RegisteredMember>> membersByGroup = {};
+    final List<RegisteredMember> unassigned = [];
+
+    for (final member in memberState.allMembers) {
+      if (member.groupId == null) {
+        unassigned.add(member);
+      } else {
+        membersByGroup.putIfAbsent(member.groupId!, () => []).add(member);
+      }
+    }
+
+    // 이름순 정렬
+    for (final list in membersByGroup.values) {
+      list.sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    // 각 조에서 최대 멤버 수
+    final maxMembers = membersByGroup.values.isEmpty
+        ? 0
+        : membersByGroup.values
+              .map((m) => m.length)
+              .reduce((a, b) => a > b ? a : b);
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(groupManagementProvider.notifier).loadAll();
+        await ref.read(memberRegisterProvider.notifier).loadAllMembers();
+      },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: _GroupTable(
+            groups: groupState.groups,
+            membersByGroup: membersByGroup,
+            unassigned: unassigned,
+            maxMembers: maxMembers,
+            allMembers: memberState.allMembers,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GroupTable extends ConsumerWidget {
+  final List<GroupDetail> groups;
+  final Map<int, List<RegisteredMember>> membersByGroup;
+  final List<RegisteredMember> unassigned;
+  final int maxMembers;
+  final List<RegisteredMember> allMembers;
+
+  const _GroupTable({
+    required this.groups,
+    required this.membersByGroup,
+    required this.unassigned,
+    required this.maxMembers,
+    required this.allMembers,
+  });
+
+  String _getMemberName(List<RegisteredMember> members, int? userId) {
+    if (userId == null) return '-';
+    final member = members.where((m) => m.id == userId).toList();
+    return member.isEmpty ? '-' : member.first.name;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    const double cellWidth = 90;
+    const double labelWidth = 60;
+    const double rowHeight = 40;
+
+    final headerStyle = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      color: AppColors.primary,
+    );
+    final labelStyle = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      color: AppColors.textTertiary,
+    );
+    final cellStyle = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      color: AppColors.ink,
+    );
+
+    return Table(
+      defaultColumnWidth: const FixedColumnWidth(cellWidth),
+      columnWidths: {
+        0: const FixedColumnWidth(labelWidth),
+        for (int i = 1; i <= groups.length; i++)
+          i: const FixedColumnWidth(cellWidth),
+      },
+      border: TableBorder.all(
+        color: AppColors.neutralBg,
+        width: 1,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      children: [
+        // 헤더 행
+        TableRow(
+          decoration: const BoxDecoration(color: AppColors.primaryBg),
+          children: [
+            _TableCell(child: const SizedBox(), height: rowHeight),
+            ...groups.map(
+              (g) => _TableCell(
+                child: Text(
+                  g.label,
+                  style: headerStyle,
+                  textAlign: TextAlign.center,
+                ),
+                height: rowHeight,
+              ),
+            ),
+          ],
+        ),
+
+        // 조장 행
+        TableRow(
+          children: [
+            _TableCell(
+              child: Text('조장', style: labelStyle),
+              height: rowHeight,
+            ),
+            ...groups.map(
+              (g) => _TableCell(
+                child: Text(
+                  _getMemberName(allMembers, g.leaderUserId),
+                  style: cellStyle,
+                  textAlign: TextAlign.center,
+                ),
+                height: rowHeight,
+              ),
+            ),
+          ],
+        ),
+
+        // 부조장 행
+        TableRow(
+          children: [
+            _TableCell(
+              child: Text('부조장', style: labelStyle),
+              height: rowHeight,
+            ),
+            ...groups.map(
+              (g) => _TableCell(
+                child: Text(
+                  _getMemberName(allMembers, g.viceLeaderUserId),
+                  style: cellStyle,
+                  textAlign: TextAlign.center,
+                ),
+                height: rowHeight,
+              ),
+            ),
+          ],
+        ),
+
+        // 부원 행
+        for (int i = 0; i < maxMembers; i++)
+          TableRow(
+            children: [
+              _TableCell(
+                child: Text(i == 0 ? '부원' : '', style: labelStyle),
+                height: rowHeight,
+              ),
+              ...groups.map((g) {
+                final members = membersByGroup[g.id] ?? [];
+                final member = i < members.length ? members[i] : null;
+                return _TableCell(
+                  child: Text(
+                    member?.name ?? '',
+                    style: cellStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                  height: rowHeight,
+                );
+              }),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _TableCell extends StatelessWidget {
+  final Widget child;
+  final double height;
+
+  const _TableCell({required this.child, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Center(child: child),
       ),
     );
   }

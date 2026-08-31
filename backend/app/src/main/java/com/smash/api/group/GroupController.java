@@ -41,4 +41,21 @@ public class GroupController {
         groupService.removeLeader(groupId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    // 부조장 지정
+    @PatchMapping("/api/v1/admin/groups/{groupId}/vice-leader")
+    public ResponseEntity<ApiResponse<GroupResponse>> assignViceLeader(
+            @PathVariable Long groupId,
+            @RequestBody GroupRequest.ViceLeaderRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                groupService.assignViceLeader(groupId, request.getViceLeaderUserId())));
+    }
+
+    // 부조장 해제
+    @DeleteMapping("/api/v1/admin/groups/{groupId}/vice-leader")
+    public ResponseEntity<ApiResponse<GroupResponse>> removeViceLeader(
+            @PathVariable Long groupId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                groupService.removeViceLeader(groupId)));
+    }
 }

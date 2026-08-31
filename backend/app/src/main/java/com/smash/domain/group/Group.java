@@ -25,6 +25,9 @@ public class Group {
 
     private Long leaderUserId; // 조장
 
+    @Column
+    private Long viceLeaderUserId; // 부조장
+
     @Builder
     public Group(DayOfWeek dayOfWeek, TimeSlot timeSlot) {
         this.dayOfWeek = dayOfWeek;
@@ -39,6 +42,10 @@ public class Group {
 
     public String getLabel() {
         return dayOfWeek.getLabel() + " " + timeSlot.getLabel();
+    }
+
+    public void assignViceLeader(Long userId) {
+        this.viceLeaderUserId = userId;
     }
 
 }

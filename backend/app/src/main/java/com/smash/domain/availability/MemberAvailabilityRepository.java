@@ -1,5 +1,6 @@
 package com.smash.domain.availability;
 
+import com.smash.domain.group.Group;
 import com.smash.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,4 +12,6 @@ public interface MemberAvailabilityRepository extends JpaRepository<MemberAvaila
     void deleteByUser(User user);
 
     List<MemberAvailability> findByGroupId(Long groupId);
+
+
 }

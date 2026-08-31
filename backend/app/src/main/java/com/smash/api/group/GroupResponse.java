@@ -16,6 +16,7 @@ public class GroupResponse {
     private String label;
     private Long leaderUserId;
     private int memberCount;
+    private Long viceLeaderUserId;
 
     public static GroupResponse of(Group group, int memberCount) {
         return GroupResponse.builder()
@@ -24,6 +25,7 @@ public class GroupResponse {
                 .timeSlot(group.getTimeSlot())
                 .label(group.getLabel())
                 .leaderUserId(group.getLeaderUserId())
+                .viceLeaderUserId(group.getViceLeaderUserId())
                 .memberCount(memberCount)
                 .build();
     }

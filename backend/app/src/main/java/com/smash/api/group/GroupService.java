@@ -1,6 +1,7 @@
 package com.smash.api.group;
 
 import com.smash.common.exception.BusinessException;
+import com.smash.domain.availability.MemberAvailabilityRepository;
 import com.smash.domain.group.Group;
 import com.smash.domain.group.GroupRepository;
 import com.smash.domain.user.UserRepository;
@@ -64,5 +65,25 @@ public class GroupService {
                         "RESOURCE_NOT_FOUND", "존재하지 않는 조입니다."));
 
         group.assignLeader(null);
+    }
+
+    @Transactional
+    public GroupResponse assignViceLeader(Long groupId, Long userId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 조입니다."));
+        group.assignViceLeader(userId);
+        int memberCount = userRepository.countByGroupId(group.getId());
+        return GroupResponse.of(group, memberCount);
+    }
+
+    @Transactional
+    public GroupResponse removeViceLeader(Long groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new BusinessException(
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 조입니다."));
+        group.assignViceLeader(null);
+        int memberCount = userRepository.countByGroupId(group.getId());
+        return GroupResponse.of(group, memberCount);
     }
 }
