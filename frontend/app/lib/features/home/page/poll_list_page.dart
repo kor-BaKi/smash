@@ -196,6 +196,16 @@ class _PollTabView extends ConsumerWidget {
                           ),
                         ],
                         const SizedBox(height: 10),
+                        Text(
+                          poll.closedAt != null
+                              ? '${poll.createdAt.substring(0, 10)} ~ ${poll.closedAt!.substring(0, 16).replaceAll('T', ' ')}'
+                              : poll.createdAt.substring(0, 10),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         Row(
                           children: [
                             Icon(
@@ -234,13 +244,6 @@ class _PollTabView extends ConsumerWidget {
                               color: AppColors.textTertiary,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              poll.createdAt.substring(0, 10),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textTertiary,
-                              ),
-                            ),
                             if (poll.myVotedOptionId != null) ...[
                               const SizedBox(width: 12),
                               const Icon(
