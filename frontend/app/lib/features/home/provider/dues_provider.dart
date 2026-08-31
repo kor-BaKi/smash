@@ -77,7 +77,7 @@ class DuesNotifier extends StateNotifier<DuesState> {
     try {
       await DuesApi.cancel(userId);
     } catch (e) {
-      // 실패 시 롤백
+      print('cancel error: $e'); // 추가
       state = state.copyWith(
         members: original,
         errorMessage: '납부 취소에 실패했습니다.',

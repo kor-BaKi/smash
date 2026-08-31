@@ -206,15 +206,22 @@ class _DuesPageState extends ConsumerState<DuesPage>
   }
 }
 
-class _DuesTabView extends ConsumerWidget {
+class _DuesTabView extends ConsumerStatefulWidget {
   final List<DuesMember> members;
   final List<GroupDetail> groups;
 
   const _DuesTabView({required this.members, required this.groups});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (members.isEmpty) {
+  ConsumerState<_DuesTabView> createState() => _DuesTabViewState();
+}
+
+class _DuesTabViewState extends ConsumerState<_DuesTabView> {
+  final Set<int> _processingIds = {};
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.members.isEmpty) {
       return const Center(
         child: Text(
           '부원이 없습니다.',
@@ -225,11 +232,11 @@ class _DuesTabView extends ConsumerWidget {
 
     return ListView.separated(
       padding: const EdgeInsets.all(20),
-      itemCount: members.length,
+      itemCount: widget.members.length,
       separatorBuilder: (_, __) =>
           const Divider(height: 1, color: AppColors.neutralBg),
       itemBuilder: (context, index) {
-        final member = members[index];
+        final member = widget.members[index];
         return Container(
           color: AppColors.cardBg,
           padding: const EdgeInsets.symmetric(
@@ -272,12 +279,20 @@ class _DuesTabView extends ConsumerWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
-                onChanged: (_) {
+                onChanged: (_) async {
+                  if (_processingIds.contains(member.userId)) return;
+                  setState(() => _processingIds.add(member.userId));
                   if (member.isPaid) {
-                    ref.read(duesProvider.notifier).cancel(member.userId);
+                    await ref
+                        .read(duesProvider.notifier)
+                        .cancel(member.userId);
                   } else {
-                    ref.read(duesProvider.notifier).pay(member.userId);
+                    await ref
+                        .read(duesProvider.notifier)
+                        .pay(member.userId);
                   }
+                  if (mounted)
+                    setState(() => _processingIds.remove(member.userId));
                 },
               ),
             ],
