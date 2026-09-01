@@ -145,9 +145,31 @@ class _ActivityAdminTile extends ConsumerWidget {
             ),
             if (_isPast) ...[
               const SizedBox(height: 8),
-              const Text(
-                '지난 활동은 수정할 수 없습니다.',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+              Row(
+                children: [
+                  // const Text(
+                  //   '지난 활동은 수정할 수 없습니다.',
+                  //   style: TextStyle(fontSize: 12, color: Colors.grey),
+                  // ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.photo_library_outlined,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ActivityPhotoPage(
+                          activityId: activity.activityId,
+                          activityLabel:
+                              '${DateTime.parse(activity.activityDate).month}/${DateTime.parse(activity.activityDate).day} 활동',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ] else ...[
               const SizedBox(height: 8),

@@ -39,6 +39,8 @@ public class SecurityConfig {
                         .requestMatchers("/apply.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/files/photos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/activities/*/transport-groups/*/settlement").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
