@@ -10,7 +10,7 @@ public class ActivityPhotoResponse {
     private Long id;
     private String url;
     private String uploadedBy;
-    private String createAt;
+    private String createdAt;
 
     public static ActivityPhotoResponse of(ActivityPhoto photo, String baseUrl) {
         return ActivityPhotoResponse.builder()
@@ -20,7 +20,7 @@ public class ActivityPhotoResponse {
                                 photo.getFilePath().lastIndexOf("/") + 1
                         ))
                 .uploadedBy(photo.getUploadedBy().getName())
-                .createAt(photo.getCreatedAt().toString().substring(0, 16))
+                .createdAt(photo.getCreatedAt().toString().substring(0, 16))
                 .build();
     }
 

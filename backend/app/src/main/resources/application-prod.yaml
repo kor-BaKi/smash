@@ -10,4 +10,4 @@ spring:
       max-request-size: 100MB
 app:
   upload-dir: /home/baki/smash-files/photos
-  base-url: https://baki.tailbdb322.ts.net/api/v1
+  base-url: https://baki.tailbdb322.ts.net
