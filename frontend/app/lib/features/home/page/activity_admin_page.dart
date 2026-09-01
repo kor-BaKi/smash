@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../model/activity_admin_model.dart';
 import '../provider/activity_admin_provider.dart';
+import 'activity_photo_page.dart';
 
 class ActivityAdminPage extends ConsumerStatefulWidget {
   const ActivityAdminPage({super.key});
@@ -180,6 +182,23 @@ class _ActivityAdminTile extends ConsumerWidget {
                       activity.activityType == 'REGULAR'
                           ? '자유활동 전환'
                           : '정규활동 전환',
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.photo_library_outlined,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ActivityPhotoPage(
+                          activityId: activity.activityId,
+                          activityLabel:
+                              '${DateTime.parse(activity.activityDate).month}/${DateTime.parse(activity.activityDate).day} 활동',
+                        ),
+                      ),
                     ),
                   ),
                 ],

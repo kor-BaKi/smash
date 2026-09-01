@@ -124,11 +124,20 @@ public class ActivityPhotoService {
 
             // byte로 받는 이유 : 이미지 파일은 byte로 저장되어있음 (0, 1) -> 파일을 byte 배열로 읽어와서 이미지로 디코딩
             byte[] bytes = Files.readAllBytes(filePath);
-            String contentType = Files.probeContentType(filePath); // 파일 확장자를 보고 MIME 타입을 감지
-
+            // 파일 확장자를 보고 MIME 타입을 감지
+            String filename2 = filePath.getFileName().toString().toLowerCase();
+            String contentType;
+            if (filename2.endsWith(".png")) {
+                contentType = "image/png";
+            } else if (filename2.endsWith(".gif")) {
+                contentType = "image/gif";
+            } else if (filename2.endsWith(".webp")) {
+                contentType = "image/webp";
+            } else {
+                contentType = "image/jpeg";
+            }
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE,
-                            contentType != null ? contentType : MediaType.IMAGE_JPEG_VALUE)
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
                     .body(bytes);
 
         } catch (IOException e) {
