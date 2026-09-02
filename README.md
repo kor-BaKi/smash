@@ -350,7 +350,7 @@ invite_code / free_period / refresh_token
 - [x] JUnit5 + Mockito 단위/통합 테스트 (25개)
 - [x] N+1 문제 해결 (@EntityGraph + IN 쿼리)
 
-**v2 (진행중)**
+**v2 (완료)**
 - [x] 일반 투표 기능 (날짜 표시 포함)
 - [x] 회비 관리 (중복 탭 방지)
 - [x] 이동 조율 시스템 (같이/따로, 택시 그룹 배정)
@@ -362,18 +362,22 @@ invite_code / free_period / refresh_token
 - [x] 부조장 지정/해제 기능
 - [x] 활동 사진 업로드/조회/삭제 (원본 저장)
 - [x] Drawer 메뉴 정리 (13개 → 8개)
-- [x] @Transactional 누락 버그 수정
 - [x] 회비 체크박스 중복 탭 버그 수정
+- [x] 타조참/이월 호차 카드 표시 버그 수정
+- [x] 투표 화면 마감 날짜 표시
+- [x] 홈 화면 하단 패딩 추가
+- [x] 부원 정보 수정/복사 기능
+- [x] signup @Transactional 누락 버그 수정
+- [x] 택시비 정산 (토스 딥링크 송금)
 - [x] 테이블 22개, API 88개, 테스트 43개
-- [ ] 테스트 사용자 피드백 기반 기능 개선 예정
 
 **v3 (예정)**
 - [ ] AWS 마이그레이션 (EC2 + RDS + S3)
 - [ ] CI/CD 파이프라인 (GitHub Actions)
 - [ ] Push Notification (FCM)
-- [ ] 택시비 정산
 - [ ] TestFlight / 앱스토어 배포
 - [ ] UI/UX 개선 및 버그 수정
+- [ ] 실제 동아리 배포 후 피드백 기반 개선
 
 ---
 
