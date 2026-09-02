@@ -27,14 +27,14 @@ public class JwtProvider { // 토큰을 만들고 검증
     }
 
     public String generateAccessToken(Long userId, String role) {
-        return generateToken(userId, role, accessExpiration);
+        return generateToken(userId, role, accessExpiration, "access");
     }
 
     public String generateRefreshToken(Long userId) {
-        return generateToken(userId, null, refreshExpiration);
+        return generateToken(userId, null, refreshExpiration, "refresh");
     }
 
-    private String generateToken(Long userId, String role, long expiration) {
+    private String generateToken(Long userId, String role, long expiration, String type) {
         /*
         new Date() → 현재 시각
         now.getTime() → 현재 시각을 밀리초(ms)로 반환
@@ -47,6 +47,7 @@ public class JwtProvider { // 토큰을 만들고 검증
                 .subject(String.valueOf(userId))
                 .issuedAt(now)              // 발급 시간
                 .expiration(expiredAt)      // 만료 시간
+                .claim("typ", type)   // 토큰 타입 명시
                 .signWith(secretKey);       // 서명 (위조 검증)
 
         if (role != null) {
@@ -83,5 +84,9 @@ public class JwtProvider { // 토큰을 만들고 검증
 
     public long getRefreshExpiration() {
         return refreshExpiration;
+    }
+
+    public boolean isAccessToken(String token) {
+        return "access".equals(getClaims(token).get("typ", String.class));
     }
 }

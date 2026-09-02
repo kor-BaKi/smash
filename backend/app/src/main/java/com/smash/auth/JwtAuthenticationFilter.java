@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter { // OncePerRe
         String token = extractToken(request);
 
         // 토큰 검증 후 인증 객체 생성
-        if (StringUtils.hasText(token) && jwtProvider.isValid(token)) {
+        if (StringUtils.hasText(token) && jwtProvider.isValid(token) && jwtProvider.isAccessToken(token)) {
             Long userId = jwtProvider.getUserId(token);
             String role = jwtProvider.getRole(token);
 

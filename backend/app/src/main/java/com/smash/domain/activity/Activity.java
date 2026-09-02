@@ -66,8 +66,8 @@ public class Activity {
 
     public boolean isVoteClosed() {
         LocalTime closeTime = this.group.getTimeSlot() == TimeSlot.SLOT_13_15
-                ? LocalTime.of(13, 0)   // 1-3시 조면 13시 마감
-                : LocalTime.of(15, 0);  // 1-3 조가 아니면 15시 마감
+                ? LocalTime.of(13, 30)   // 1-3시 조면 13시 30분 마감 -> 늦참자들 위해서 30분 늦춤
+                : LocalTime.of(15, 30);  // 1-3 조가 아니면 15시 30분 마감
 
         LocalDate today = LocalDate.now();
         return today.isAfter(this.activityDate) ||
