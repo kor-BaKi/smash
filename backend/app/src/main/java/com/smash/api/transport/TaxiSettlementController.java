@@ -37,18 +37,20 @@ public class TaxiSettlementController {
     @PatchMapping("/api/v1/settlements/{settlementId}/payments/{userId}")
     public ResponseEntity<ApiResponse<Void>> togglePayment(
             @PathVariable Long settlementId,
-            @PathVariable Long userId
+            @PathVariable Long userId,
+            @AuthenticationPrincipal Long requesterId
     ) {
-        taxiSettlementService.togglePayment(settlementId, userId);
+        taxiSettlementService.togglePayment(settlementId, userId, requesterId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     // 정산 삭제
     @DeleteMapping("/api/v1/settlements/{settlementId}")
     public ResponseEntity<ApiResponse<Void>> delete(
-            @PathVariable Long settlementId
+            @PathVariable Long settlementId,
+            @AuthenticationPrincipal Long requesterId
     ) {
-        taxiSettlementService.delete(settlementId);
+        taxiSettlementService.delete(settlementId, requesterId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

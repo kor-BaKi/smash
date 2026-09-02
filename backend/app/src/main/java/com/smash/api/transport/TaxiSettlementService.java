@@ -98,10 +98,15 @@ public class TaxiSettlementService {
 
     // 납부 확인 토글
     @Transactional
-    public void togglePayment(Long settlementId, Long userId) {
+    public void togglePayment(Long settlementId, Long userId, Long requesterId) {
         TaxiSettlement settlement = settlementRepository.findById(settlementId)
                 .orElseThrow(() -> new BusinessException(
                         "RESOURCE_NOT_FOUND", "정산 정보가 없습니다."));
+
+        // 결제자 본인만 납부 확인 가능 (보안)
+        if (!settlement.getPayer().getId().equals(requesterId)) {
+            throw new BusinessException(("FORBIDDEN"), "결제자만 납부 확인을 처리할 수 있습니다.");
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(
@@ -121,11 +126,17 @@ public class TaxiSettlementService {
 
     // 정산 삭제
     @Transactional
-    public void delete(Long settlementId) {
+    public void delete(Long settlementId, Long requesterId) {
         TaxiSettlement settlement = settlementRepository.findById(settlementId)
                 .orElseThrow(() -> new BusinessException(
                         "RESOURCE_NOT_FOUND", "정산 정보가 없습니다."
                 ));
+
+        // 결제자 본인만 삭제 가능 (보안)
+        if (!settlement.getPayer().getId().equals(requesterId)) {
+            throw new BusinessException(("FORBIDDEN"), "결제자만 정산을 삭제할 수 있습니다.");
+        }
+
         paymentRepository.deleteBySettlement(settlement);
         settlementRepository.delete(settlement);
     }
