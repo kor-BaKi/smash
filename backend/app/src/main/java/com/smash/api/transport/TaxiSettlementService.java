@@ -42,6 +42,10 @@ public class TaxiSettlementService {
                 .orElseThrow(() -> new BusinessException(
                         "RESOURCE_NOT_FOUND", "존재하지 않는 유저입니다."));
 
+        if (!transportMemberRepository.existsByTransportGroupAndUserId(group, payerId)) {
+            throw new BusinessException("FORBIDDEN", "해당 호차 멤버만 정산을 생성할 수 있습니다.");
+        }
+
         // 이미 정산이 있으면 예외 처리
         if (settlementRepository.findByTransportGroup(group).isPresent()) {
             throw new BusinessException("ALREADY_EXISTS", "이미 정산이 등록되어 있습니다.");
@@ -81,10 +85,14 @@ public class TaxiSettlementService {
 
     // 정산 조회
     @Transactional(readOnly = true)
-    public TaxiSettlementResponse getSettlement(Long activityId, Long groupId) {
+    public TaxiSettlementResponse getSettlement(Long activityId, Long groupId, Long requesterId) {
         TransportGroup group = transportGroupRepository.findById(groupId)
                 .orElseThrow(() -> new BusinessException(
                         "RESOURCE_NOT_FOUND", "존재하지 않는 호차입니다."));
+
+        if (!transportMemberRepository.existsByTransportGroupAndUserId(group, requesterId)) {
+            throw new BusinessException("FORBIDDEN", "해당 호차 멤버가 아닙니다.");
+        }
 
         TaxiSettlement settlement = settlementRepository
                 .findByTransportGroup(group)

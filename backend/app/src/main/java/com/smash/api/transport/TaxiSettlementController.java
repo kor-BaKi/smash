@@ -28,9 +28,10 @@ public class TaxiSettlementController {
     @GetMapping("/api/v1/activities/{activityId}/transport-groups/{groupId}/settlement")
     public ResponseEntity<ApiResponse<TaxiSettlementResponse>> getSettlement(
             @PathVariable Long activityId,
-            @PathVariable Long groupId
+            @PathVariable Long groupId,
+            @AuthenticationPrincipal Long requesterId
     ) {
-        return ResponseEntity.ok(ApiResponse.success(taxiSettlementService.getSettlement(activityId, groupId)));
+        return ResponseEntity.ok(ApiResponse.success(taxiSettlementService.getSettlement(activityId, groupId, requesterId)));
     }
 
     // 납부 확인 토글
