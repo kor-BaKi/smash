@@ -4,7 +4,6 @@ import com.smash.auth.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -40,8 +39,6 @@ public class SecurityConfig {
                         .requestMatchers("/apply.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/files/photos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/api/v1/activities/*/transport-groups/*/settlement").permitAll()
                         .requestMatchers("/api/v1/settlements/**").authenticated()
                         .requestMatchers("/api/v1/activities/*/transport-groups/*/settlement").authenticated()
                         .anyRequest().authenticated()

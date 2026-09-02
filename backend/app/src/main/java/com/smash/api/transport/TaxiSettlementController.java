@@ -34,7 +34,7 @@ public class TaxiSettlementController {
     }
 
     // 납부 확인 토글
-    @PatchMapping("/api/v1/settlement/{settlementId}/payments/{userId}")
+    @PatchMapping("/api/v1/settlements/{settlementId}/payments/{userId}")
     public ResponseEntity<ApiResponse<Void>> togglePayment(
             @PathVariable Long settlementId,
             @PathVariable Long userId
@@ -44,7 +44,7 @@ public class TaxiSettlementController {
     }
 
     // 정산 삭제
-    @DeleteMapping("/api/v1/settlement/{settlementId}")
+    @DeleteMapping("/api/v1/settlements/{settlementId}")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable Long settlementId
     ) {
