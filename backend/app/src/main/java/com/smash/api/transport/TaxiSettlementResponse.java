@@ -23,14 +23,14 @@ public class TaxiSettlementResponse {
     public static class PaymentStatus {
         private Long userId;
         private String userName;
-        private boolean isPaid;
+        private Boolean isPaid;
         private String paidAt;
 
         public static PaymentStatus of(TaxiSettlementPayment payment) {
             return PaymentStatus.builder()
                     .userId(payment.getUser().getId())
                     .userName(payment.getUser().getName())
-                    .isPaid(payment.isPaid())
+                    .isPaid(payment.getIsPaid())
                     .paidAt(payment.getPaidAt() != null
                             ? payment.getPaidAt().toString().substring(0, 16)
                             : null)

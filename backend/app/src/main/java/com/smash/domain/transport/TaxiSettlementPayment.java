@@ -28,7 +28,7 @@ public class TaxiSettlementPayment { // 납부자 테이블
     private User user;
 
     @Column(nullable = false)
-    private boolean isPaid;
+    private Boolean isPaid;
 
     @Column
     private LocalDateTime paidAt;
