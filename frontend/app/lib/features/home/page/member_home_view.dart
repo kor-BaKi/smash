@@ -290,7 +290,7 @@ class _ActivityCard extends ConsumerWidget {
                                     .then((_) {
                                       // 참여/이월/타조참 모두 이동 방법 팝업
                                       if (type == 'ATTEND' ||
-                                          type == 'FREE_ATTEND' ||
+                                          type == 'CARRYOVER' ||
                                           type == 'OTHER_GROUP') {
                                         _showTravelTypeDialog(
                                           context,
@@ -370,7 +370,9 @@ class _ActivityCard extends ConsumerWidget {
                         // 이동 방법 선택/변경
                         if (activity.myParticipation!.type == 'REGULAR' ||
                             activity.myParticipation!.type ==
-                                'FREE_ATTEND') ...[
+                                'OTHER_GROUP' ||
+                            activity.myParticipation!.type ==
+                                'CARRYOVER') ...[
                           const SizedBox(height: 8),
                           const Divider(
                             height: 1,
@@ -444,9 +446,9 @@ class _ActivityCard extends ConsumerWidget {
                               (activity.myParticipation!.type ==
                                       'REGULAR' ||
                                   activity.myParticipation!.type ==
-                                      'FREE_ATTEND' ||
+                                      'OTHER_GROUP' ||
                                   activity.myParticipation!.type ==
-                                      'OTHER_GROUP')) ...[
+                                      'CARRYOVER')) ...[
                             const SizedBox(height: 8),
                             _MyTransportGroup(
                               activityId: activity.activityId,
