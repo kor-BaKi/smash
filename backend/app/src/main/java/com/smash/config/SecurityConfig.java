@@ -42,6 +42,8 @@ public class SecurityConfig {
                         .requestMatchers("/files/photos/**").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/activities/*/transport-groups/*/settlement").permitAll()
+                        .requestMatchers("/api/v1/settlements/**").authenticated()
+                        .requestMatchers("/api/v1/activities/*/transport-groups/*/settlement").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
