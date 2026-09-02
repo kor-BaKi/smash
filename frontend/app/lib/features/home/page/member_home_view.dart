@@ -1,4 +1,5 @@
 import 'package:app/features/home/page/poll_result_dialog.dart';
+import 'package:app/features/home/page/taxi_settlement_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -439,12 +440,13 @@ class _ActivityCard extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          // 이동 방법 선택/변경 박스 아래에 추가
                           if (activity.myParticipation != null &&
                               (activity.myParticipation!.type ==
                                       'REGULAR' ||
                                   activity.myParticipation!.type ==
-                                      'FREE_ATTEND')) ...[
+                                      'FREE_ATTEND' ||
+                                  activity.myParticipation!.type ==
+                                      'OTHER_GROUP')) ...[
                             const SizedBox(height: 8),
                             _MyTransportGroup(
                               activityId: activity.activityId,
@@ -1052,7 +1054,17 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TaxiSettlementPage(
+                    activityId: widget.activityId,
+                    groupId: myGroup.groupId,
+                    groupNumber: myGroup.groupNumber,
+                    myUserId: userId,
+                  ),
+                ),
+              ),
               icon: const Icon(Icons.calculate_outlined, size: 14),
               label: const Text('택시비 정산'),
               style: OutlinedButton.styleFrom(
