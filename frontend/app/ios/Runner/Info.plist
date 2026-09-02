@@ -32,6 +32,10 @@
     <string>활동 사진을 촬영하기 위해 카메라에 접근합니다.</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>활동 사진을 저장하기 위해 사진 라이브러리에 접근합니다.</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>supertoss</string>
+    </array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

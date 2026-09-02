@@ -943,7 +943,6 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      print('loadGroups activityId: ${widget.activityId}');
       ref
           .read(transportByActivityProvider(widget.activityId).notifier)
           .loadGroups(widget.activityId);

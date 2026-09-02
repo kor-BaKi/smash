@@ -40,13 +40,11 @@ class _ApplicationDetailPageState
       final data = await ApplicationApi.getApplication(
         widget.applicationId,
       );
-      print('detail data: $data');
       setState(() {
         _detail = ApplicationInfo.fromJson(data);
         _isLoading = false;
       });
     } catch (e) {
-      print('detail error: $e'); // 에러 확인
       setState(() => _isLoading = false);
     }
   }

@@ -19,9 +19,7 @@ class InviteCodeApi {
 
   // 가입코드 활성/비활성 토글
   static Future<void> toggle(int id, bool isActive) async {
-    print('=== API toggle 호출: id=$id, isActive=$isActive');
     final body = {'isActive': isActive};
-    print('=== 요청 body: $body');
     await _dio.patch('/admin/invite-codes/$id', data: body);
   }
 }

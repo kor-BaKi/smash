@@ -52,7 +52,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = state.copyWith(user: auth.user, isLoading: false);
     } catch (e) {
-      print('로그인 에러: $e'); // 추가
       state = state.copyWith(
         isLoading: false,
         errorMessage: '로그인에 실패했습니다.',

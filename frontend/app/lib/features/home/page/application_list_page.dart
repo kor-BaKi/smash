@@ -192,7 +192,6 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
         ).showSnackBar(const SnackBar(content: Text('엑셀 파일이 저장되었습니다.')));
       }
     } catch (e) {
-      print('excel download error: $e'); // 추가
       if (mounted) {
         ScaffoldMessenger.of(
           context,
