@@ -112,7 +112,7 @@ public class TaxiSettlementService {
                 .orElseThrow(() -> new BusinessException(
                         "RESOURCE_NOT_FOUND", "납부 정보가 없습니다."));
 
-        if (payment.isPaid()) {
+        if (payment.getIsPaid()) {
             payment.markAsUnpaid();
         } else {
             payment.markAsPaid();
