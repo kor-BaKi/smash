@@ -84,6 +84,8 @@ public class ActivityService {
                             .type(myParticipation.getType().name())
                             .targetActivityId(myParticipation.getCarryoverTarget() == null
                                               ? null : myParticipation.getCarryoverTarget().getId())
+                            .travelType(myParticipation.getTravelType() == null
+                                        ? null : myParticipation.getTravelType().name())
                             .build())
                     .voteClosed(voteClosed)
                     .build());

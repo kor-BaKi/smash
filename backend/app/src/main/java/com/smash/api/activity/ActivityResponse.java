@@ -39,6 +39,7 @@ public class ActivityResponse {
         private Long participationId;
         private String type;
         private Long targetActivityId;
+        private String travelType;
     }
 
 }

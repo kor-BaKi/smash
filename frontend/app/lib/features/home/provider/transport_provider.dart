@@ -93,3 +93,11 @@ final transportProvider =
     StateNotifierProvider<TransportNotifier, TransportState>((ref) {
       return TransportNotifier();
     });
+
+final transportByActivityProvider =
+    StateNotifierProvider.family<TransportNotifier, TransportState, int>((
+      ref,
+      activityId,
+    ) {
+      return TransportNotifier();
+    });

@@ -940,22 +940,24 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref
-          .read(transportProvider.notifier)
-          .loadGroups(widget.activityId),
-    );
+    Future.microtask(() {
+      print('loadGroups activityId: ${widget.activityId}');
+      ref
+          .read(transportByActivityProvider(widget.activityId).notifier)
+          .loadGroups(widget.activityId);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final userId = ref.watch(authProvider).user?.id;
-    final transportState = ref.watch(transportProvider);
-
     if (userId == null) return const SizedBox();
 
+    final transportState = ref.watch(
+      transportByActivityProvider(widget.activityId),
+    );
     final myGroup = ref
-        .read(transportProvider.notifier)
+        .read(transportByActivityProvider(widget.activityId).notifier)
         .findMyGroup(userId);
 
     if (myGroup == null) {
