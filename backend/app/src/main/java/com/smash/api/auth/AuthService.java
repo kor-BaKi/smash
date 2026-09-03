@@ -108,6 +108,19 @@ public class AuthService {
         if (!jwtProvider.isValid(refreshToken) || !jwtProvider.isRefreshToken(refreshToken)) {
             throw new BusinessException("INVALID_REFRESH_TOKEN", "유효하지 않는 리프레시 토큰입니다.");
         }
+        /*
+            두 가지를 모두 확인합니다:
+
+            1. isValid(refreshToken)
+               → 서명이 유효한지, 만료되지 않았는지
+               → 위조된 토큰이면 false
+
+            2. isRefreshToken(refreshToken)
+               → typ 클레임이 "refresh"인지
+               → Access Token을 여기에 넣으면 false
+
+            둘 중 하나라도 false면 예외 발생
+         */
 
         // 서버에 저장된 토큰과 비교
         RefreshToken stored = refreshTokenRepository.findByToken(hash(refreshToken))

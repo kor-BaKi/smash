@@ -93,4 +93,12 @@ public class JwtProvider { // 토큰을 만들고 검증
     public boolean isRefreshToken(String token) {
         return "refresh".equals(getClaims(token).get("typ", String.class));
     }
+    /*
+        getClaims(token): 토큰에서 클레임 꺼내기
+        .get("typ", String.class): typ 클레임 값을 String으로 반환
+        "refresh".equals(...): "refresh"와 일치하는지 확인
+
+        Refresh Token: typ = "refresh" → true
+        Access Token:  typ = "access"  → false
+     */
 }

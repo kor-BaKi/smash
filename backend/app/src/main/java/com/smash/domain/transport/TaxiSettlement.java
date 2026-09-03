@@ -21,7 +21,7 @@ public class TaxiSettlement { // 결제자 테이블
     private Long Id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transport_goup_id", nullable = false) // 외래 키 컬럼 이름 지정
+    @JoinColumn(name = "transport_group_id", nullable = false) // 외래 키 컬럼 이름 지정
     private TransportGroup transportGroup; // // 어떤 호차의 정산인지 -> 1호차, 2호차 ...
 
     @ManyToOne(fetch = FetchType.LAZY)

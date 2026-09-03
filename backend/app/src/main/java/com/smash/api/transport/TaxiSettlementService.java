@@ -54,6 +54,11 @@ public class TaxiSettlementService {
         // 탑승자 수로 1인당 금액 계산
         List<TransportMember> members =
                 transportMemberRepository.findByTransportGroup(group);
+
+        if (members.isEmpty()) {
+            throw new BusinessException("INVALID_REQUEST", "호차에 탑승자가 없습니다.");
+        }
+
         int amountPerPerson = request.getTotalAmount() / members.size();
 
         TaxiSettlement settlement = settlementRepository.save(
