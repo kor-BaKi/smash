@@ -47,7 +47,7 @@ class AuthApi {
     required String newPassword,
   }) async {
     await _dio.patch(
-      '/me/password',
+      '/auth/password',
       data: {
         'currentPassword': currentPassword,
         'newPassword': newPassword,
