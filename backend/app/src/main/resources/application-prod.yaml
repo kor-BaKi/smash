@@ -4,6 +4,11 @@ spring:
     username: ${DB_USERNAME:smash_user}
     password: ${DB_PASSWORD:}
     driver-class-name: org.mariadb.jdbc.Driver
+    jpa:
+      show-sql: false
+      properties:
+        hibernate:
+          format_sql: false
   servlet:
     multipart:
       max-file-size: 20MB
@@ -11,3 +16,7 @@ spring:
 app:
   upload-dir: /home/baki/smash-files/photos
   base-url: https://baki.tailbdb322.ts.net
+logging:
+  level:
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
