@@ -13,7 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -77,8 +81,12 @@ public class AuthService {
         refreshTokenRepository.findByUserId(user.getId())
                 .ifPresentOrElse(
                         existing -> existing.rotate(refreshToken, expiresAt),
-                        () -> refreshTokenRepository.save(RefreshToken.builder()
-                                .userId(user.getId()).token(refreshToken).expiresAt(expiresAt).build())
+                        () -> refreshTokenRepository.save(
+                                RefreshToken.builder()
+                                    .userId(user.getId())
+                                    .token(hash(refreshToken)) // 해시로 저장
+                                    .expiresAt(expiresAt)
+                                    .build())
                 );
 
         return AuthResponse.builder()
@@ -97,7 +105,7 @@ public class AuthService {
     @Transactional
     public AuthResponse refresh(String refreshToken) {
         // 서버에 저장된 토큰과 비교
-        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
+        RefreshToken stored = refreshTokenRepository.findByToken(hash(refreshToken))
                 .orElseThrow(() -> new BusinessException(
                         "INVALID_REFRESH_TOKEN", "유효하지 않는 리프레시 토큰입니다."
                 ));
@@ -123,7 +131,7 @@ public class AuthService {
                 .plusSeconds(jwtProvider.getRefreshExpiration() / 1000);
 
         // 기존 토큰 교체
-        stored.rotate(newRefreshToken, expiresAt);
+        stored.rotate(hash(newRefreshToken), expiresAt);
 
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
@@ -170,9 +178,21 @@ public class AuthService {
         }
 
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
-
-
-
-
     }
+
+    private String hash(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256"); // MessageDigest : Java 표준 라이브러리의 해시 함수 클래스, getInstance("SHA-256"): SHA-256 알고리즘으로 초기화
+            byte[] hashBytes = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hashBytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 알고리즘을 찾을 수 없습니다.", e);
+        }
+    }
+    /*
+        SHA-256:
+          어떤 길이의 입력이든 256비트(32바이트) 고정 길이 출력
+          같은 입력 → 항상 같은 출력
+          출력값으로 입력값 복원 불가 (단방향)
+     */
 }
