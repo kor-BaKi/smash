@@ -89,4 +89,8 @@ public class JwtProvider { // 토큰을 만들고 검증
     public boolean isAccessToken(String token) {
         return "access".equals(getClaims(token).get("typ", String.class));
     }
+
+    public boolean isRefreshToken(String token) {
+        return "refresh".equals(getClaims(token).get("typ", String.class));
+    }
 }

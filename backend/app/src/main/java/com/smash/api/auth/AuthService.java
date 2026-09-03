@@ -104,6 +104,11 @@ public class AuthService {
     // 토큰 재발급
     @Transactional
     public AuthResponse refresh(String refreshToken) {
+
+        if (!jwtProvider.isValid(refreshToken) || !jwtProvider.isRefreshToken(refreshToken)) {
+            throw new BusinessException("INVALID_REFRESH_TOKEN", "유효하지 않는 리프레시 토큰입니다.");
+        }
+
         // 서버에 저장된 토큰과 비교
         RefreshToken stored = refreshTokenRepository.findByToken(hash(refreshToken))
                 .orElseThrow(() -> new BusinessException(
