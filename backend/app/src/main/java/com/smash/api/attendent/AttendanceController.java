@@ -16,7 +16,7 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     // E-1. 조별 충족 현황
-    @GetMapping("/api/m1/admin/attendance")
+    @GetMapping("/api/v1/admin/attendance")
     public ResponseEntity<ApiResponse<AttendanceResponse>> getAttendance(
             @RequestParam Long groupId,
             @RequestParam int year,
