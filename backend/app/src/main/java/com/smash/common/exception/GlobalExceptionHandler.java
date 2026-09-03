@@ -58,6 +58,7 @@ public class GlobalExceptionHandler {
 
             // 403 — 접근 권한 없음
             case "NOT_ACTIVE"             -> HttpStatus.FORBIDDEN;
+            case "FORBIDDEN"              -> HttpStatus.FORBIDDEN;
 
             // 400 — 잘못된 입력 (기본값)
             default                       -> HttpStatus.BAD_REQUEST;
