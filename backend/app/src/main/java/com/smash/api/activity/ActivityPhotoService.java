@@ -64,6 +64,11 @@ public class ActivityPhotoService {
             String fileName = UUID.randomUUID() + ext;
             Path filePath = activityDir.resolve(fileName);
 
+            // 매직 바이트 검증 (보안)
+            if (!isValidImage(file)) {
+                throw new BusinessException("INVALID_FILE", "이미지 파일만 업로드 할 수 있습니다.");
+            }
+
             try {
                 file.transferTo(filePath);
             } catch (IOException e) {
@@ -162,5 +167,40 @@ public class ActivityPhotoService {
     private String getExtension(String filename) {
         if (filename == null || !filename.contains(".")) return ".jpg";
         return filename.substring(filename.lastIndexOf("."));
+    }
+
+    private boolean isValidImage(MultipartFile file) { // 매직 바이트로 사진 파일만 걸러내기
+        try {
+            byte[] bytes = file.getBytes();
+            if (bytes.length < 4) return false;
+
+            // JPEG : FF D8 FF
+            if (bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xD8 && bytes[2] == (byte) 0xFF) {
+                return true;
+            }
+
+            // PNG : 89 50 4E 47
+            if (bytes[0] == (byte) 0x89 && bytes[1] == (byte) 0x50
+                    && bytes[2] == (byte) 0x4E && bytes[3] == (byte) 0x47) {
+                return true;
+            }
+            // GIF: 47 49 46 38
+            if (bytes[0] == (byte) 0x47 && bytes[1] == (byte) 0x49
+                    && bytes[2] == (byte) 0x46 && bytes[3] == (byte) 0x38) {
+                return true;
+            }
+            // WEBP: 52 49 46 46 ... 57 45 42 50
+            if (bytes[0] == (byte) 0x52 && bytes[1] == (byte) 0x49
+                    && bytes[2] == (byte) 0x46 && bytes[3] == (byte) 0x46
+                    && bytes.length >= 12
+                    && bytes[8] == (byte) 0x57 && bytes[9] == (byte) 0x45
+                    && bytes[10] == (byte) 0x42 && bytes[11] == (byte) 0x50) {
+                return true;
+            }
+            return false;
+
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
