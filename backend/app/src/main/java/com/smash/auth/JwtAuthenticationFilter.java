@@ -37,6 +37,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter { // OncePerRe
             Long userId = jwtProvider.getUserId(token);
             String role = jwtProvider.getRole(token);
 
+            // role이 null이면 인증 객체 생성 거부 (보안)
+            if (role == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             userId,
