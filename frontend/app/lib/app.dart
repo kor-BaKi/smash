@@ -1,5 +1,5 @@
 import 'package:app/features/auth/page/login_page.dart';
-import 'package:app/features/home/page/main_page.dart';
+import 'package:app/features/home/page/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +32,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const MainPage(),
+        builder: (context, state) => const HomePage(),
       ),
       GoRoute(
         path: '/signup',
@@ -51,7 +51,7 @@ class SmashApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'SMASH',
-      theme: AppTheme.light(),
+      theme: AppTheme.dark(),
       debugShowCheckedModeBanner: false,
       routerConfig: router,
     );

@@ -17,7 +17,7 @@ class MorePage extends StatelessWidget {
           GestureDetector(
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const SettingsPage()),
+              MaterialPageRoute(builder: (_) => const SettingPage()),
             ),
             child: Container(
               padding: const EdgeInsets.symmetric(

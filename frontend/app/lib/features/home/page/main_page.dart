@@ -1,104 +1,112 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import 'home_page.dart';
-import 'more_page.dart';
-import 'poll_list_page.dart';
+import '../provider/auth_provider.dart';
+import 'activity_admin_page.dart';
+import 'application_form_page.dart';
+import 'application_list_page.dart';
+import 'availability_page.dart';
+import 'dues_page.dart';
+import 'free_period_page.dart';
+import 'invite_code_page.dart';
+import 'member_home_view.dart';
+import 'member_management_page.dart';
+import 'schedule_page.dart';
 
-class MainPage extends ConsumerStatefulWidget {
-  const MainPage({super.key});
+class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
 
   @override
-  ConsumerState<MainPage> createState() => _MainPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authProvider).user;
+    if (user == null) {
+      return const Scaffold(body: Center(child: Text('로그인이 필요합니다')));
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.bg,
+      drawer: user.isAdmin ? const _AdminDrawer() : null,
+      body: SafeArea(
+        child: user.groupId == null
+            ? _NeedGroupNotice(isAdmin: user.isAdmin)
+            : const MemberHomeView(),
+      ),
+    );
+  }
 }
 
-class _MainPageState extends ConsumerState<MainPage> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = const [
-    HomePage(),
-    PollListPage(),
-    MorePage(),
-  ];
+class _NeedGroupNotice extends StatelessWidget {
+  const _NeedGroupNotice({required this.isAdmin});
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark,
-      child: Scaffold(
-        extendBody: true,
-        extendBodyBehindAppBar: true,
-        backgroundColor: AppColors.scaffoldBg,
-        body: Stack(
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // 콘텐츠
-            IndexedStack(index: _currentIndex, children: _pages),
-
-            // 하단 바
-            Positioned(
-              left: 24,
-              right: 24,
-              bottom: bottomPadding + 12,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.20),
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _NavItem(
-                          icon: Icons.home_outlined,
-                          selectedIcon: Icons.home_rounded,
-                          label: '홈',
-                          isSelected: _currentIndex == 0,
-                          onTap: () => setState(() => _currentIndex = 0),
-                        ),
-                        _NavItem(
-                          icon: Icons.how_to_vote_outlined,
-                          selectedIcon: Icons.how_to_vote_rounded,
-                          label: '투표',
-                          isSelected: _currentIndex == 1,
-                          onTap: () => setState(() => _currentIndex = 1),
-                        ),
-                        _NavItem(
-                          icon: Icons.menu_outlined,
-                          selectedIcon: Icons.menu_rounded,
-                          label: '더보기',
-                          isSelected: _currentIndex == 2,
-                          onTap: () => setState(() => _currentIndex = 2),
-                        ),
-                      ],
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.groups_outlined,
+                size: 32,
+                color: AppColors.gray,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              '아직 조가 배정되지 않았어요',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isAdmin
+                  ? '왼쪽 상단 메뉴에서 운영 기능을 이용할 수 있습니다.'
+                  : '참여 가능한 요일을 먼저 제출해주세요.',
+              style: const TextStyle(fontSize: 14, color: AppColors.gray),
+              textAlign: TextAlign.center,
+            ),
+            if (!isAdmin) ...[
+              const SizedBox(height: 24),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AvailabilityPage(),
+                  ),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.lime,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text(
+                    '가능 요일 제출하기',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF111111),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -106,49 +114,186 @@ class _MainPageState extends ConsumerState<MainPage> {
   }
 }
 
-class _NavItem extends StatelessWidget {
+class _AdminDrawer extends ConsumerWidget {
+  const _AdminDrawer();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authProvider).user;
+
+    return Drawer(
+      backgroundColor: AppColors.card,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.lime,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      user?.name.substring(0, 1) ?? '',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF111111),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user?.name ?? '',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.white,
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.lime.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: const Text(
+                          '임원',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.lime,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Container(height: 0.5, color: AppColors.border),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 10,
+                ),
+                children: [
+                  _sectionLabel('회원 운영'),
+                  _DrawerItem(
+                    icon: Icons.person_outline,
+                    label: '부원 관리',
+                    onTap: () =>
+                        _push(context, const MemberManagementPage()),
+                  ),
+                  _DrawerItem(
+                    icon: Icons.assignment_outlined,
+                    label: '지원서 관리',
+                    onTap: () =>
+                        _push(context, const ApplicationListPage()),
+                  ),
+                  _DrawerItem(
+                    icon: Icons.edit_document,
+                    label: '지원 폼 관리',
+                    onTap: () =>
+                        _push(context, const ApplicationFormPage()),
+                  ),
+                  _DrawerItem(
+                    icon: Icons.key_outlined,
+                    label: '가입코드 관리',
+                    onTap: () => _push(context, const InviteCodePage()),
+                  ),
+                  _sectionLabel('활동 운영'),
+                  _DrawerItem(
+                    icon: Icons.calendar_month_outlined,
+                    label: '정규활동 일정',
+                    onTap: () => _push(context, const SchedulePage()),
+                  ),
+                  _DrawerItem(
+                    icon: Icons.event_note_outlined,
+                    label: '날짜별 활동 관리',
+                    onTap: () => _push(context, const ActivityAdminPage()),
+                  ),
+                  _DrawerItem(
+                    icon: Icons.sports_tennis_outlined,
+                    label: '자유활동 기간 설정',
+                    onTap: () => _push(context, const FreePeriodPage()),
+                  ),
+                  _sectionLabel('재정 운영'),
+                  _DrawerItem(
+                    icon: Icons.wallet_outlined,
+                    label: '회비 관리',
+                    onTap: () => _push(context, const DuesPage()),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _push(BuildContext context, Widget page) {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
+  Widget _sectionLabel(String text) => Padding(
+    padding: const EdgeInsets.fromLTRB(12, 16, 12, 6),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        color: AppColors.darkGray,
+        letterSpacing: 0.08,
+      ),
+    ),
+  );
+}
+
+class _DrawerItem extends StatelessWidget {
   final IconData icon;
-  final IconData selectedIcon;
   final String label;
-  final bool isSelected;
   final VoidCallback onTap;
 
-  const _NavItem({
+  const _DrawerItem({
     required this.icon,
-    required this.selectedIcon,
     required this.label,
-    required this.isSelected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white.withOpacity(0.2)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+        child: Row(
           children: [
-            Icon(
-              isSelected ? selectedIcon : icon,
-              color: isSelected ? Colors.white : Colors.white70,
-              size: 22,
-            ),
-            const SizedBox(height: 2),
+            Icon(icon, size: 20, color: AppColors.gray),
+            const SizedBox(width: 14),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : Colors.white70,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.white,
               ),
             ),
           ],

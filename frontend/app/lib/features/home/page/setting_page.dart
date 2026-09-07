@@ -5,14 +5,14 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../provider/auth_provider.dart';
 
-class SettingsPage extends ConsumerStatefulWidget {
-  const SettingsPage({super.key});
+class SettingPage extends ConsumerStatefulWidget {
+  const SettingPage({super.key});
 
   @override
-  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends ConsumerState<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingPage> {
   String _appVersion = '';
 
   @override
