@@ -37,7 +37,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.cardBg,
+      backgroundColor: AppColors.bg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(28, 40, 28, 28),
@@ -60,16 +60,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -1,
-                    color: AppColors.ink,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 6),
                 const Text(
                   'SMASH 계정으로 로그인하세요',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textTertiary,
-                  ),
+                  style: TextStyle(fontSize: 14, color: AppColors.gray),
                 ),
                 const SizedBox(height: 32),
                 _buildLabel('학번'),
@@ -77,6 +74,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 TextFormField(
                   controller: _studentNoController,
                   keyboardType: TextInputType.number,
+                  style: const TextStyle(color: AppColors.white),
                   validator: (v) =>
                       (v == null || v.isEmpty) ? '학번을 입력해주세요.' : null,
                 ),
@@ -86,6 +84,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
+                  obscuringCharacter: '*',
+                  style: const TextStyle(color: AppColors.white),
                   validator: (v) =>
                       (v == null || v.isEmpty) ? '비밀번호를 입력해주세요.' : null,
                 ),
@@ -111,10 +111,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: Color(0xFF111111),
                           ),
                         )
-                      : const Text('로그인'),
+                      : const Text(
+                          '로그인',
+                          style: TextStyle(
+                            fontFamily: 'BMJUA',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.white,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 20),
                 Center(
@@ -122,15 +130,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     text: TextSpan(
                       style: const TextStyle(
                         fontSize: 14,
-                        color: AppColors.textTertiary,
-                        fontFamily: 'Pretendard',
+                        color: AppColors.gray,
+                        fontFamily: 'BMJUA',
                       ),
                       children: [
                         const TextSpan(text: '아직 회원이 아니신가요? '),
                         TextSpan(
                           text: '가입하기',
                           style: const TextStyle(
-                            color: AppColors.primary,
+                            color: AppColors.lime,
                             fontWeight: FontWeight.w700,
                           ),
                           recognizer: TapGestureRecognizer()
@@ -153,7 +161,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     style: const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w700,
-      color: AppColors.textTertiary,
+      color: AppColors.gray,
     ),
   );
 }

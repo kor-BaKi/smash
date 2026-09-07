@@ -81,7 +81,7 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.5,
-                            fontFamily: 'Pretendard',
+                            fontFamily: 'BMJUA',
                           ),
                           children: [
                             TextSpan(
@@ -176,11 +176,8 @@ class _ActivityCard extends ConsumerWidget {
       !activity.voteClosed &&
       (activity.activityType == 'FREE' || activity.isMyGroup);
 
-  Color get _textColor =>
-      _isColorCard ? const Color(0xFF111111) : AppColors.white;
-  Color get _subColor => _isColorCard
-      ? const Color(0xFF111111).withValues(alpha: 0.5)
-      : AppColors.gray;
+  Color get _textColor => AppColors.white;
+  Color get _subColor => AppColors.white.withValues(alpha: 0.6);
 
   String get _subtitle {
     if (activity.voteClosed) return '${activity.groupLabel} · 마감됨';
@@ -297,18 +294,14 @@ class _ActivityCard extends ConsumerWidget {
 
                 if (_isColorCard) {
                   btnBg = isPrimary
-                      ? const Color(0xFF111111)
-                      : Colors.black.withValues(alpha: 0.1);
-                  btnFg = isPrimary
-                      ? AppColors.lime
-                      : const Color(0xFF111111);
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : Colors.white.withValues(alpha: 0.1);
+                  btnFg = AppColors.white;
                 } else {
                   btnBg = isPrimary
                       ? AppColors.lime
                       : Colors.white.withValues(alpha: 0.1);
-                  btnFg = isPrimary
-                      ? const Color(0xFF111111)
-                      : AppColors.white;
+                  btnFg = AppColors.white;
                 }
 
                 return Expanded(
@@ -562,10 +555,10 @@ class _PollCard extends ConsumerWidget {
         children: [
           Text(
             poll.isAnonymous ? '익명 투표' : '기명 투표',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Color(0x88111111),
+              color: AppColors.white.withValues(alpha: 0.6),
               letterSpacing: 0.07,
             ),
           ),
@@ -576,7 +569,7 @@ class _PollCard extends ConsumerWidget {
               fontSize: 22,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
-              color: Color(0xFF111111),
+              color: AppColors.white,
               height: 1.15,
             ),
           ),
@@ -584,9 +577,9 @@ class _PollCard extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               '마감: ${poll.closedAt!.substring(0, 16).replaceAll('T', ' ')}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: Color(0x88111111),
+                color: AppColors.white.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -623,10 +616,10 @@ class _PollCard extends ConsumerWidget {
                               alignment: Alignment.center,
                               child: Text(
                                 option.content,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF111111),
+                                  color: AppColors.white,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -656,7 +649,7 @@ class _PollCard extends ConsumerWidget {
                     width: 20,
                     height: 20,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF111111),
+                      color: AppColors.white,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -672,7 +665,7 @@ class _PollCard extends ConsumerWidget {
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF111111),
+                        color: AppColors.white,
                       ),
                     ),
                   ),
@@ -682,11 +675,11 @@ class _PollCard extends ConsumerWidget {
                         : () => ref
                               .read(pollProvider.notifier)
                               .cancelVote(poll.id),
-                    child: const Text(
+                    child: Text(
                       '다시 투표',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Color(0x88111111),
+                        color: AppColors.white.withValues(alpha: 0.6),
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -703,12 +696,12 @@ class _PollCard extends ConsumerWidget {
                 context: context,
                 builder: (_) => PollResultDialog(pollId: poll.id),
               ),
-              child: const Text(
+              child: Text(
                 '결과 보기 ›',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Color(0x88111111),
+                  color: AppColors.white.withValues(alpha: 0.6),
                 ),
               ),
             ),

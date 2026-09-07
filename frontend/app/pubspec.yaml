@@ -77,6 +77,10 @@ flutter:
           weight: 700
         - asset: assets/fonts/Pretendard-ExtraBold.otf
           weight: 800
+    - family: BMJUA
+      fonts:
+        - asset: assets/fonts/BMJUA_otf.otf
+          weight: 400
 
 flutter_launcher_icons:
   android: true

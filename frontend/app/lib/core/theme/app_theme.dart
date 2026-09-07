@@ -57,7 +57,7 @@ class AppTheme {
   static ThemeData dark() {
     return ThemeData(
       useMaterial3: true,
-      fontFamily: 'Pretendard',
+      fontFamily: 'BMJUA',
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.bg,
 
@@ -140,6 +140,7 @@ class AppTheme {
           borderSide: BorderSide.none,
         ),
         hintStyle: const TextStyle(color: AppColors.gray),
+        labelStyle: const TextStyle(color: AppColors.white),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,

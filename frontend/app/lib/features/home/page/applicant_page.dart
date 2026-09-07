@@ -120,7 +120,7 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textTertiary,
-                          fontFamily: 'Pretendard',
+                          fontFamily: 'BMJUA',
                         ),
                         children: [
                           const TextSpan(text: '등록 '),
