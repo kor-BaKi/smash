@@ -18,7 +18,7 @@ public class CalendarEventController {
     @GetMapping("/api/v1/calendar")
     public ResponseEntity<ApiResponse<List<CalendarEventResponse>>> getEvents(
             @RequestParam int year,
-            @RequestParam int month,
+            @RequestParam int month
             ) {
         return ResponseEntity.ok(ApiResponse.success(
                 calendarEventService.getEvents(year, month)
