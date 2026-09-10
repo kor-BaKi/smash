@@ -154,7 +154,10 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
               .watch(pollProvider)
               .polls
               .where((p) => !p.isExpired)
-              .map((poll) => _PollCard(poll: poll)),
+              .toList()
+              .asMap()
+              .entries
+              .map((e) => _PollCard(poll: e.value, index: e.key)),
         ],
       ),
     );
@@ -166,15 +169,12 @@ class _ActivityCard extends ConsumerWidget {
   const _ActivityCard({required this.activity});
 
   Color get _cardColor {
-    if (activity.voteClosed) return AppColors.card;
     if (activity.activityType == 'FREE') return AppColors.green;
-    if (!activity.isMyGroup) return AppColors.card;
+    if (!activity.isMyGroup) return AppColors.coral;
     return AppColors.lime;
   }
 
-  bool get _isColorCard =>
-      !activity.voteClosed &&
-      (activity.activityType == 'FREE' || activity.isMyGroup);
+  bool get _isColorCard => true;
 
   Color get _textColor => AppColors.white;
   Color get _subColor => AppColors.white.withValues(alpha: 0.6);
@@ -523,7 +523,16 @@ class _ActivityCard extends ConsumerWidget {
 
 class _PollCard extends ConsumerWidget {
   final PollInfo poll;
-  const _PollCard({required this.poll});
+  final int index;
+  const _PollCard({required this.poll, required this.index});
+
+  static const _cardColors = [
+    AppColors.green,
+    AppColors.coral,
+    AppColors.lime,
+    Color(0xFF7B5EA7),
+    Color(0xFF3A7BD5),
+  ];
 
   List<List<PollOptionResult>> _groupOptions() {
     final options = poll.options;
@@ -547,7 +556,7 @@ class _PollCard extends ConsumerWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: AppColors.green,
+        color: _cardColors[index % _cardColors.length],
         borderRadius: BorderRadius.circular(28),
       ),
       child: Column(

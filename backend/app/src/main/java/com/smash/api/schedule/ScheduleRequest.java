@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class ScheduleRequest {
+public class ScheduleRequest { // 정규활동
 
     @NotNull
     private List<ScheduleItem> schedules;
