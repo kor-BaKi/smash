@@ -21,7 +21,7 @@ public class CalendarEventService {
     // 월별 일정 조회
     @Transactional(readOnly = true)
     public List<CalendarEventResponse> getEvents(int year, int month) {
-        return scheduleRepository.findByDateYearAndDateMonth(year, month)
+        return scheduleRepository.findByYearAndMonth(year, month)
                 .stream()
                 .map(CalendarEventResponse::of)
                 .toList();
