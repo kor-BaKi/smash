@@ -8,6 +8,7 @@ import 'activity_admin_page.dart';
 import 'application_form_page.dart';
 import 'application_list_page.dart';
 import 'availability_page.dart';
+import 'calendar_tab_page.dart';
 import 'dues_page.dart';
 import 'free_period_page.dart';
 import 'invite_code_page.dart';
@@ -38,7 +39,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ? _NeedGroupNotice(isAdmin: user.isAdmin)
           : const MemberHomeView(),
       const PollListPage(),
-      const _CalendarTab(),
+      const CalendarTabPage(),
       const SettingPage(),
     ];
 
@@ -194,35 +195,6 @@ class _NeedGroupNotice extends StatelessWidget {
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CalendarTab extends StatelessWidget {
-  const _CalendarTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.calendar_month_outlined,
-            size: 48,
-            color: AppColors.darkGray,
-          ),
-          SizedBox(height: 16),
-          Text(
-            '캘린더 기능 준비 중',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.gray,
-            ),
-          ),
-        ],
       ),
     );
   }

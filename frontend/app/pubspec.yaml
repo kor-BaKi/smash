@@ -34,6 +34,9 @@ dependencies:
   # HTTP 클라이언트 
   dio: ^5.7.0
 
+  # 캘린더
+  table_calendar: ^3.1.2
+
   # 상태관리
   flutter_riverpod: ^2.6.1
 
