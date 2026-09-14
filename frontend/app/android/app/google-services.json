@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "187981151851",
+    "project_id": "smash-a60bd",
+    "storage_bucket": "smash-a60bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:187981151851:android:b2e732b682e2cffda73b2e",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsIcOX_2z2njIk3rrElp47pL54qMeE2oE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

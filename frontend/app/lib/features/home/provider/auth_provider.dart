@@ -1,8 +1,13 @@
 // 로그인한 유저 정보 상태
+import 'dart:io';
+
 import 'package:app/core/api/auth_api.dart';
 import 'package:app/core/storage/token_storage.dart';
 import 'package:app/features/auth/model/auth_model.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/api/fcm_api.dart';
 
 class AuthState {
   // 앱의 로그인 상태를 표현하는 데이터 클래스 (지금 누가 로그인했는지)
@@ -34,40 +39,6 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(const AuthState());
-
-  // 로그인
-  Future<void> login(String studentNo, String password) async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
-
-    try {
-      final response = await AuthApi.login(
-        studentNo: studentNo,
-        password: password,
-      );
-
-      final auth = AuthResponse.fromJson(response);
-
-      await TokenStorage.saveAccessToken(auth.accessToken);
-      await TokenStorage.saveRefreshToken(auth.refreshToken);
-
-      state = state.copyWith(user: auth.user, isLoading: false);
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: '로그인에 실패했습니다.',
-      );
-    }
-  }
-
-  // 로그아웃
-  Future<void> logout() async {
-    try {
-      await AuthApi.logout();
-    } finally {
-      await TokenStorage.deleteAll();
-      state = const AuthState();
-    }
-  }
 
   // 비밀번호 변경
   Future<bool> changePassword({
@@ -126,6 +97,52 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
         errorMessage: '회원가입에 실패했습니다. 가입코드와 학번을 확인해주세요.',
       );
+    }
+  }
+
+  // 로그인
+  Future<void> login(String studentNo, String password) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final response = await AuthApi.login(
+        studentNo: studentNo,
+        password: password,
+      );
+
+      final auth = AuthResponse.fromJson(response);
+
+      await TokenStorage.saveAccessToken(auth.accessToken);
+      await TokenStorage.saveRefreshToken(auth.refreshToken);
+
+      state = state.copyWith(user: auth.user, isLoading: false);
+
+      // FCM 토큰 서버 전송
+      try {
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null) {
+          final deviceType = Platform.isIOS ? 'IOS' : 'ANDROID';
+          await FcmApi.saveToken(fcmToken, deviceType);
+        }
+      } catch (e) {
+        // FCM 토큰 전송 실패해도 로그인은 유지
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: '로그인에 실패했습니다.',
+      );
+    }
+  }
+
+  // 로그아웃
+  Future<void> logout() async {
+    try {
+      await FcmApi.deleteToken(); // FCM 토큰 삭제
+      await AuthApi.logout();
+    } finally {
+      await TokenStorage.deleteAll();
+      state = const AuthState();
     }
   }
 }
