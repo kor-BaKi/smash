@@ -20,12 +20,48 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
   DateTime? _selectedDay;
   List<Map<String, dynamic>> _events = [];
   List<PollInfo> _polls = [];
+  Map<int, int> _pollSlots = {};
+  int _totalSlots = 0;
   bool _isLoading = true;
+
+  static const double _kRowHeight = 110;
+  static const double _kDateArea = 26;
+  static const double _kItemHeight = 10;
+
+  void _assignPollSlots() {
+    // 기간 내림차순 정렬 후 슬롯 부여
+    final sorted = List.generate(_polls.length, (i) => i)
+      ..sort(
+        (a, b) => _getPollDuration(
+          _polls[b],
+        ).compareTo(_getPollDuration(_polls[a])),
+      );
+
+    _pollSlots = {};
+    for (int slot = 0; slot < sorted.length; slot++) {
+      _pollSlots[sorted[slot]] = slot;
+    }
+    _totalSlots = _polls.length;
+  }
+
+  static const _pollColors = [
+    AppColors.green,
+    AppColors.coral,
+    AppColors.lime,
+    Color(0xFF7B5EA7),
+    Color(0xFF3A7BD5),
+  ];
+
+  Color _getPollColor(int index) =>
+      _pollColors[index % _pollColors.length];
 
   @override
   void initState() {
     super.initState();
-    _loadEvents();
+    Future.microtask(() async {
+      await ref.read(pollProvider.notifier).loadPolls();
+      _loadEvents();
+    });
   }
 
   Future<void> _loadEvents() async {
@@ -35,10 +71,10 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
         _focusedDay.year,
         _focusedDay.month,
       );
-      await ref.read(pollProvider.notifier).loadPolls();
       setState(() {
         _events = events;
         _polls = ref.read(pollProvider).polls;
+        _assignPollSlots();
         _isLoading = false;
       });
     } catch (e) {
@@ -46,20 +82,171 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
     }
   }
 
-  List<PollInfo> _getPollsForDay(DateTime day) {
-    return _polls.where((poll) {
-      final start = DateTime.parse(poll.createdAt);
-      final startDate = DateTime(start.year, start.month, start.day);
+  Future<void> _showDayDetailSheet(
+    DateTime day,
+    List<Map<String, dynamic>> events,
+    List<PollInfo> polls,
+  ) async {
+    final isAdmin = ref.read(authProvider).user?.isAdmin ?? false;
 
-      if (poll.closedAt == null) {
-        return isSameDay(startDate, day);
-      }
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${day.month}월 ${day.day}일',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
 
-      final end = DateTime.parse(poll.closedAt!);
-      final endDate = DateTime(end.year, end.month, end.day);
+            // 임원 일정
+            ...events.map(
+              (event) => Container(
+                // margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.card2,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 3,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.lime,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event['title'],
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          if (event['memo'] != null &&
+                              event['memo'].toString().isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              event['memo'],
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.gray,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (isAdmin)
+                      GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await CalendarApi.delete(event['id']);
+                          await _loadEvents();
+                        },
+                        child: const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.coral,
+                          size: 20,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
 
-      return !day.isBefore(startDate) && !day.isAfter(endDate);
-    }).toList();
+            // 투표 일정
+            ...polls.map(
+              (poll) => Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.green.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.green, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 3,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.green,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            poll.title,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            poll.closedAt != null
+                                ? '마감: ${poll.closedAt!.substring(0, 10)}'
+                                : '진행중',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.green.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        '투표',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   List<Map<String, dynamic>> _getEventsForDay(DateTime day) {
@@ -71,10 +258,61 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
     }).toList();
   }
 
+  int _getPollDuration(PollInfo poll) {
+    final start = DateTime.parse(poll.createdAt);
+    if (poll.closedAt == null) return 1;
+    final end = DateTime.parse(poll.closedAt!);
+    return end.difference(start).inDays + 1;
+  }
+
+  List<PollInfo> _getPollsForDay(DateTime day) {
+    return _polls.where((poll) {
+      final start = DateTime.parse(poll.createdAt);
+      final startDate = DateTime(start.year, start.month, start.day);
+      if (poll.closedAt == null) return isSameDay(startDate, day);
+      final end = DateTime.parse(poll.closedAt!);
+      final endDate = DateTime(end.year, end.month, end.day);
+      return !day.isBefore(startDate) && !day.isAfter(endDate);
+    }).toList();
+  }
+
+  List<({PollInfo poll, int index})> _getPollsOverDay(DateTime day) {
+    final result = <({PollInfo poll, int index})>[];
+    for (int i = 0; i < _polls.length; i++) {
+      final poll = _polls[i];
+      final start = DateTime.parse(poll.createdAt);
+      final startDate = DateTime(start.year, start.month, start.day);
+      if (poll.closedAt == null) {
+        if (isSameDay(startDate, day)) result.add((poll: poll, index: i));
+        continue;
+      }
+      final end = DateTime.parse(poll.closedAt!);
+      final endDate = DateTime(end.year, end.month, end.day);
+      if (!day.isBefore(startDate) && !day.isAfter(endDate)) {
+        result.add((poll: poll, index: i));
+      }
+    }
+    return result;
+  }
+
+  bool _isPollStart(PollInfo poll, DateTime day) {
+    final start = DateTime.parse(poll.createdAt);
+    return isSameDay(DateTime(start.year, start.month, start.day), day);
+  }
+
+  bool _isPollEnd(PollInfo poll, DateTime day) {
+    if (poll.closedAt == null) return true;
+    final end = DateTime.parse(poll.closedAt!);
+    return isSameDay(DateTime(end.year, end.month, end.day), day);
+  }
+
+  bool _isWeekStart(DateTime day) => day.weekday == DateTime.sunday;
+  bool _isWeekEnd(DateTime day) => day.weekday == DateTime.saturday;
+
   Future<void> _showAddEventDialog() async {
     final titleController = TextEditingController();
     final memoController = TextEditingController();
-    DateTime selectedDate = _selectedDay ?? _focusedDay;
+    final selectedDate = _selectedDay ?? _focusedDay;
 
     await showModalBottomSheet(
       context: context,
@@ -133,47 +371,240 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
               ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: GestureDetector(
-                onTap: () async {
-                  if (titleController.text.isEmpty) return;
-                  try {
-                    await CalendarApi.create(
-                      titleController.text,
-                      selectedDate.toIso8601String().substring(0, 10),
-                      memoController.text.isEmpty
-                          ? null
-                          : memoController.text,
+            GestureDetector(
+              onTap: () async {
+                if (titleController.text.isEmpty) return;
+                try {
+                  await CalendarApi.create(
+                    titleController.text,
+                    selectedDate.toIso8601String().substring(0, 10),
+                    memoController.text.isEmpty
+                        ? null
+                        : memoController.text,
+                  );
+                  if (mounted) Navigator.pop(context);
+                  await _loadEvents();
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('일정 추가 실패')),
                     );
-                    if (mounted) Navigator.pop(context);
-                    await _loadEvents();
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('일정 추가 실패')),
-                      );
-                    }
                   }
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: AppColors.lime,
-                    borderRadius: BorderRadius.circular(16),
+                }
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.lime,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  '추가',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF111111),
                   ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDayCell(DateTime day, bool isSelected, bool isToday) {
+    final eventsForDay = _getEventsForDay(day);
+    final isWeekend =
+        day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
+
+    // 이 셀에 표시 가능한 최대 아이템 수
+    final maxItems = ((_kRowHeight - _kDateArea) / _kItemHeight).floor();
+
+    final itemWidgets = <Widget>[];
+
+    // 투표 슬롯 (빈 슬롯도 항상 같은 높이 유지)
+    for (int slot = 0; slot < _totalSlots; slot++) {
+      if (itemWidgets.length >= maxItems) break;
+
+      final pollIndex = _pollSlots.entries
+          .where((e) => e.value == slot)
+          .map((e) => e.key)
+          .firstOrNull;
+
+      if (pollIndex == null) {
+        itemWidgets.add(const SizedBox(height: _kItemHeight));
+        continue;
+      }
+
+      final poll = _polls[pollIndex];
+      final start = DateTime.parse(poll.createdAt);
+      final startDate = DateTime(start.year, start.month, start.day);
+      DateTime? endDate;
+      if (poll.closedAt != null) {
+        final end = DateTime.parse(poll.closedAt!);
+        endDate = DateTime(end.year, end.month, end.day);
+      }
+
+      final isInRange = endDate == null
+          ? isSameDay(startDate, day)
+          : !day.isBefore(startDate) && !day.isAfter(endDate);
+
+      if (!isInRange) {
+        // 조건 없이 항상 같은 높이 → 슬롯 정렬 유지
+        itemWidgets.add(const SizedBox(height: _kItemHeight));
+        continue;
+      }
+
+      final isStart = isSameDay(startDate, day) || _isWeekStart(day);
+      final isEnd = endDate == null
+          ? true
+          : isSameDay(endDate, day) || _isWeekEnd(day);
+      final showTitle = isSameDay(startDate, day) || _isWeekStart(day);
+      final color = _getPollColor(pollIndex);
+
+      itemWidgets.add(
+        Container(
+          height: _kItemHeight,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.horizontal(
+              left: isStart ? const Radius.circular(4) : Radius.zero,
+              right: isEnd ? const Radius.circular(4) : Radius.zero,
+            ),
+          ),
+          padding: const EdgeInsets.only(left: 3),
+          alignment: Alignment.centerLeft,
+          child: showTitle
+              ? Text(
+                  poll.title,
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                    fontFamily: 'BMJUA',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                )
+              : null,
+        ),
+      );
+    }
+
+    // 임원 일정
+    int hiddenCount = 0;
+    for (final event in eventsForDay) {
+      if (itemWidgets.length >= maxItems) {
+        hiddenCount++;
+        continue;
+      }
+      itemWidgets.add(
+        Container(
+          height: _kItemHeight,
+          margin: const EdgeInsets.only(top: 1),
+          padding: const EdgeInsets.only(left: 3),
+          child: Row(
+            children: [
+              Container(
+                width: 2,
+                height: 9,
+                decoration: BoxDecoration(
+                  color: AppColors.lime,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+              const SizedBox(width: 2),
+              Expanded(
+                child: Text(
+                  event['title'],
+                  style: const TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.lime,
+                    fontFamily: 'BMJUA',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 넘친 개수 표시
+    if (hiddenCount > 0 && itemWidgets.isNotEmpty) {
+      itemWidgets.removeLast();
+      itemWidgets.add(
+        SizedBox(
+          height: _kItemHeight,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 3),
+            child: Text(
+              '+${hiddenCount + 1}',
+              style: const TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w700,
+                color: AppColors.gray,
+                fontFamily: 'BMJUA',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 셀 높이를 rowHeight로 강제 고정 + 클리핑
+    return SizedBox(
+      height: _kRowHeight,
+      width: double.infinity,
+      child: ClipRect(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: _kDateArea,
+              child: Center(
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: isSelected
+                      ? const BoxDecoration(
+                          color: AppColors.lime,
+                          shape: BoxShape.circle,
+                        )
+                      : isToday
+                      ? BoxDecoration(
+                          color: AppColors.lime.withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
+                        )
+                      : null,
                   alignment: Alignment.center,
-                  child: const Text(
-                    '추가',
+                  child: Text(
+                    '${day.day}',
                     style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF111111),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'BMJUA',
+                      color: isSelected
+                          ? const Color(0xFF111111)
+                          : isToday
+                          ? AppColors.lime
+                          : isWeekend
+                          ? AppColors.coral
+                          : AppColors.white,
                     ),
                   ),
                 ),
               ),
             ),
+            ...itemWidgets,
           ],
         ),
       ),
@@ -226,271 +657,108 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
               ),
             ),
 
-            // 캘린더
-            TableCalendar(
-              firstDay: DateTime(2020),
-              lastDay: DateTime(2030),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-                _loadEvents();
-              },
-              eventLoader: (day) {
-                return [..._getEventsForDay(day), ..._getPollsForDay(day)];
-              },
-              locale: 'ko_KR',
-              calendarStyle: CalendarStyle(
-                outsideDaysVisible: false,
-                defaultTextStyle: const TextStyle(
-                  color: AppColors.white,
-                  fontFamily: 'BMJUA',
-                ),
-                weekendTextStyle: const TextStyle(
-                  color: AppColors.coral,
-                  fontFamily: 'BMJUA',
-                ),
-                todayDecoration: BoxDecoration(
-                  color: AppColors.lime.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                ),
-                todayTextStyle: const TextStyle(
-                  color: AppColors.lime,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'BMJUA',
-                ),
-                selectedDecoration: const BoxDecoration(
-                  color: AppColors.lime,
-                  shape: BoxShape.circle,
-                ),
-                selectedTextStyle: const TextStyle(
-                  color: Color(0xFF111111),
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'BMJUA',
-                ),
-                markerDecoration: const BoxDecoration(
-                  color: AppColors.lime,
-                  shape: BoxShape.circle,
-                ),
-                outsideTextStyle: const TextStyle(
-                  color: AppColors.darkGray,
-                  fontFamily: 'BMJUA',
-                ),
-              ),
-              headerStyle: HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-                titleTextStyle: const TextStyle(
-                  color: AppColors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'BMJUA',
-                ),
-                leftChevronIcon: const Icon(
-                  Icons.chevron_left,
-                  color: AppColors.white,
-                ),
-                rightChevronIcon: const Icon(
-                  Icons.chevron_right,
-                  color: AppColors.white,
-                ),
-                decoration: const BoxDecoration(color: AppColors.bg),
-              ),
-              daysOfWeekStyle: const DaysOfWeekStyle(
-                weekdayStyle: TextStyle(
-                  color: AppColors.gray,
-                  fontSize: 12,
-                  fontFamily: 'BMJUA',
-                ),
-                weekendStyle: TextStyle(
-                  color: AppColors.coral,
-                  fontSize: 12,
-                  fontFamily: 'BMJUA',
-                ),
-              ),
-            ),
-
-            // 선택된 날짜 일정
-            if (_selectedDay != null) ...[
-              const Divider(color: AppColors.border, height: 1),
-              Expanded(
-                child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.lime,
-                        ),
-                      )
-                    : (_getEventsForDay(_selectedDay!).isEmpty &&
-                          _getPollsForDay(_selectedDay!).isEmpty)
-                    ? const Center(
-                        child: Text(
-                          '일정이 없습니다',
-                          style: TextStyle(
-                            color: AppColors.gray,
-                            fontSize: 14,
-                          ),
-                        ),
-                      )
-                    : ListView(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          ..._getEventsForDay(_selectedDay!).map(
-                            (event) => Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.card,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 4,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.lime,
-                                      borderRadius: BorderRadius.circular(
-                                        2,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          event['title'],
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.white,
-                                          ),
-                                        ),
-                                        if (event['memo'] != null &&
-                                            event['memo']
-                                                .toString()
-                                                .isNotEmpty) ...[
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            event['memo'],
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: AppColors.gray,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                  if (isAdmin)
-                                    GestureDetector(
-                                      onTap: () async {
-                                        await CalendarApi.delete(
-                                          event['id'],
-                                        );
-                                        await _loadEvents();
-                                      },
-                                      child: const Icon(
-                                        Icons.delete_outline,
-                                        color: AppColors.coral,
-                                        size: 20,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          ..._getPollsForDay(_selectedDay!).map(
-                            (poll) => Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.green.withValues(
-                                  alpha: 0.15,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: AppColors.green,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 4,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.green,
-                                      borderRadius: BorderRadius.circular(
-                                        2,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          poll.title,
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          poll.closedAt != null
-                                              ? '마감: ${poll.closedAt!.substring(0, 10)}'
-                                              : '진행중',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.green,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.green.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        8,
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      '투표',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.green,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+            // 캘린더 (전체 화면 차지)
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.lime,
                       ),
-              ),
-            ],
+                    )
+                  : TableCalendar(
+                      rowHeight: _kRowHeight,
+                      firstDay: DateTime(2020),
+                      lastDay: DateTime(2030),
+                      focusedDay: _focusedDay,
+                      selectedDayPredicate: (day) =>
+                          isSameDay(_selectedDay, day),
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                        final events = _getEventsForDay(selectedDay);
+                        final polls = _getPollsForDay(selectedDay);
+                        if (events.isNotEmpty || polls.isNotEmpty) {
+                          _showDayDetailSheet(selectedDay, events, polls);
+                        }
+                      },
+                      onPageChanged: (focusedDay) {
+                        _focusedDay = focusedDay;
+                        _loadEvents();
+                      },
+                      locale: 'ko_KR',
+                      daysOfWeekHeight: 28,
+                      calendarBuilders: CalendarBuilders(
+                        defaultBuilder: (context, day, focusedDay) =>
+                            _buildDayCell(day, false, false),
+                        selectedBuilder: (context, day, focusedDay) =>
+                            _buildDayCell(day, true, false),
+                        todayBuilder: (context, day, focusedDay) =>
+                            _buildDayCell(day, false, true),
+                        outsideBuilder: (context, day, focusedDay) =>
+                            const SizedBox(),
+                      ),
+                      calendarStyle: CalendarStyle(
+                        outsideDaysVisible: false,
+                        cellMargin: EdgeInsets.zero,
+                        cellPadding: EdgeInsets.zero,
+                        defaultTextStyle: const TextStyle(
+                          color: AppColors.white,
+                          fontFamily: 'BMJUA',
+                        ),
+                        weekendTextStyle: const TextStyle(
+                          color: AppColors.coral,
+                          fontFamily: 'BMJUA',
+                        ),
+                        outsideTextStyle: const TextStyle(
+                          color: AppColors.darkGray,
+                          fontFamily: 'BMJUA',
+                        ),
+                        todayDecoration: BoxDecoration(
+                          color: AppColors.lime.withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        selectedDecoration: const BoxDecoration(
+                          color: AppColors.lime,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      headerStyle: HeaderStyle(
+                        formatButtonVisible: false,
+                        titleCentered: true,
+                        titleTextStyle: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'BMJUA',
+                        ),
+                        leftChevronIcon: const Icon(
+                          Icons.chevron_left,
+                          color: AppColors.white,
+                        ),
+                        rightChevronIcon: const Icon(
+                          Icons.chevron_right,
+                          color: AppColors.white,
+                        ),
+                        decoration: const BoxDecoration(
+                          color: AppColors.bg,
+                        ),
+                      ),
+                      daysOfWeekStyle: const DaysOfWeekStyle(
+                        weekdayStyle: TextStyle(
+                          color: AppColors.gray,
+                          fontSize: 12,
+                          fontFamily: 'BMJUA',
+                        ),
+                        weekendStyle: TextStyle(
+                          color: AppColors.coral,
+                          fontSize: 12,
+                          fontFamily: 'BMJUA',
+                        ),
+                      ),
+                    ),
+            ),
           ],
         ),
       ),
