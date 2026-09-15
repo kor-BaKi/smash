@@ -4,10 +4,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import com.smash.domain.user.FcmToken;
-import com.smash.domain.user.FcmTokenRepository;
-import com.smash.domain.user.User;
-import com.smash.domain.user.UserRepository;
+import com.smash.domain.user.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +19,7 @@ public class FcmService {
 
     private final FcmTokenRepository fcmTokenRepository;
     private final UserRepository userRepository;
+    private final UserNotificationSettingRepository notificationSettingRepository;
 
     // FCM 토큰 저장/업데이트
     @Transactional
@@ -29,7 +27,13 @@ public class FcmService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-        // 이미 존재하는 토큰이면 업데이트
+        // 알림 설정 기본값 생성 (최초 로그인 시)
+        notificationSettingRepository.findByUser(user).orElseGet(() ->
+                notificationSettingRepository.save(
+                        UserNotificationSetting.builder().user(user).build()
+                )
+        );
+
         fcmTokenRepository.findByToken(token).ifPresentOrElse(
                 fcmToken -> fcmToken.updateToken(token),
                 () -> fcmTokenRepository.save(
@@ -53,7 +57,43 @@ public class FcmService {
         }
     }
 
-    // 전체 유저에게 알림 전송
+    // 투표 알림 - 전체 유저 중 투표 알림 ON인 유저에게만 전송
+    public void sendPollNotification(String title, String body) {
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            notificationSettingRepository.findByUser(user).ifPresent(setting -> {
+                if (setting.isPollNotification()) {
+                    sendToUser(user.getId(), title, body);
+                }
+            });
+        }
+    }
+
+    // 정산 알림 - 특정 유저가 정산 알림 ON이면 전송
+    public void sendSettlementNotification(Long userId, String title, String body) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        notificationSettingRepository.findByUser(user).ifPresent(setting -> {
+            if (setting.isSettlementNotification()) {
+                sendToUser(userId, title, body);
+            }
+        });
+    }
+
+    // 활동 알림 - 특정 유저가 활동 알림 ON이면 전송
+    public void sendActivityNotificationToUser(Long userId, String title, String body) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        notificationSettingRepository.findByUser(user).ifPresent(setting -> {
+            if (setting.isActivityNotification()) {
+                sendToUser(userId, title, body);
+            }
+        });
+    }
+
+    // 전체 유저에게 알림 전송 (설정 무관)
     public void sendToAll(String title, String body) {
         List<FcmToken> tokens = fcmTokenRepository.findAll();
         for (FcmToken fcmToken : tokens) {
@@ -73,7 +113,7 @@ public class FcmService {
                     .build();
 
             String response = FirebaseMessaging.getInstance().send(message);
-            log.info("FCM 전송 성공 : {}", response);
+            log.info("FCM 전송 성공: {}", response);
         } catch (FirebaseMessagingException e) {
             log.error("FCM 전송 실패 - token: {}, error: {}", token, e.getMessage());
         }

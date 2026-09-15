@@ -1,5 +1,6 @@
 package com.smash.api.poll;
 
+import com.smash.api.fcm.FcmService;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.poll.*;
 import com.smash.domain.user.User;
@@ -22,6 +23,7 @@ public class PollService {
     private final PollOptionRepository pollOptionRepository;
     private final PollVoteRepository pollVoteRepository;
     private final UserRepository userRepository;
+    private final FcmService fcmService;
 
     // 투표 생성 (임원)
     @Transactional
@@ -44,6 +46,13 @@ public class PollService {
                     .content(options.get(i))
                     .orderIndex(i)
                     .build());
+        }
+
+        if (request.isSendNotification()) {
+            fcmService.sendPollNotification(
+                    "새 투표가 등록되었습니다!",
+                    request.getTitle()
+            );
         }
 
         return getDetail(userId, poll.getId());

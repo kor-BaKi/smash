@@ -20,6 +20,8 @@ public class PollRequest {
 
     private LocalDateTime closedAt; // null이면 수동 종료
 
+    private boolean sendNotification; // 알림 전송 여부
+
     @NotEmpty(message = "옵션을 최소 2개 이상 입력해주세요.")
     @Size(min = 2, message = "옵션을 최소 2개 이상 입력해주세요.")
     private List<String> options;

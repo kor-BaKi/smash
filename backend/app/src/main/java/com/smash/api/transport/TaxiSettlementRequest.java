@@ -14,4 +14,6 @@ public class TaxiSettlementRequest {
 
     @NotNull(message = "계좌번호를 입력해주세요.")
     private String accountNumber;
+
+    private boolean sendNotification; // 알림 전송 여부
 }

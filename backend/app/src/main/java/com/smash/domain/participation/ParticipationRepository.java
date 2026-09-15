@@ -65,4 +65,6 @@ public interface ParticipationRepository extends JpaRepository<Participation, In
     List<Participation> findByActivityIdInAndUserId(
             @Param("activityIds") List<Long> activityIds,
             @Param("userId") Long userId);
+
+    boolean existsByActivityAndUser(Activity activity, User user);
 }

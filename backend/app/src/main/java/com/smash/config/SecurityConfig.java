@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/activities/*/transport-groups/*/settlement").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/calendar").authenticated()
                         .requestMatchers("/api/v1/fcm/token").authenticated()
+                        .requestMatchers("/api/v1/notification/setting").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,

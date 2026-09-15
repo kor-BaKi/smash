@@ -1,5 +1,6 @@
 package com.smash.api.transport;
 
+import com.smash.api.fcm.FcmService;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.activity.Activity;
 import com.smash.domain.activity.ActivityRepository;
@@ -22,6 +23,7 @@ public class TaxiSettlementService {
     private final TransportMemberRepository transportMemberRepository;
     private final ActivityRepository activityRepository;
     private final UserRepository userRepository;
+    private final FcmService fcmService;
 
 
     // 정산 생성
@@ -85,6 +87,20 @@ public class TaxiSettlementService {
 
         List<TaxiSettlementPayment> payments =
                 paymentRepository.findBySettlement(settlement);
+
+        if (request.isSendNotification()) {
+            for (TransportMember member : members) {
+                if(!member.getUser().getId().equals(payerId)) {
+                    fcmService.sendSettlementNotification(
+                            member.getUser().getId(),
+                            "택시비 정산 요청",
+                            amountPerPerson + "원을" + payer.getName() + "님께 송금해주세요."
+                    );
+                }
+            }
+        }
+
+
         return TaxiSettlementResponse.of(settlement, payments);
     }
 
