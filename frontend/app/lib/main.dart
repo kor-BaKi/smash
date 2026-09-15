@@ -1,6 +1,7 @@
 import 'package:app/features/home/provider/auth_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -24,7 +25,6 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // 백그라운드 메시지 핸들러 등록
   FirebaseMessaging.onBackgroundMessage(
     _firebaseMessagingBackgroundHandler,
   );
@@ -36,9 +36,24 @@ void main() async {
     sound: true,
   );
 
-  // FCM 토큰 출력 (개발용)
-  final token = await FirebaseMessaging.instance.getToken();
-  print('FCM Token: $token');
+  // iOS APNs 토큰 대기 후 FCM 토큰 가져오기
+  try {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // APNS 토큰 대기 (최대 5초)
+      for (int i = 0; i < 10; i++) {
+        final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken != null) {
+          print('APNS Token: $apnsToken');
+          break;
+        }
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+    final token = await FirebaseMessaging.instance.getToken();
+    print('FCM Token: $token');
+  } catch (e) {
+    print('FCM Token 가져오기 실패: $e');
+  }
 
   final container = ProviderContainer();
   await container.read(authProvider.notifier).checkToken();
