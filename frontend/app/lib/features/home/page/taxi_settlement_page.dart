@@ -123,21 +123,37 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('정산 삭제'),
-        content: const Text('정산을 삭제할까요?'),
+        title: const Text(
+          '정산 삭제',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: const Text(
+          '정산을 삭제할까요?',
+          style: TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '삭제',
-              style: TextStyle(color: AppColors.danger),
+              style: TextStyle(
+                color: AppColors.coral,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -198,7 +214,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.scaffoldBg,
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
           title: Text('${widget.groupNumber}호차 택시비 정산'),
           actions: [
@@ -206,14 +222,16 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
               IconButton(
                 icon: const Icon(
                   Icons.delete_outline,
-                  color: AppColors.danger,
+                  color: AppColors.coral,
                 ),
                 onPressed: _deleteSettlement,
               ),
           ],
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.lime),
+              )
             : _settlement == null
             ? _buildCreateView()
             : _buildSettlementView(),
@@ -221,7 +239,6 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
     );
   }
 
-  // 정산 생성 화면
   Widget _buildCreateView() {
     if (!_isCreating) {
       return Center(
@@ -231,7 +248,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
             const Icon(
               Icons.calculate_outlined,
               size: 48,
-              color: AppColors.textTertiary,
+              color: AppColors.darkGray,
             ),
             const SizedBox(height: 16),
             const Text(
@@ -239,35 +256,33 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textTertiary,
+                color: AppColors.gray,
               ),
             ),
             const SizedBox(height: 8),
             const Text(
               '결제자가 정산을 시작할 수 있습니다.',
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.textTertiary,
-              ),
+              style: TextStyle(fontSize: 13, color: AppColors.gray),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => setState(() => _isCreating = true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
+            GestureDetector(
+              onTap: () => setState(() => _isCreating = true),
+              child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
-                  vertical: 12,
+                  vertical: 14,
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                decoration: BoxDecoration(
+                  color: AppColors.lime,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ),
-              child: const Text(
-                '정산 시작',
-                style: TextStyle(fontWeight: FontWeight.w700),
+                child: const Text(
+                  '정산 시작',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF111111),
+                  ),
+                ),
               ),
             ),
           ],
@@ -275,82 +290,42 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
       );
     }
 
-    // 정산 입력 폼
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '총 금액',
-            style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
-          ),
+          _buildLabel('총 금액'),
           const SizedBox(height: 8),
           TextField(
             controller: _amountController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(
+            style: const TextStyle(color: AppColors.white),
+            decoration: const InputDecoration(
               hintText: '예: 32000',
               suffixText: '원',
-              filled: true,
-              fillColor: AppColors.cardBg,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            '은행명',
-            style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
-          ),
+          _buildLabel('은행명'),
           const SizedBox(height: 8),
           TextField(
             controller: _bankController,
-            decoration: InputDecoration(
-              hintText: '예: 카카오뱅크',
-              filled: true,
-              fillColor: AppColors.cardBg,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-            ),
+            style: const TextStyle(color: AppColors.white),
+            decoration: const InputDecoration(hintText: '예: 카카오뱅크'),
           ),
           const SizedBox(height: 16),
-          const Text(
-            '계좌번호',
-            style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
-          ),
+          _buildLabel('계좌번호'),
           const SizedBox(height: 8),
           TextField(
             controller: _accountController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(
+            style: const TextStyle(color: AppColors.white),
+            decoration: const InputDecoration(
               hintText: '예: 3333011234567',
-              filled: true,
-              fillColor: AppColors.cardBg,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
             ),
           ),
-          // const SizedBox(height: 32), 아래에 추가
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           Container(
             decoration: BoxDecoration(
               color: AppColors.card,
@@ -382,15 +357,6 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _createSettlement,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
               child: const Text(
                 '정산 시작',
                 style: TextStyle(fontWeight: FontWeight.w700),
@@ -402,7 +368,6 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
     );
   }
 
-  // 정산 현황 화면
   Widget _buildSettlementView() {
     final payments = _settlement!['payments'] as List;
     final isPayer = _isPayer;
@@ -417,8 +382,8 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.cardBg,
-              borderRadius: BorderRadius.circular(16),
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,7 +393,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                     const Icon(
                       Icons.directions_car,
                       size: 16,
-                      color: AppColors.primary,
+                      color: AppColors.lime,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -436,6 +401,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
+                        color: AppColors.white,
                       ),
                     ),
                   ],
@@ -461,7 +427,6 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
               ],
             ),
           ),
-
           const SizedBox(height: 12),
 
           // 송금 버튼 (동승자만)
@@ -473,12 +438,9 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                 icon: const Icon(Icons.send, size: 16),
                 label: const Text('토스로 바로 송금'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -491,11 +453,11 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                 icon: const Icon(Icons.copy, size: 16),
                 label: const Text('계좌번호 복사'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
+                  foregroundColor: AppColors.lime,
+                  side: const BorderSide(color: AppColors.lime),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -506,7 +468,11 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
           // 납부 현황
           const Text(
             '납부 현황',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: AppColors.white,
+            ),
           ),
           const SizedBox(height: 12),
           ...payments.map((payment) {
@@ -518,20 +484,20 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                 vertical: 14,
               ),
               decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: AppColors.primaryBg,
+                    backgroundColor: AppColors.card2,
                     child: Text(
                       payment['userName'].substring(0, 1),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: AppColors.gray,
                       ),
                     ),
                   ),
@@ -545,6 +511,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
+                            color: AppColors.white,
                           ),
                         ),
                         if (payment['isPaid'] && payment['paidAt'] != null)
@@ -552,17 +519,16 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                             payment['paidAt'],
                             style: const TextStyle(
                               fontSize: 11,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                           ),
                       ],
                     ),
                   ),
-                  // 결제자만 체크 가능
                   if (isPayer)
                     Checkbox(
                       value: payment['isPaid'],
-                      activeColor: AppColors.freeActivity,
+                      activeColor: AppColors.green,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -576,8 +542,8 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                       ),
                       decoration: BoxDecoration(
                         color: payment['isPaid']
-                            ? AppColors.freeActivity.withOpacity(0.1)
-                            : AppColors.neutralBg,
+                            ? AppColors.greenTag
+                            : AppColors.grayTag,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -586,8 +552,8 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: payment['isPaid']
-                              ? AppColors.freeActivity
-                              : AppColors.textTertiary,
+                              ? AppColors.greenTagText
+                              : AppColors.grayTagText,
                         ),
                       ),
                     ),
@@ -599,6 +565,15 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
       ),
     );
   }
+
+  Widget _buildLabel(String text) => Text(
+    text,
+    style: const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      color: AppColors.gray,
+    ),
+  );
 }
 
 class _InfoRow extends StatelessWidget {
@@ -622,10 +597,7 @@ class _InfoRow extends StatelessWidget {
             width: 60,
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textTertiary,
-              ),
+              style: const TextStyle(fontSize: 13, color: AppColors.gray),
             ),
           ),
           Text(
@@ -633,7 +605,7 @@ class _InfoRow extends StatelessWidget {
             style: TextStyle(
               fontSize: highlight ? 16 : 13,
               fontWeight: highlight ? FontWeight.w800 : FontWeight.w600,
-              color: highlight ? AppColors.primary : AppColors.ink,
+              color: highlight ? AppColors.lime : AppColors.white,
             ),
           ),
         ],

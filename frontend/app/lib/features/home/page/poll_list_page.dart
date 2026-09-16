@@ -35,17 +35,16 @@ class _PollListPageState extends ConsumerState<PollListPage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(pollProvider);
-    final authState = ref.watch(authProvider);
-    final isAdmin = authState.user?.isAdmin ?? false;
+    final isAdmin = ref.watch(authProvider).user?.isAdmin ?? false;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('투표'),
         actions: [
           if (isAdmin)
             IconButton(
-              icon: const Icon(Icons.add, color: AppColors.primary),
+              icon: const Icon(Icons.add, color: AppColors.lime),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const PollCreatePage()),
@@ -54,9 +53,9 @@ class _PollListPageState extends ConsumerState<PollListPage>
         ],
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textTertiary,
-          indicatorColor: AppColors.primary,
+          labelColor: AppColors.lime,
+          unselectedLabelColor: AppColors.darkGray,
+          indicatorColor: AppColors.lime,
           labelStyle: const TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 13,
@@ -68,17 +67,17 @@ class _PollListPageState extends ConsumerState<PollListPage>
         ),
       ),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : TabBarView(
               controller: _tabController,
               children: [
-                // 종료된 탭
                 _PollTabView(
                   polls: state.polls.where((p) => p.isExpired).toList(),
                   emptyMessage: '종료된 투표가 없습니다.',
                   isAdmin: isAdmin,
                 ),
-                // 진행 중 탭
                 _PollTabView(
                   polls: state.polls.where((p) => !p.isExpired).toList(),
                   emptyMessage: '진행 중인 투표가 없습니다.',
@@ -107,15 +106,17 @@ class _PollTabView extends ConsumerWidget {
       return Center(
         child: Text(
           emptyMessage,
-          style: const TextStyle(color: AppColors.textTertiary),
+          style: const TextStyle(color: AppColors.gray),
         ),
       );
     }
 
     return RefreshIndicator(
+      color: AppColors.lime,
+      backgroundColor: AppColors.card,
       onRefresh: () => ref.read(pollProvider.notifier).loadPolls(),
       child: ListView.builder(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
         itemCount: polls.length,
         itemBuilder: (context, index) {
           final poll = polls[index];
@@ -129,18 +130,18 @@ class _PollTabView extends ConsumerWidget {
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(20),
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    height: 5,
+                    height: 4,
                     color: poll.isExpired
-                        ? AppColors.textTertiary
-                        : AppColors.amber,
+                        ? AppColors.darkGray
+                        : AppColors.green,
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16),
@@ -155,7 +156,7 @@ class _PollTabView extends ConsumerWidget {
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.ink,
+                                  color: AppColors.white,
                                 ),
                               ),
                             ),
@@ -166,8 +167,8 @@ class _PollTabView extends ConsumerWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: poll.isExpired
-                                    ? AppColors.neutralBg
-                                    : AppColors.amberBg,
+                                    ? AppColors.grayTag
+                                    : AppColors.greenTag,
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
@@ -176,8 +177,8 @@ class _PollTabView extends ConsumerWidget {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                   color: poll.isExpired
-                                      ? AppColors.textTertiary
-                                      : AppColors.amber,
+                                      ? AppColors.grayTagText
+                                      : AppColors.greenTagText,
                                 ),
                               ),
                             ),
@@ -189,7 +190,7 @@ class _PollTabView extends ConsumerWidget {
                             poll.description!,
                             style: const TextStyle(
                               fontSize: 13,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -202,7 +203,7 @@ class _PollTabView extends ConsumerWidget {
                               : poll.createdAt.substring(0, 10),
                           style: const TextStyle(
                             fontSize: 12,
-                            color: AppColors.textTertiary,
+                            color: AppColors.gray,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -213,50 +214,43 @@ class _PollTabView extends ConsumerWidget {
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                               size: 14,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               poll.isAnonymous ? '익명' : '기명',
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textTertiary,
+                                color: AppColors.gray,
                               ),
                             ),
                             const SizedBox(width: 12),
                             const Icon(
                               Icons.people,
                               size: 14,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '${poll.totalVotes}명 참여',
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textTertiary,
+                                color: AppColors.gray,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            const Icon(
-                              Icons.access_time,
-                              size: 14,
-                              color: AppColors.textTertiary,
-                            ),
-                            const SizedBox(width: 4),
                             if (poll.myVotedOptionId != null) ...[
                               const SizedBox(width: 12),
                               const Icon(
                                 Icons.check_circle,
                                 size: 14,
-                                color: AppColors.freeActivity,
+                                color: AppColors.green,
                               ),
                               const SizedBox(width: 4),
                               const Text(
                                 '투표 완료',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.freeActivity,
+                                  color: AppColors.green,
                                 ),
                               ),
                             ],

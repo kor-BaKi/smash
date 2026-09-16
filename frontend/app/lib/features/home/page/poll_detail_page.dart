@@ -28,21 +28,37 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('투표 종료'),
-        content: const Text('투표를 종료할까요?\n종료 후에는 되돌릴 수 없습니다.'),
+        title: const Text(
+          '투표 종료',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: const Text(
+          '투표를 종료할까요?\n종료 후에는 되돌릴 수 없습니다.',
+          style: TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '종료',
-              style: TextStyle(color: AppColors.danger),
+              style: TextStyle(
+                color: AppColors.coral,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -60,7 +76,7 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
     final isAdmin = ref.watch(authProvider).user?.isAdmin ?? false;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('투표'),
         actions: [
@@ -70,7 +86,7 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
               child: const Text(
                 '종료',
                 style: TextStyle(
-                  color: AppColors.danger,
+                  color: AppColors.coral,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -78,7 +94,9 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
         ],
       ),
       body: state.isLoading || poll == null
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -88,9 +106,10 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
                   Text(
                     poll.title,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.white,
+                      letterSpacing: -0.5,
                     ),
                   ),
                   if (poll.description != null) ...[
@@ -99,11 +118,11 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
                       poll.description!,
                       style: const TextStyle(
                         fontSize: 14,
-                        color: AppColors.textTertiary,
+                        color: AppColors.gray,
                       ),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Icon(
@@ -111,14 +130,14 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
                             ? Icons.visibility_off
                             : Icons.visibility,
                         size: 14,
-                        color: AppColors.textTertiary,
+                        color: AppColors.gray,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         poll.isAnonymous ? '익명 투표' : '기명 투표',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: AppColors.textTertiary,
+                          color: AppColors.gray,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -126,7 +145,7 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
                         '총 ${poll.totalVotes}명 참여',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: AppColors.textTertiary,
+                          color: AppColors.gray,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -137,8 +156,8 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
                         ),
                         decoration: BoxDecoration(
                           color: poll.isExpired
-                              ? AppColors.neutralBg
-                              : AppColors.primaryBg,
+                              ? AppColors.grayTag
+                              : AppColors.greenTag,
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
@@ -147,15 +166,15 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: poll.isExpired
-                                ? AppColors.textTertiary
-                                : AppColors.primary,
+                                ? AppColors.grayTagText
+                                : AppColors.greenTagText,
                           ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Divider(color: AppColors.neutralBg),
+                  Container(height: 0.5, color: AppColors.border),
                   const SizedBox(height: 16),
 
                   // 옵션 목록
@@ -169,8 +188,8 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.neutralBg,
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -178,14 +197,14 @@ class _PollDetailPageState extends ConsumerState<PollDetailPage> {
                           Icon(
                             Icons.lock,
                             size: 16,
-                            color: AppColors.textTertiary,
+                            color: AppColors.gray,
                           ),
                           SizedBox(width: 8),
                           Text(
                             '종료된 투표입니다.',
                             style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                           ),
                         ],
@@ -221,10 +240,12 @@ class _OptionTile extends ConsumerWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
-          color: isMyVote ? AppColors.primaryBg : AppColors.cardBg,
+          color: isMyVote
+              ? AppColors.lime.withValues(alpha: 0.15)
+              : AppColors.card,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isMyVote ? AppColors.primary : AppColors.divider,
+            color: isMyVote ? AppColors.lime : AppColors.border,
             width: isMyVote ? 1.5 : 1,
           ),
         ),
@@ -240,8 +261,8 @@ class _OptionTile extends ConsumerWidget {
                     widthFactor: percent,
                     child: Container(
                       color: isMyVote
-                          ? AppColors.primary.withOpacity(0.15)
-                          : AppColors.neutralBg,
+                          ? AppColors.lime.withValues(alpha: 0.15)
+                          : AppColors.card2,
                     ),
                   ),
                 ),
@@ -261,7 +282,7 @@ class _OptionTile extends ConsumerWidget {
                                   child: Icon(
                                     Icons.check_circle,
                                     size: 16,
-                                    color: AppColors.primary,
+                                    color: AppColors.lime,
                                   ),
                                 ),
                               Expanded(
@@ -273,8 +294,8 @@ class _OptionTile extends ConsumerWidget {
                                         ? FontWeight.w700
                                         : FontWeight.w500,
                                     color: isMyVote
-                                        ? AppColors.primaryDeep
-                                        : AppColors.ink,
+                                        ? AppColors.lime
+                                        : AppColors.white,
                                   ),
                                 ),
                               ),
@@ -287,7 +308,7 @@ class _OptionTile extends ConsumerWidget {
                               option.voters.join(', '),
                               style: const TextStyle(
                                 fontSize: 11,
-                                color: AppColors.textTertiary,
+                                color: AppColors.gray,
                               ),
                             ),
                           ],
@@ -305,15 +326,15 @@ class _OptionTile extends ConsumerWidget {
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: isMyVote
-                                  ? AppColors.primary
-                                  : AppColors.textSecondary,
+                                  ? AppColors.lime
+                                  : AppColors.gray,
                             ),
                           ),
                           Text(
                             '${option.voteCount}명',
                             style: const TextStyle(
                               fontSize: 11,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                           ),
                         ],

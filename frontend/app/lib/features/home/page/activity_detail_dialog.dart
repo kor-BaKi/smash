@@ -35,9 +35,9 @@ class _ActivityDetailDialogState
     final detail = state.selectedDetail;
 
     return Dialog(
-      backgroundColor: AppColors.cardBg,
+      backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -46,12 +46,19 @@ class _ActivityDetailDialogState
           child: state.isLoadingDetail
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.lime,
+                    ),
+                  ),
                 )
               : state.errorMessage != null
               ? Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Text(state.errorMessage!),
+                  child: Text(
+                    state.errorMessage!,
+                    style: const TextStyle(color: AppColors.gray),
+                  ),
                 )
               : detail == null
               ? const SizedBox()
@@ -70,6 +77,7 @@ class _DetailBody extends ConsumerWidget {
   final ActivityDetail detail;
   final bool isAdmin;
   final int activityId;
+
   const _DetailBody({
     required this.detail,
     required this.isAdmin,
@@ -99,16 +107,13 @@ class _DetailBody extends ConsumerWidget {
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.w800,
-            color: AppColors.ink,
+            color: AppColors.white,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           detail.groupLabel,
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textTertiary,
-          ),
+          style: const TextStyle(fontSize: 13, color: AppColors.gray),
         ),
         const SizedBox(height: 20),
         Row(
@@ -117,8 +122,8 @@ class _DetailBody extends ConsumerWidget {
               child: _StatBox(
                 count: total,
                 label: '참여',
-                bg: AppColors.primaryBg,
-                fg: AppColors.primary,
+                bg: AppColors.lime.withValues(alpha: 0.15),
+                fg: AppColors.lime,
               ),
             ),
             const SizedBox(width: 10),
@@ -126,8 +131,8 @@ class _DetailBody extends ConsumerWidget {
               child: _StatBox(
                 count: detail.summary.absent,
                 label: '불참',
-                bg: AppColors.neutralBg,
-                fg: AppColors.textTertiary,
+                bg: AppColors.card2,
+                fg: AppColors.gray,
               ),
             ),
           ],
@@ -138,7 +143,7 @@ class _DetailBody extends ConsumerWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.textTertiary,
+            color: AppColors.gray,
           ),
         ),
         const SizedBox(height: 10),
@@ -147,7 +152,7 @@ class _DetailBody extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Text(
               '참여자가 없습니다.',
-              style: TextStyle(color: AppColors.textTertiary),
+              style: TextStyle(color: AppColors.gray),
             ),
           )
         else
@@ -160,11 +165,13 @@ class _DetailBody extends ConsumerWidget {
                           final sorted = [...participants];
                           sorted.sort((a, b) {
                             if (a.travelType == 'ALONE' &&
-                                b.travelType != 'ALONE')
+                                b.travelType != 'ALONE') {
                               return 1;
+                            }
                             if (a.travelType != 'ALONE' &&
-                                b.travelType == 'ALONE')
+                                b.travelType == 'ALONE') {
                               return -1;
+                            }
                             return 0;
                           });
                           return sorted;
@@ -178,11 +185,11 @@ class _DetailBody extends ConsumerWidget {
                               children: [
                                 CircleAvatar(
                                   radius: 15,
-                                  backgroundColor: AppColors.neutralBg,
+                                  backgroundColor: AppColors.card2,
                                   child: Text(
                                     p.name.characters.first,
                                     style: const TextStyle(
-                                      color: AppColors.textTertiary,
+                                      color: AppColors.gray,
                                       fontWeight: FontWeight.w800,
                                       fontSize: 13,
                                     ),
@@ -195,6 +202,7 @@ class _DetailBody extends ConsumerWidget {
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14,
+                                      color: AppColors.white,
                                     ),
                                   ),
                                 ),
@@ -206,8 +214,10 @@ class _DetailBody extends ConsumerWidget {
                                     ),
                                     decoration: BoxDecoration(
                                       color: p.travelType == 'TOGETHER'
-                                          ? AppColors.primaryBg
-                                          : AppColors.neutralBg,
+                                          ? AppColors.lime.withValues(
+                                              alpha: 0.15,
+                                            )
+                                          : AppColors.card2,
                                       borderRadius: BorderRadius.circular(
                                         999,
                                       ),
@@ -220,8 +230,8 @@ class _DetailBody extends ConsumerWidget {
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
                                         color: p.travelType == 'TOGETHER'
-                                            ? AppColors.primary
-                                            : AppColors.textTertiary,
+                                            ? AppColors.lime
+                                            : AppColors.gray,
                                       ),
                                     ),
                                   ),
@@ -255,10 +265,13 @@ class _DetailBody extends ConsumerWidget {
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.lime,
+                foregroundColor: const Color(0xFF111111),
                 minimumSize: const Size.fromHeight(48),
                 elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
@@ -269,9 +282,13 @@ class _DetailBody extends ConsumerWidget {
           child: ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.neutralBg,
-              foregroundColor: AppColors.textSecondary,
+              backgroundColor: AppColors.card2,
+              foregroundColor: AppColors.gray,
               minimumSize: const Size.fromHeight(48),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
             child: const Text('닫기'),
           ),
@@ -300,7 +317,7 @@ class _StatBox extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [

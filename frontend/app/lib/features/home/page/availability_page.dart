@@ -37,10 +37,12 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
     final state = ref.watch(availabilityProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(title: const Text('가능 요일 제출')),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : Column(
               children: [
                 Padding(
@@ -52,14 +54,14 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryBg,
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.lime.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Text(
                       '아직 조가 배정되지 않았어요. 참여 가능한 활동을 모두 선택해 주세요.',
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.primaryDeep,
+                        color: AppColors.lime,
                         height: 1.5,
                       ),
                     ),
@@ -69,15 +71,16 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: ListView.separated(
                       itemCount: state.groups.length,
-                      separatorBuilder: (_, __) => const Divider(
-                        height: 1,
-                        color: AppColors.neutralBg,
+                      separatorBuilder: (_, __) => Container(
+                        height: 0.5,
+                        color: AppColors.border,
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
                       ),
                       itemBuilder: (context, index) {
                         final group = state.groups[index];
@@ -101,12 +104,12 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                                   height: 24,
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? AppColors.primary
+                                        ? AppColors.lime
                                         : Colors.transparent,
                                     border: isSelected
                                         ? null
                                         : Border.all(
-                                            color: AppColors.divider,
+                                            color: AppColors.border,
                                             width: 2,
                                           ),
                                     borderRadius: BorderRadius.circular(7),
@@ -115,7 +118,7 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                                       ? const Icon(
                                           Icons.check,
                                           size: 16,
-                                          color: Colors.white,
+                                          color: Color(0xFF111111),
                                         )
                                       : null,
                                 ),
@@ -126,8 +129,8 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: isSelected
-                                        ? AppColors.ink
-                                        : AppColors.textSecondary,
+                                        ? AppColors.white
+                                        : AppColors.gray,
                                   ),
                                 ),
                               ],
@@ -141,7 +144,7 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-                  color: AppColors.scaffoldBg,
+                  color: AppColors.bg,
                   child: Column(
                     children: [
                       if (state.errorMessage != null)
@@ -150,7 +153,7 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                           child: Text(
                             state.errorMessage!,
                             style: const TextStyle(
-                              color: AppColors.danger,
+                              color: AppColors.coral,
                               fontSize: 13,
                             ),
                           ),
@@ -163,7 +166,7 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: Color(0xFF111111),
                                 ),
                               )
                             : const Text('제출하기'),
