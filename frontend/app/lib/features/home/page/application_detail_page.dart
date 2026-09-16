@@ -49,28 +49,62 @@ class _ApplicationDetailPageState
     }
   }
 
+  Map<String, dynamic> _detailJson(String status) => {
+    'id': _detail!.id,
+    'name': _detail!.name,
+    'studentNo': _detail!.studentNo,
+    'department': _detail!.department,
+    'phone': _detail!.phone,
+    'availabilities': _detail!.availabilities,
+    'status': status,
+    'memo': _detail!.memo,
+    'createdAt': _detail!.createdAt,
+    'answers':
+        _detail!.answers
+            ?.map(
+              (a) => {
+                'questionId': a.questionId,
+                'questionContent': a.questionContent,
+                'answer': a.answer,
+              },
+            )
+            .toList() ??
+        [],
+  };
+
   Future<void> _accept() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('합격 처리'),
+        title: const Text(
+          '합격 처리',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         content: Text(
           '${_detail?.name}님을 합격 처리할까요?\nusers 테이블에 자동으로 등록됩니다.',
+          style: const TextStyle(color: AppColors.gray),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '합격',
               style: TextStyle(
-                color: AppColors.freeActivity,
+                color: AppColors.green,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -83,28 +117,7 @@ class _ApplicationDetailPageState
           .read(applicationProvider.notifier)
           .accept(widget.applicationId);
       setState(
-        () => _detail = ApplicationInfo.fromJson({
-          'id': _detail!.id,
-          'name': _detail!.name,
-          'studentNo': _detail!.studentNo,
-          'department': _detail!.department,
-          'phone': _detail!.phone,
-          'availabilities': _detail!.availabilities,
-          'status': 'ACCEPTED',
-          'memo': _detail!.memo,
-          'createdAt': _detail!.createdAt,
-          'answers':
-              _detail!.answers
-                  ?.map(
-                    (a) => {
-                      'questionId': a.questionId,
-                      'questionContent': a.questionContent,
-                      'answer': a.answer,
-                    },
-                  )
-                  .toList() ??
-              [],
-        }),
+        () => _detail = ApplicationInfo.fromJson(_detailJson('ACCEPTED')),
       );
       if (mounted) {
         ScaffoldMessenger.of(
@@ -118,22 +131,35 @@ class _ApplicationDetailPageState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('불합격 처리'),
-        content: Text('${_detail?.name}님을 불합격 처리할까요?'),
+        title: const Text(
+          '불합격 처리',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Text(
+          '${_detail?.name}님을 불합격 처리할까요?',
+          style: const TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '불합격',
               style: TextStyle(
-                color: AppColors.danger,
+                color: AppColors.coral,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -146,33 +172,67 @@ class _ApplicationDetailPageState
           .read(applicationProvider.notifier)
           .reject(widget.applicationId);
       setState(
-        () => _detail = ApplicationInfo.fromJson({
-          'id': _detail!.id,
-          'name': _detail!.name,
-          'studentNo': _detail!.studentNo,
-          'department': _detail!.department,
-          'phone': _detail!.phone,
-          'availabilities': _detail!.availabilities,
-          'status': 'REJECTED',
-          'memo': _detail!.memo,
-          'createdAt': _detail!.createdAt,
-          'answers':
-              _detail!.answers
-                  ?.map(
-                    (a) => {
-                      'questionId': a.questionId,
-                      'questionContent': a.questionContent,
-                      'answer': a.answer,
-                    },
-                  )
-                  .toList() ??
-              [],
-        }),
+        () => _detail = ApplicationInfo.fromJson(_detailJson('REJECTED')),
       );
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('불합격 처리되었습니다.')));
+      }
+    }
+  }
+
+  Future<void> _cancelReject() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        title: const Text(
+          '불합격 취소',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Text(
+          '${_detail?.name}님의 불합격을 취소하고 미처리로 되돌릴까요?',
+          style: const TextStyle(color: AppColors.gray),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              '확인',
+              style: TextStyle(
+                color: AppColors.lime,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref
+          .read(applicationProvider.notifier)
+          .cancelReject(widget.applicationId);
+      setState(
+        () => _detail = ApplicationInfo.fromJson(_detailJson('PENDING')),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('불합격이 취소되었습니다.')));
       }
     }
   }
@@ -223,11 +283,22 @@ class _ApplicationDetailPageState
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        backgroundColor: AppColors.bg,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.lime),
+        ),
       );
     }
     if (_detail == null) {
-      return const Scaffold(body: Center(child: Text('지원서를 불러오지 못했습니다.')));
+      return const Scaffold(
+        backgroundColor: AppColors.bg,
+        body: Center(
+          child: Text(
+            '지원서를 불러오지 못했습니다.',
+            style: TextStyle(color: AppColors.gray),
+          ),
+        ),
+      );
     }
 
     final d = _detail!;
@@ -235,7 +306,7 @@ class _ApplicationDetailPageState
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.scaffoldBg,
+        backgroundColor: AppColors.bg,
         appBar: AppBar(title: Text('${d.name} 지원서')),
         body: ListView(
           padding: const EdgeInsets.all(16),
@@ -244,10 +315,10 @@ class _ApplicationDetailPageState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _statusColor(d.status).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
+                color: _statusColor(d.status).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: _statusColor(d.status).withOpacity(0.3),
+                  color: _statusColor(d.status).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -271,13 +342,12 @@ class _ApplicationDetailPageState
                     d.createdAt.substring(0, 10),
                     style: const TextStyle(
                       fontSize: 12,
-                      color: AppColors.textTertiary,
+                      color: AppColors.gray,
                     ),
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 12),
 
             // 기본 정보
@@ -294,7 +364,6 @@ class _ApplicationDetailPageState
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
 
             // 답변
@@ -311,15 +380,14 @@ class _ApplicationDetailPageState
                     )
                     .toList(),
               ),
-
             const SizedBox(height: 12),
 
             // 메모
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(14),
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,19 +397,17 @@ class _ApplicationDetailPageState
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textTertiary,
+                      color: AppColors.gray,
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // 메모 목록 (타임라인)
                   if (d.memos != null && d.memos!.isNotEmpty)
                     ...d.memos!.map(
                       (memo) => Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.scaffoldBg,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Column(
@@ -354,7 +420,7 @@ class _ApplicationDetailPageState
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.primary,
+                                    color: AppColors.lime,
                                   ),
                                 ),
                                 const Spacer(),
@@ -362,7 +428,7 @@ class _ApplicationDetailPageState
                                   memo.createdAt,
                                   style: const TextStyle(
                                     fontSize: 11,
-                                    color: AppColors.textTertiary,
+                                    color: AppColors.gray,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -371,7 +437,7 @@ class _ApplicationDetailPageState
                                   child: const Icon(
                                     Icons.close,
                                     size: 14,
-                                    color: AppColors.textTertiary,
+                                    color: AppColors.gray,
                                   ),
                                 ),
                               ],
@@ -382,36 +448,22 @@ class _ApplicationDetailPageState
                               style: const TextStyle(
                                 fontSize: 14,
                                 height: 1.5,
+                                color: AppColors.white,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-
                   const SizedBox(height: 8),
-
-                  // 새 메모 입력
                   Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: _newMemoController,
-                          decoration: InputDecoration(
+                          style: const TextStyle(color: AppColors.white),
+                          decoration: const InputDecoration(
                             hintText: '메모를 입력해주세요',
-                            hintStyle: const TextStyle(
-                              color: AppColors.textTertiary,
-                            ),
-                            filled: true,
-                            fillColor: AppColors.scaffoldBg,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
                           ),
                         ),
                       ),
@@ -421,12 +473,12 @@ class _ApplicationDetailPageState
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: AppColors.lime,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
                             Icons.send,
-                            color: Colors.white,
+                            color: Color(0xFF111111),
                             size: 18,
                           ),
                         ),
@@ -436,17 +488,49 @@ class _ApplicationDetailPageState
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
 
             // 합격/불합격 버튼
-            if (d.status == 'PENDING' || d.status == 'ACCEPTED') ...[
+            if (d.status == 'PENDING') ...[
+              ElevatedButton(
+                onPressed: _accept,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: const Text(
+                  '합격 처리',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: _reject,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.danger,
-                  side: const BorderSide(color: AppColors.danger),
+                  foregroundColor: AppColors.coral,
+                  side: const BorderSide(color: AppColors.coral),
                   minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: const Text(
+                  '불합격 처리',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ] else if (d.status == 'ACCEPTED') ...[
+              OutlinedButton(
+                onPressed: _reject,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.coral,
+                  side: const BorderSide(color: AppColors.coral),
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 child: const Text(
                   '불합격 처리',
@@ -457,9 +541,12 @@ class _ApplicationDetailPageState
               OutlinedButton(
                 onPressed: _cancelReject,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
+                  foregroundColor: AppColors.lime,
+                  side: const BorderSide(color: AppColors.lime),
                   minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 child: const Text(
                   '불합격 취소',
@@ -467,7 +554,6 @@ class _ApplicationDetailPageState
                 ),
               ),
             ],
-
             const SizedBox(height: 40),
           ],
         ),
@@ -478,11 +564,11 @@ class _ApplicationDetailPageState
   Color _statusColor(String status) {
     switch (status) {
       case 'ACCEPTED':
-        return AppColors.freeActivity;
+        return AppColors.green;
       case 'REJECTED':
-        return AppColors.danger;
+        return AppColors.coral;
       default:
-        return AppColors.primary;
+        return AppColors.lime;
     }
   }
 
@@ -494,69 +580,6 @@ class _ApplicationDetailPageState
         return Icons.cancel;
       default:
         return Icons.pending;
-    }
-  }
-
-  Future<void> _cancelReject() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text('불합격 취소'),
-        content: Text('${_detail?.name}님의 불합격을 취소하고 미처리로 되돌릴까요?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              '확인',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await ref
-          .read(applicationProvider.notifier)
-          .cancelReject(widget.applicationId);
-      setState(
-        () => _detail = ApplicationInfo.fromJson({
-          'id': _detail!.id,
-          'name': _detail!.name,
-          'studentNo': _detail!.studentNo,
-          'department': _detail!.department,
-          'phone': _detail!.phone,
-          'availabilities': _detail!.availabilities,
-          'status': 'PENDING',
-          'memo': _detail!.memo,
-          'createdAt': _detail!.createdAt,
-          'answers':
-              _detail!.answers
-                  ?.map(
-                    (a) => {
-                      'questionId': a.questionId,
-                      'questionContent': a.questionContent,
-                      'answer': a.answer,
-                    },
-                  )
-                  .toList() ??
-              [],
-        }),
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('불합격이 취소되었습니다.')));
-      }
     }
   }
 }
@@ -572,8 +595,8 @@ class _InfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -583,7 +606,7 @@ class _InfoCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.textTertiary,
+              color: AppColors.gray,
             ),
           ),
           const SizedBox(height: 12),
@@ -617,7 +640,7 @@ class _InfoRow extends StatelessWidget {
                   label,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.textTertiary,
+                    color: AppColors.gray,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -626,6 +649,7 @@ class _InfoRow extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
+                    color: AppColors.white,
                   ),
                 ),
               ],
@@ -639,7 +663,7 @@ class _InfoRow extends StatelessWidget {
                     label,
                     style: const TextStyle(
                       fontSize: 13,
-                      color: AppColors.textTertiary,
+                      color: AppColors.gray,
                     ),
                   ),
                 ),
@@ -649,6 +673,7 @@ class _InfoRow extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
+                      color: AppColors.white,
                     ),
                   ),
                 ),

@@ -47,7 +47,7 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
     final state = ref.watch(scheduleProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('정규활동 일정'),
         actions: [
@@ -59,13 +59,13 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primary,
+                      color: AppColors.lime,
                     ),
                   )
                 : const Text(
                     '저장',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: AppColors.lime,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -73,18 +73,20 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
         ],
       ),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
+                    child: const Text(
                       '활성화된 요일에만 매일 자동으로 활동이 생성됩니다.',
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.textTertiary,
+                        color: AppColors.gray,
                       ),
                     ),
                   ),
@@ -93,16 +95,14 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: ListView.separated(
                       itemCount: state.schedules.length,
-                      separatorBuilder: (_, __) => const Divider(
-                        height: 1,
-                        color: AppColors.neutralBg,
-                      ),
+                      separatorBuilder: (_, __) =>
+                          Container(height: 0.5, color: AppColors.border),
                       itemBuilder: (context, index) {
                         final item = state.schedules[index];
                         final label =
@@ -115,13 +115,17 @@ class _SchedulePageState extends ConsumerState<SchedulePage> {
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                               color: item.isActive
-                                  ? AppColors.ink
-                                  : AppColors.textTertiary,
+                                  ? AppColors.white
+                                  : AppColors.darkGray,
                             ),
                           ),
                           value: item.isActive,
-                          activeThumbColor: Colors.white,
-                          activeTrackColor: AppColors.primary,
+                          activeColor: AppColors.lime,
+                          activeTrackColor: AppColors.lime.withValues(
+                            alpha: 0.3,
+                          ),
+                          inactiveThumbColor: AppColors.darkGray,
+                          inactiveTrackColor: AppColors.card2,
                           onChanged: (_) => ref
                               .read(scheduleProvider.notifier)
                               .toggle(item.id),

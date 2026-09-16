@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../model/carryover_candidate_model.dart';
 import '../provider/activity_provider.dart';
 
@@ -33,18 +34,33 @@ class _CarryoverDialogState extends ConsumerState<CarryoverDialog> {
     final state = ref.watch(activityProvider);
 
     return AlertDialog(
-      title: const Text('이월할 날짜 선택'),
+      backgroundColor: AppColors.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      title: const Text(
+        '이월할 날짜 선택',
+        style: TextStyle(
+          color: AppColors.white,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
       content: SizedBox(
         width: double.maxFinite,
         child: state.isLoadingCandidates
             ? const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.lime),
+                ),
               )
             : state.carryoverCandidates.isEmpty
             ? const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
-                child: Text('이월 가능한 날짜가 없습니다.'),
+                child: Text(
+                  '이월 가능한 날짜가 없습니다.',
+                  style: TextStyle(color: AppColors.gray),
+                ),
               )
             : ListView.builder(
                 shrinkWrap: true,
@@ -73,7 +89,7 @@ class _CarryoverDialogState extends ConsumerState<CarryoverDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('취소'),
+          child: const Text('취소', style: TextStyle(color: AppColors.gray)),
         ),
       ],
     );
@@ -91,10 +107,19 @@ class _CandidateTile extends StatelessWidget {
     return ListTile(
       leading: Icon(
         candidate.isFuture ? Icons.event : Icons.history,
-        color: candidate.isFuture ? Colors.blue : Colors.grey,
+        color: candidate.isFuture ? AppColors.lime : AppColors.darkGray,
       ),
-      title: Text(candidate.date),
-      subtitle: Text(candidate.isFuture ? '다가오는 활동일' : '지난 미참여일'),
+      title: Text(
+        candidate.date,
+        style: const TextStyle(
+          color: AppColors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: Text(
+        candidate.isFuture ? '다가오는 활동일' : '지난 미참여일',
+        style: const TextStyle(color: AppColors.gray, fontSize: 12),
+      ),
       onTap: onTap,
     );
   }

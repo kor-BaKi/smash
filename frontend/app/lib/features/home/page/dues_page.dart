@@ -21,7 +21,7 @@ class _DuesPageState extends ConsumerState<DuesPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 1, vsync: this); // 초기값
+    _tabController = TabController(length: 1, vsync: this);
     Future.microtask(() {
       ref.read(duesProvider.notifier).load();
       ref.read(groupManagementProvider.notifier).loadAll();
@@ -38,21 +38,37 @@ class _DuesPageState extends ConsumerState<DuesPage>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('전체 초기화'),
-        content: const Text('모든 납부 기록을 초기화할까요?'),
+        title: const Text(
+          '전체 초기화',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: const Text(
+          '모든 납부 기록을 초기화할까요?',
+          style: TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '초기화',
-              style: TextStyle(color: AppColors.danger),
+              style: TextStyle(
+                color: AppColors.coral,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -69,7 +85,6 @@ class _DuesPageState extends ConsumerState<DuesPage>
     final groupState = ref.watch(groupManagementProvider);
     final groups = groupState.groups;
 
-    // TabController를 groups 개수 기준으로 초기화
     if (_tabController.length != groups.length + 1) {
       _tabController.dispose();
       _tabController = TabController(
@@ -78,17 +93,14 @@ class _DuesPageState extends ConsumerState<DuesPage>
       );
     }
 
-    // 미배정 부원
     final unassigned = duesState.members
         .where((m) => m.groupId == null)
         .toList();
-
-    // 납부 완료 수
     final paidCount = duesState.members.where((m) => m.isPaid).length;
     final totalCount = duesState.members.length;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('회비 관리'),
         actions: [
@@ -97,7 +109,7 @@ class _DuesPageState extends ConsumerState<DuesPage>
             child: const Text(
               '초기화',
               style: TextStyle(
-                color: AppColors.danger,
+                color: AppColors.coral,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -108,9 +120,9 @@ class _DuesPageState extends ConsumerState<DuesPage>
             : TabBar(
                 controller: _tabController,
                 isScrollable: true,
-                labelColor: AppColors.primary,
-                unselectedLabelColor: AppColors.textTertiary,
-                indicatorColor: AppColors.primary,
+                labelColor: AppColors.lime,
+                unselectedLabelColor: AppColors.darkGray,
+                indicatorColor: AppColors.lime,
                 labelStyle: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
@@ -122,24 +134,25 @@ class _DuesPageState extends ConsumerState<DuesPage>
               ),
       ),
       body: duesState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : Column(
               children: [
-                // 납부 현황 요약
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 12,
                   ),
-                  color: AppColors.cardBg,
+                  color: AppColors.card,
                   child: Row(
                     children: [
-                      Text(
+                      const Text(
                         '납부 완료',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.textTertiary,
+                          color: AppColors.gray,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -148,7 +161,7 @@ class _DuesPageState extends ConsumerState<DuesPage>
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.lime,
                         ),
                       ),
                       const Spacer(),
@@ -156,7 +169,7 @@ class _DuesPageState extends ConsumerState<DuesPage>
                         height: 6,
                         width: 120,
                         decoration: BoxDecoration(
-                          color: AppColors.neutralBg,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: FractionallySizedBox(
@@ -166,7 +179,7 @@ class _DuesPageState extends ConsumerState<DuesPage>
                               : paidCount / totalCount,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: AppColors.freeActivity,
+                              color: AppColors.green,
                               borderRadius: BorderRadius.circular(999),
                             ),
                           ),
@@ -175,7 +188,7 @@ class _DuesPageState extends ConsumerState<DuesPage>
                     ],
                   ),
                 ),
-                const Divider(height: 1, color: AppColors.neutralBg),
+                Container(height: 0.5, color: AppColors.border),
                 Expanded(
                   child: groups.isEmpty
                       ? _DuesTabView(
@@ -223,10 +236,7 @@ class _DuesTabViewState extends ConsumerState<_DuesTabView> {
   Widget build(BuildContext context) {
     if (widget.members.isEmpty) {
       return const Center(
-        child: Text(
-          '부원이 없습니다.',
-          style: TextStyle(color: AppColors.textTertiary),
-        ),
+        child: Text('부원이 없습니다.', style: TextStyle(color: AppColors.gray)),
       );
     }
 
@@ -234,11 +244,11 @@ class _DuesTabViewState extends ConsumerState<_DuesTabView> {
       padding: const EdgeInsets.all(20),
       itemCount: widget.members.length,
       separatorBuilder: (_, __) =>
-          const Divider(height: 1, color: AppColors.neutralBg),
+          Container(height: 0.5, color: AppColors.border),
       itemBuilder: (context, index) {
         final member = widget.members[index];
         return Container(
-          color: AppColors.cardBg,
+          color: AppColors.bg,
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
@@ -255,8 +265,8 @@ class _DuesTabViewState extends ConsumerState<_DuesTabView> {
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: member.isPaid
-                            ? AppColors.textTertiary
-                            : AppColors.ink,
+                            ? AppColors.darkGray
+                            : AppColors.white,
                         decoration: member.isPaid
                             ? TextDecoration.lineThrough
                             : null,
@@ -267,7 +277,7 @@ class _DuesTabViewState extends ConsumerState<_DuesTabView> {
                       member.studentNo,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: AppColors.textTertiary,
+                        color: AppColors.gray,
                       ),
                     ),
                   ],
@@ -275,7 +285,7 @@ class _DuesTabViewState extends ConsumerState<_DuesTabView> {
               ),
               Checkbox(
                 value: member.isPaid,
-                activeColor: AppColors.primary,
+                activeColor: AppColors.green,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -291,8 +301,9 @@ class _DuesTabViewState extends ConsumerState<_DuesTabView> {
                         .read(duesProvider.notifier)
                         .pay(member.userId);
                   }
-                  if (mounted)
+                  if (mounted) {
                     setState(() => _processingIds.remove(member.userId));
+                  }
                 },
               ),
             ],

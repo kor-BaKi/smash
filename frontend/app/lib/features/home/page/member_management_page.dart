@@ -54,14 +54,14 @@ class _MemberManagementPageState
         .toList();
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('부원 관리'),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textTertiary,
-          indicatorColor: AppColors.primary,
+          labelColor: AppColors.lime,
+          unselectedLabelColor: AppColors.darkGray,
+          indicatorColor: AppColors.lime,
           labelStyle: const TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 13,
@@ -82,12 +82,10 @@ class _MemberManagementPageState
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                 child: TextField(
+                  style: const TextStyle(color: AppColors.white),
                   decoration: const InputDecoration(
                     hintText: '이름 또는 학번 검색',
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: AppColors.textTertiary,
-                    ),
+                    prefixIcon: Icon(Icons.search, color: AppColors.gray),
                   ),
                   onChanged: (value) =>
                       setState(() => _searchQuery = value),
@@ -101,14 +99,19 @@ class _MemberManagementPageState
                     '총 ${filtered.length}명',
                     style: const TextStyle(
                       fontSize: 13,
-                      color: AppColors.textTertiary,
+                      color: AppColors.gray,
                     ),
                   ),
                 ),
               ),
               Expanded(
                 child: filtered.isEmpty
-                    ? const Center(child: Text('검색 결과가 없습니다.'))
+                    ? const Center(
+                        child: Text(
+                          '검색 결과가 없습니다.',
+                          style: TextStyle(color: AppColors.gray),
+                        ),
+                      )
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
@@ -135,7 +138,7 @@ class _MemberManagementPageState
                                 vertical: 14,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.cardBg,
+                                color: AppColors.card,
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Row(
@@ -150,6 +153,7 @@ class _MemberManagementPageState
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                             fontSize: 15,
+                                            color: AppColors.white,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
@@ -157,7 +161,7 @@ class _MemberManagementPageState
                                           member.studentNo,
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: AppColors.textTertiary,
+                                            color: AppColors.gray,
                                           ),
                                         ),
                                       ],
@@ -176,8 +180,10 @@ class _MemberManagementPageState
                                       ),
                                       decoration: BoxDecoration(
                                         color: member.groupId == null
-                                            ? AppColors.amberBg
-                                            : AppColors.primaryBg,
+                                            ? AppColors.amberTag
+                                            : AppColors.lime.withValues(
+                                                alpha: 0.15,
+                                              ),
                                         borderRadius:
                                             BorderRadius.circular(8),
                                       ),
@@ -190,8 +196,8 @@ class _MemberManagementPageState
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
                                               color: member.groupId == null
-                                                  ? AppColors.amber
-                                                  : AppColors.primary,
+                                                  ? AppColors.amberTagText
+                                                  : AppColors.lime,
                                             ),
                                           ),
                                           const SizedBox(width: 4),
@@ -199,8 +205,8 @@ class _MemberManagementPageState
                                             Icons.edit,
                                             size: 12,
                                             color: member.groupId == null
-                                                ? AppColors.amber
-                                                : AppColors.primary,
+                                                ? AppColors.amberTagText
+                                                : AppColors.lime,
                                           ),
                                         ],
                                       ),
@@ -232,10 +238,17 @@ class _MemberManagementPageState
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: Text('${member.name} 조 변경'),
+        title: Text(
+          '${member.name} 조 변경',
+          style: const TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         children: [
           ...groups.map(
             (group) => SimpleDialogOption(
@@ -272,8 +285,8 @@ class _MemberManagementPageState
                         ? FontWeight.w800
                         : FontWeight.w400,
                     color: member.groupId == group.id
-                        ? AppColors.primary
-                        : AppColors.ink,
+                        ? AppColors.lime
+                        : AppColors.white,
                   ),
                 ),
               ),
@@ -294,10 +307,11 @@ class _GroupOverviewTab extends ConsumerWidget {
     final memberState = ref.watch(memberRegisterProvider);
 
     if (groupState.isLoading || memberState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.lime),
+      );
     }
 
-    // groupId로 멤버 그룹핑
     final Map<int, List<RegisteredMember>> membersByGroup = {};
     final List<RegisteredMember> unassigned = [];
 
@@ -309,12 +323,10 @@ class _GroupOverviewTab extends ConsumerWidget {
       }
     }
 
-    // 이름순 정렬
     for (final list in membersByGroup.values) {
       list.sort((a, b) => a.name.compareTo(b.name));
     }
 
-    // 각 조에서 최대 멤버 수
     final maxMembers = membersByGroup.values.isEmpty
         ? 0
         : membersByGroup.values
@@ -322,6 +334,8 @@ class _GroupOverviewTab extends ConsumerWidget {
               .reduce((a, b) => a > b ? a : b);
 
     return RefreshIndicator(
+      color: AppColors.lime,
+      backgroundColor: AppColors.card,
       onRefresh: () async {
         await ref.read(groupManagementProvider.notifier).loadAll();
         await ref.read(memberRegisterProvider.notifier).loadAllMembers();
@@ -373,17 +387,17 @@ class _GroupTable extends ConsumerWidget {
     final headerStyle = const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w700,
-      color: AppColors.primary,
+      color: AppColors.lime,
     );
     final labelStyle = const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w700,
-      color: AppColors.textTertiary,
+      color: AppColors.gray,
     );
     final cellStyle = const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      color: AppColors.ink,
+      color: AppColors.white,
     );
 
     return Table(
@@ -394,14 +408,15 @@ class _GroupTable extends ConsumerWidget {
           i: const FixedColumnWidth(cellWidth),
       },
       border: TableBorder.all(
-        color: AppColors.neutralBg,
+        color: AppColors.border,
         width: 1,
         borderRadius: BorderRadius.circular(12),
       ),
       children: [
-        // 헤더 행
         TableRow(
-          decoration: const BoxDecoration(color: AppColors.primaryBg),
+          decoration: BoxDecoration(
+            color: AppColors.lime.withValues(alpha: 0.1),
+          ),
           children: [
             _TableCell(child: const SizedBox(), height: rowHeight),
             ...groups.map(
@@ -416,8 +431,6 @@ class _GroupTable extends ConsumerWidget {
             ),
           ],
         ),
-
-        // 조장 행
         TableRow(
           children: [
             _TableCell(
@@ -436,8 +449,6 @@ class _GroupTable extends ConsumerWidget {
             ),
           ],
         ),
-
-        // 부조장 행
         TableRow(
           children: [
             _TableCell(
@@ -456,8 +467,6 @@ class _GroupTable extends ConsumerWidget {
             ),
           ],
         ),
-
-        // 부원 행
         for (int i = 0; i < maxMembers; i++)
           TableRow(
             children: [

@@ -42,6 +42,20 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
     super.dispose();
   }
 
+  Future<void> _loadDetail() async {
+    try {
+      final data = await MemberRegisterApi.getMember(widget.userId);
+      setState(() {
+        _detail = data;
+        _isLoading = false;
+        _departmentController.text = data['department'] ?? '';
+        _phoneController.text = data['phone'] ?? '';
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _saveInfo() async {
     try {
       await MemberRegisterApi.updateMemberInfo(
@@ -69,21 +83,37 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('부원 탈퇴'),
-        content: Text('${_detail!['name']}님을 탈퇴 처리할까요?\n모든 데이터가 삭제됩니다.'),
+        title: const Text(
+          '부원 탈퇴',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Text(
+          '${_detail!['name']}님을 탈퇴 처리할까요?\n모든 데이터가 삭제됩니다.',
+          style: const TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '탈퇴',
-              style: TextStyle(color: AppColors.danger),
+              style: TextStyle(
+                color: AppColors.coral,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -109,36 +139,33 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
     }
   }
 
-  Future<void> _loadDetail() async {
-    try {
-      final data = await MemberRegisterApi.getMember(widget.userId);
-      setState(() {
-        _detail = data;
-        _isLoading = false;
-        _departmentController.text = data['department'] ?? '';
-        _phoneController.text = data['phone'] ?? '';
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-    }
-  }
-
   Future<void> _changeRole(String currentRole) async {
     final newRole = currentRole == 'ADMIN' ? 'MEMBER' : 'ADMIN';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('권한 변경'),
+        title: const Text(
+          '권한 변경',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         content: Text(
           '${_detail!['name']}님을 ${newRole == 'ADMIN' ? '임원' : '부원'}으로 변경할까요?',
+          style: const TextStyle(color: AppColors.gray),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -146,8 +173,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
               '변경',
               style: TextStyle(
                 color: newRole == 'ADMIN'
-                    ? AppColors.primary
-                    : AppColors.danger,
+                    ? AppColors.lime
+                    : AppColors.coral,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -178,10 +205,17 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
     await showDialog(
       context: context,
       builder: (context) => SimpleDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: Text('${_detail!['name']} 조 변경'),
+        title: Text(
+          '${_detail!['name']} 조 변경',
+          style: const TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         children: groups
             .map(
               (group) => SimpleDialogOption(
@@ -213,7 +247,10 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                     }
                   }
                 },
-                child: Text(group.label),
+                child: Text(
+                  group.label,
+                  style: const TextStyle(color: AppColors.white),
+                ),
               ),
             )
             .toList(),
@@ -260,9 +297,9 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Dialog(
-        backgroundColor: AppColors.cardBg,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
         insetPadding: const EdgeInsets.symmetric(
           horizontal: 20,
@@ -271,12 +308,19 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
         child: _isLoading
             ? const SizedBox(
                 height: 200,
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.lime),
+                ),
               )
             : _detail == null
             ? const SizedBox(
                 height: 200,
-                child: Center(child: Text('정보를 불러오지 못했습니다.')),
+                child: Center(
+                  child: Text(
+                    '정보를 불러오지 못했습니다.',
+                    style: TextStyle(color: AppColors.gray),
+                  ),
+                ),
               )
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -289,13 +333,15 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                       children: [
                         CircleAvatar(
                           radius: 24,
-                          backgroundColor: AppColors.primaryBg,
+                          backgroundColor: AppColors.lime.withValues(
+                            alpha: 0.15,
+                          ),
                           child: Text(
                             _detail!['name'].substring(0, 1),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
+                              color: AppColors.lime,
                             ),
                           ),
                         ),
@@ -309,6 +355,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
+                                  color: AppColors.white,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -316,7 +363,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                 _detail!['studentNo'] ?? '-',
                                 style: const TextStyle(
                                   fontSize: 13,
-                                  color: AppColors.textTertiary,
+                                  color: AppColors.gray,
                                 ),
                               ),
                             ],
@@ -325,7 +372,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                         IconButton(
                           icon: Icon(
                             _isEditing ? Icons.check : Icons.edit_outlined,
-                            color: AppColors.primary,
+                            color: AppColors.lime,
                           ),
                           onPressed: _isEditing
                               ? _saveInfo
@@ -334,19 +381,22 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                         IconButton(
                           icon: const Icon(
                             Icons.person_remove_outlined,
-                            color: AppColors.danger,
+                            color: AppColors.coral,
                           ),
                           onPressed: _deleteMember,
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close),
+                          icon: const Icon(
+                            Icons.close,
+                            color: AppColors.gray,
+                          ),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
                     ),
 
                     const SizedBox(height: 20),
-                    const Divider(height: 1),
+                    Container(height: 0.5, color: AppColors.border),
                     const SizedBox(height: 16),
 
                     // 기본 정보
@@ -386,14 +436,16 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                     // 조 변경
                     Row(
                       children: [
-                        const Text(
-                          '조',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textTertiary,
+                        const SizedBox(
+                          width: 60,
+                          child: Text(
+                            '조',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.gray,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () => _changeGroup(groupState.groups),
                           child: Container(
@@ -403,8 +455,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                             ),
                             decoration: BoxDecoration(
                               color: _detail!['groupId'] == null
-                                  ? AppColors.amberBg
-                                  : AppColors.primaryBg,
+                                  ? AppColors.amberTag
+                                  : AppColors.lime.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -416,8 +468,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: _detail!['groupId'] == null
-                                        ? AppColors.amber
-                                        : AppColors.primary,
+                                        ? AppColors.amberTagText
+                                        : AppColors.lime,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
@@ -425,8 +477,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                   Icons.edit,
                                   size: 12,
                                   color: _detail!['groupId'] == null
-                                      ? AppColors.amber
-                                      : AppColors.primary,
+                                      ? AppColors.amberTagText
+                                      : AppColors.lime,
                                 ),
                               ],
                             ),
@@ -440,14 +492,16 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                     // 권한 변경
                     Row(
                       children: [
-                        const Text(
-                          '권한',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textTertiary,
+                        const SizedBox(
+                          width: 60,
+                          child: Text(
+                            '권한',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.gray,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () => _changeRole(_detail!['role']),
                           child: Container(
@@ -457,8 +511,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                             ),
                             decoration: BoxDecoration(
                               color: _detail!['role'] == 'ADMIN'
-                                  ? AppColors.primaryBg
-                                  : AppColors.neutralBg,
+                                  ? AppColors.lime.withValues(alpha: 0.15)
+                                  : AppColors.card2,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -472,8 +526,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: _detail!['role'] == 'ADMIN'
-                                        ? AppColors.primary
-                                        : AppColors.textSecondary,
+                                        ? AppColors.lime
+                                        : AppColors.gray,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
@@ -481,8 +535,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                   Icons.edit,
                                   size: 12,
                                   color: _detail!['role'] == 'ADMIN'
-                                      ? AppColors.primary
-                                      : AppColors.textSecondary,
+                                      ? AppColors.lime
+                                      : AppColors.gray,
                                 ),
                               ],
                             ),
@@ -492,7 +546,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                     ),
 
                     const SizedBox(height: 20),
-                    const Divider(height: 1),
+                    Container(height: 0.5, color: AppColors.border),
                     const SizedBox(height: 16),
 
                     // 개인 메모
@@ -501,12 +555,11 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textTertiary,
+                        color: AppColors.gray,
                       ),
                     ),
                     const SizedBox(height: 10),
 
-                    // 메모 목록
                     if (_detail!['notes'] != null &&
                         (_detail!['notes'] as List).isNotEmpty)
                       ...(_detail!['notes'] as List).map(
@@ -514,7 +567,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: AppColors.scaffoldBg,
+                            color: AppColors.card2,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
@@ -529,7 +582,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                       note['createdAt'],
                                       style: const TextStyle(
                                         fontSize: 11,
-                                        color: AppColors.textTertiary,
+                                        color: AppColors.gray,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
@@ -538,6 +591,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                       style: const TextStyle(
                                         fontSize: 13,
                                         height: 1.5,
+                                        color: AppColors.white,
                                       ),
                                     ),
                                   ],
@@ -548,7 +602,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                                 child: const Icon(
                                   Icons.close,
                                   size: 14,
-                                  color: AppColors.textTertiary,
+                                  color: AppColors.gray,
                                 ),
                               ),
                             ],
@@ -558,27 +612,14 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
 
                     const SizedBox(height: 8),
 
-                    // 메모 입력
                     Row(
                       children: [
                         Expanded(
                           child: TextField(
                             controller: _noteController,
-                            decoration: InputDecoration(
+                            style: const TextStyle(color: AppColors.white),
+                            decoration: const InputDecoration(
                               hintText: '메모를 입력해주세요',
-                              hintStyle: const TextStyle(
-                                color: AppColors.textTertiary,
-                              ),
-                              filled: true,
-                              fillColor: AppColors.scaffoldBg,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
                             ),
                           ),
                         ),
@@ -588,12 +629,12 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppColors.primary,
+                              color: AppColors.lime,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(
                               Icons.send,
-                              color: Colors.white,
+                              color: Color(0xFF111111),
                               size: 18,
                             ),
                           ),
@@ -603,43 +644,6 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                   ],
                 ),
               ),
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _InfoRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 60,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textTertiary,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -661,10 +665,7 @@ class _CopyableInfoRow extends StatelessWidget {
             width: 60,
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textTertiary,
-              ),
+              style: const TextStyle(fontSize: 13, color: AppColors.gray),
             ),
           ),
           Expanded(
@@ -680,6 +681,7 @@ class _CopyableInfoRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.white,
                 ),
               ),
             ),
@@ -709,19 +711,21 @@ class _EditableInfoRow extends StatelessWidget {
           width: 60,
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textTertiary,
-            ),
+            style: const TextStyle(fontSize: 13, color: AppColors.gray),
           ),
         ),
         Expanded(
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.white,
+            ),
             decoration: InputDecoration(
               filled: true,
-              fillColor: AppColors.scaffoldBg,
+              fillColor: AppColors.card2,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -730,10 +734,6 @@ class _EditableInfoRow extends StatelessWidget {
                 horizontal: 12,
                 vertical: 8,
               ),
-            ),
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
             ),
           ),
         ),

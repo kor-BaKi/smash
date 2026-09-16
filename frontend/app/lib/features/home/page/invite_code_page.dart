@@ -25,10 +25,12 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
     final code = state.code;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(title: const Text('가입코드 관리')),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -37,8 +39,8 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
                       children: [
@@ -47,7 +49,7 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textTertiary,
+                            color: AppColors.gray,
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -76,7 +78,7 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                                   fontSize: 34,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 4,
-                                  color: AppColors.primary,
+                                  color: AppColors.lime,
                                 ),
                               ),
                               if (code != null) ...[
@@ -84,7 +86,7 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                                 const Icon(
                                   Icons.copy,
                                   size: 20,
-                                  color: AppColors.primary,
+                                  color: AppColors.lime,
                                 ),
                               ],
                             ],
@@ -99,8 +101,8 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                             ),
                             decoration: BoxDecoration(
                               color: code.isActive
-                                  ? AppColors.freeActivityBg
-                                  : AppColors.neutralBg,
+                                  ? AppColors.greenTag
+                                  : AppColors.grayTag,
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Row(
@@ -111,8 +113,8 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                                   height: 8,
                                   decoration: BoxDecoration(
                                     color: code.isActive
-                                        ? AppColors.freeActivity
-                                        : AppColors.textTertiary,
+                                        ? AppColors.green
+                                        : AppColors.darkGray,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -123,8 +125,8 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: code.isActive
-                                        ? AppColors.freeActivityText
-                                        : AppColors.textTertiary,
+                                        ? AppColors.greenTagText
+                                        : AppColors.grayTagText,
                                   ),
                                 ),
                               ],
@@ -141,8 +143,8 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.cardBg,
-                        borderRadius: BorderRadius.circular(16),
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: SwitchListTile(
                         contentPadding: EdgeInsets.zero,
@@ -151,18 +153,23 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
+                            color: AppColors.white,
                           ),
                         ),
                         subtitle: const Text(
                           '끄면 신규 가입이 막혀요',
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.textTertiary,
+                            color: AppColors.gray,
                           ),
                         ),
                         value: code.isActive,
-                        activeThumbColor: Colors.white,
-                        activeTrackColor: AppColors.primary,
+                        activeColor: AppColors.lime,
+                        activeTrackColor: AppColors.lime.withValues(
+                          alpha: 0.3,
+                        ),
+                        inactiveThumbColor: AppColors.darkGray,
+                        inactiveTrackColor: AppColors.card2,
                         onChanged: (_) =>
                             ref.read(inviteCodeProvider.notifier).toggle(),
                       ),
@@ -174,7 +181,7 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         state.errorMessage!,
-                        style: const TextStyle(color: AppColors.danger),
+                        style: const TextStyle(color: AppColors.coral),
                       ),
                     ),
                   OutlinedButton(
@@ -186,12 +193,12 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(54),
                       side: const BorderSide(
-                        color: AppColors.primary,
+                        color: AppColors.lime,
                         width: 1.5,
                       ),
-                      foregroundColor: AppColors.primary,
+                      foregroundColor: AppColors.lime,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                     child: state.isCreating
@@ -200,6 +207,7 @@ class _InviteCodePageState extends ConsumerState<InviteCodePage> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
+                              color: AppColors.lime,
                             ),
                           )
                         : Text(code == null ? '가입코드 발급' : '코드 재발급'),

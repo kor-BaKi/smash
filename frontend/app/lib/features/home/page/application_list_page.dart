@@ -42,7 +42,6 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
     final state = ref.watch(applicationProvider);
     final form = state.form;
 
-    // 탭별 필터
     final pending = state.applications
         .where(
           (a) =>
@@ -69,20 +68,21 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
         .toList();
 
     return Scaffold(
-      // Scaffold에 floatingActionButton 추가
+      backgroundColor: AppColors.bg,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.lime,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const ApplicantPage()),
         ).then((_) => ref.read(applicationProvider.notifier).load()),
-        child: const Icon(Icons.person_add_outlined, color: Colors.white),
+        child: const Icon(
+          Icons.person_add_outlined,
+          color: Color(0xFF111111),
+        ),
       ),
-      backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
         title: const Text('지원서 관리'),
         actions: [
-          // 폼 활성/비활성 토글
           if (form != null)
             Row(
               children: [
@@ -92,13 +92,16 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: form.isActive
-                        ? AppColors.freeActivity
-                        : AppColors.textTertiary,
+                        ? AppColors.green
+                        : AppColors.gray,
                   ),
                 ),
                 Switch(
                   value: form.isActive,
-                  activeColor: AppColors.freeActivity,
+                  activeColor: AppColors.lime,
+                  activeTrackColor: AppColors.lime.withValues(alpha: 0.3),
+                  inactiveThumbColor: AppColors.darkGray,
+                  inactiveTrackColor: AppColors.card2,
                   onChanged: (val) => ref
                       .read(applicationProvider.notifier)
                       .toggleForm(val),
@@ -106,16 +109,16 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
               ],
             ),
           IconButton(
-            icon: const Icon(Icons.download),
+            icon: const Icon(Icons.download, color: AppColors.lime),
             tooltip: '엑셀 내보내기',
             onPressed: _downloadExcel,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textTertiary,
-          indicatorColor: AppColors.primary,
+          labelColor: AppColors.lime,
+          unselectedLabelColor: AppColors.darkGray,
+          indicatorColor: AppColors.lime,
           labelStyle: const TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 13,
@@ -128,32 +131,21 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
         ),
       ),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : Column(
               children: [
-                // 검색
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: TextField(
+                    style: const TextStyle(color: AppColors.white),
                     onChanged: (v) => setState(() => _searchQuery = v),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: '이름 또는 학번 검색',
-                      hintStyle: const TextStyle(
-                        color: AppColors.textTertiary,
-                      ),
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.search,
-                        color: AppColors.textTertiary,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.cardBg,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                        color: AppColors.gray,
                       ),
                     ),
                   ),
@@ -201,7 +193,6 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
   }
 }
 
-// _ApplicationTabView 위젯에서 미처리 탭일 때만 버튼 표시
 class _ApplicationTabView extends ConsumerWidget {
   final List<ApplicationInfo> applications;
   final bool showAcceptAll;
@@ -215,10 +206,7 @@ class _ApplicationTabView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (applications.isEmpty) {
       return const Center(
-        child: Text(
-          '지원서가 없습니다.',
-          style: TextStyle(color: AppColors.textTertiary),
-        ),
+        child: Text('지원서가 없습니다.', style: TextStyle(color: AppColors.gray)),
       );
     }
 
@@ -232,12 +220,12 @@ class _ApplicationTabView extends ConsumerWidget {
               child: ElevatedButton(
                 onPressed: () => _confirmAcceptAll(context, ref),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.freeActivity,
+                  backgroundColor: AppColors.green,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 child: Text(
@@ -265,8 +253,8 @@ class _ApplicationTabView extends ConsumerWidget {
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.cardBg,
-                    borderRadius: BorderRadius.circular(14),
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
@@ -274,7 +262,7 @@ class _ApplicationTabView extends ConsumerWidget {
                         radius: 20,
                         backgroundColor: _statusColor(
                           app.status,
-                        ).withOpacity(0.15),
+                        ).withValues(alpha: 0.15),
                         child: Text(
                           app.name.characters.first,
                           style: TextStyle(
@@ -295,6 +283,7 @@ class _ApplicationTabView extends ConsumerWidget {
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 15,
+                                    color: AppColors.white,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -306,7 +295,7 @@ class _ApplicationTabView extends ConsumerWidget {
                                   decoration: BoxDecoration(
                                     color: _statusColor(
                                       app.status,
-                                    ).withOpacity(0.12),
+                                    ).withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(
                                       999,
                                     ),
@@ -327,7 +316,7 @@ class _ApplicationTabView extends ConsumerWidget {
                               '${app.studentNo} · ${app.department}',
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textTertiary,
+                                color: AppColors.gray,
                               ),
                             ),
                             if (app.memo != null &&
@@ -337,7 +326,7 @@ class _ApplicationTabView extends ConsumerWidget {
                                 '📝 ${app.memo}',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.textTertiary,
+                                  color: AppColors.gray,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -349,7 +338,7 @@ class _ApplicationTabView extends ConsumerWidget {
                       const Icon(
                         Icons.arrow_forward_ios,
                         size: 14,
-                        color: AppColors.textTertiary,
+                        color: AppColors.darkGray,
                       ),
                     ],
                   ),
@@ -369,22 +358,35 @@ class _ApplicationTabView extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('전체 합격 처리'),
-        content: Text('미처리 ${applications.length}명을 모두 합격 처리할까요?'),
+        title: const Text(
+          '전체 합격 처리',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Text(
+          '미처리 ${applications.length}명을 모두 합격 처리할까요?',
+          style: const TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '전체 합격',
               style: TextStyle(
-                color: AppColors.freeActivity,
+                color: AppColors.green,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -416,11 +418,11 @@ class _ApplicationTabView extends ConsumerWidget {
   Color _statusColor(String status) {
     switch (status) {
       case 'ACCEPTED':
-        return AppColors.freeActivity;
+        return AppColors.green;
       case 'REJECTED':
-        return AppColors.danger;
+        return AppColors.coral;
       default:
-        return AppColors.primary;
+        return AppColors.lime;
     }
   }
 }

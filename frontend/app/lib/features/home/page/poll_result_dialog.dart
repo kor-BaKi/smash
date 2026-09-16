@@ -6,16 +6,16 @@ import '../provider/auth_provider.dart';
 import '../provider/poll_provider.dart';
 
 Color pollOptionColor(String content, int index) {
-  if (content.contains('불')) return AppColors.danger;
-  if (content.contains('참')) return AppColors.freeActivity;
+  if (content.contains('불')) return AppColors.coral;
+  if (content.contains('참')) return AppColors.green;
 
   const palette = [
-    AppColors.primary,
-    AppColors.amber,
+    AppColors.lime,
+    AppColors.coral,
+    AppColors.green,
     Color(0xFF7C3AED),
     Color(0xFF0891B2),
     Color(0xFFDB2777),
-    Color(0xFF65A30D),
   ];
   return palette[index % palette.length];
 }
@@ -45,9 +45,9 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
     final isAdmin = ref.watch(authProvider).user?.isAdmin ?? false;
 
     return Dialog(
-      backgroundColor: AppColors.cardBg,
+      backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -56,7 +56,11 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
           child: state.isLoading || poll == null
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.lime,
+                    ),
+                  ),
                 )
               : Column(
                   mainAxisSize: MainAxisSize.min,
@@ -70,7 +74,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.ink,
+                              color: AppColors.white,
                             ),
                           ),
                         ),
@@ -80,20 +84,35 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                               final confirmed = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
+                                  backgroundColor: AppColors.card,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
-                                      20,
+                                      24,
                                     ),
                                   ),
-                                  title: const Text('투표 종료'),
+                                  title: const Text(
+                                    '투표 종료',
+                                    style: TextStyle(
+                                      color: AppColors.white,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
                                   content: const Text(
                                     '투표를 종료할까요?\n종료 후에는 되돌릴 수 없습니다.',
+                                    style: TextStyle(
+                                      color: AppColors.gray,
+                                    ),
                                   ),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.of(context).pop(false),
-                                      child: const Text('취소'),
+                                      child: const Text(
+                                        '취소',
+                                        style: TextStyle(
+                                          color: AppColors.gray,
+                                        ),
+                                      ),
                                     ),
                                     TextButton(
                                       onPressed: () =>
@@ -101,7 +120,8 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                       child: const Text(
                                         '종료',
                                         style: TextStyle(
-                                          color: AppColors.danger,
+                                          color: AppColors.coral,
+                                          fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                     ),
@@ -118,7 +138,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                             child: const Text(
                               '종료',
                               style: TextStyle(
-                                color: AppColors.danger,
+                                color: AppColors.coral,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -131,7 +151,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                         poll.description!,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: AppColors.textTertiary,
+                          color: AppColors.gray,
                         ),
                       ),
                     ],
@@ -142,7 +162,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                           '총 ${poll.totalVotes}명 참여',
                           style: const TextStyle(
                             fontSize: 12,
-                            color: AppColors.textTertiary,
+                            color: AppColors.gray,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -153,8 +173,8 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                           ),
                           decoration: BoxDecoration(
                             color: poll.isExpired
-                                ? AppColors.neutralBg
-                                : AppColors.amberBg,
+                                ? AppColors.grayTag
+                                : AppColors.greenTag,
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
@@ -163,15 +183,15 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: poll.isExpired
-                                  ? AppColors.textTertiary
-                                  : AppColors.amber,
+                                  ? AppColors.grayTagText
+                                  : AppColors.greenTagText,
                             ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Divider(color: AppColors.neutralBg),
+                    Container(height: 0.5, color: AppColors.border),
                     const SizedBox(height: 12),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxHeight: 300),
@@ -179,7 +199,6 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 옵션별 결과
                             ...poll.options.asMap().entries.map((entry) {
                               final index = entry.key;
                               final option = entry.value;
@@ -198,8 +217,8 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isMyVote
-                                      ? color.withOpacity(0.12)
-                                      : AppColors.neutralBg,
+                                      ? color.withValues(alpha: 0.12)
+                                      : AppColors.card2,
                                   borderRadius: BorderRadius.circular(12),
                                   border: isMyVote
                                       ? Border.all(
@@ -231,7 +250,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                               : FontWeight.w500,
                                           color: isMyVote
                                               ? color
-                                              : AppColors.ink,
+                                              : AppColors.white,
                                         ),
                                       ),
                                     ),
@@ -242,7 +261,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                         fontWeight: FontWeight.w700,
                                         color: isMyVote
                                             ? color
-                                            : AppColors.textSecondary,
+                                            : AppColors.gray,
                                       ),
                                     ),
                                   ],
@@ -250,7 +269,6 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                               );
                             }),
 
-                            // 기명 투표 참여자 목록
                             if (!poll.isAnonymous &&
                                 poll.options.any(
                                   (o) => o.voters.isNotEmpty,
@@ -261,7 +279,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textTertiary,
+                                  color: AppColors.gray,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -291,8 +309,8 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                                   vertical: 3,
                                                 ),
                                             decoration: BoxDecoration(
-                                              color: color.withOpacity(
-                                                0.12,
+                                              color: color.withValues(
+                                                alpha: 0.12,
                                               ),
                                               borderRadius:
                                                   BorderRadius.circular(6),
@@ -313,8 +331,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                               option.voters.join(', '),
                                               style: const TextStyle(
                                                 fontSize: 13,
-                                                color: AppColors
-                                                    .textSecondary,
+                                                color: AppColors.gray,
                                               ),
                                             ),
                                           ),
@@ -333,10 +350,13 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.neutralBg,
-                          foregroundColor: AppColors.textSecondary,
+                          backgroundColor: AppColors.card2,
+                          foregroundColor: AppColors.gray,
                           minimumSize: const Size.fromHeight(48),
                           elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                         child: const Text('닫기'),
                       ),
