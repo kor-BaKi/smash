@@ -11,14 +11,16 @@ class TaxiSettlementApi {
     int groupId,
     int totalAmount,
     String accountBank,
-    String accountNumber,
-  ) async {
+    String accountNumber, {
+    bool sendNotification = true,
+  }) async {
     final response = await _dio.post(
       '/activities/$activityId/transport-groups/$groupId/settlement',
       data: {
         'totalAmount': totalAmount,
         'accountBank': accountBank,
         'accountNumber': accountNumber,
+        'sendNotification': sendNotification,
       },
     );
     return response.data['data'];

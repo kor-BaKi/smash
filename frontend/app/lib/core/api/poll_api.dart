@@ -36,6 +36,7 @@ class PollApi {
     required bool isAnonymous,
     String? closedAt,
     required List<String> options,
+    bool sendNotification = false,
   }) async {
     final response = await _dio.post(
       '/admin/polls',
@@ -45,6 +46,7 @@ class PollApi {
         'isAnonymous': isAnonymous,
         if (closedAt != null) 'closedAt': closedAt,
         'options': options,
+        'sendNotification': sendNotification,
       },
     );
     return response.data['data'];

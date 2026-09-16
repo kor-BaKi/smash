@@ -102,6 +102,7 @@ class PollNotifier extends StateNotifier<PollState> {
     required bool isAnonymous,
     String? closedAt,
     required List<String> options,
+    bool sendNotification = false,
   }) async {
     state = state.copyWith(isSubmitting: true, errorMessage: null);
     try {
@@ -111,6 +112,7 @@ class PollNotifier extends StateNotifier<PollState> {
         isAnonymous: isAnonymous,
         closedAt: closedAt,
         options: options,
+        sendNotification: sendNotification,
       );
       await loadPolls();
       state = state.copyWith(isSubmitting: false);

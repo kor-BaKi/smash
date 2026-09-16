@@ -29,6 +29,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
   Map<String, dynamic>? _settlement;
   bool _isLoading = true;
   bool _isCreating = false;
+  bool _sendNotification = true;
 
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _bankController = TextEditingController();
@@ -90,6 +91,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
         amount,
         _bankController.text.trim(),
         _accountController.text.trim(),
+        sendNotification: _sendNotification,
       );
       setState(() {
         _settlement = data;
@@ -347,7 +349,35 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
               ),
             ),
           ),
+          // const SizedBox(height: 32), 아래에 추가
           const SizedBox(height: 32),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: SwitchListTile(
+              title: const Text(
+                '알림 보내기',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: AppColors.white,
+                ),
+              ),
+              subtitle: const Text(
+                '동승자에게 정산 요청 알림을 전송합니다.',
+                style: TextStyle(fontSize: 12, color: AppColors.gray),
+              ),
+              value: _sendNotification,
+              activeColor: AppColors.lime,
+              activeTrackColor: AppColors.lime.withValues(alpha: 0.3),
+              inactiveThumbColor: AppColors.darkGray,
+              inactiveTrackColor: AppColors.card2,
+              onChanged: (v) => setState(() => _sendNotification = v),
+            ),
+          ),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

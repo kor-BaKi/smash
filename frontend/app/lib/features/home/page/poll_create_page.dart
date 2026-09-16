@@ -21,6 +21,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
 
   bool _isAnonymous = false;
   bool _hasDeadline = false;
+  bool _sendNotification = true;
   DateTime? _closedAt;
 
   @override
@@ -108,6 +109,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
               ? _closedAt!.toIso8601String()
               : null,
           options: options,
+          sendNotification: _sendNotification,
         );
 
     if (success && mounted) {
@@ -120,7 +122,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
     final state = ref.watch(pollProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('투표 만들기'),
         actions: [
@@ -132,13 +134,13 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primary,
+                      color: AppColors.lime,
                     ),
                   )
                 : const Text(
                     '등록',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: AppColors.lime,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -155,6 +157,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
             const SizedBox(height: 8),
             TextField(
               controller: _titleController,
+              style: const TextStyle(color: AppColors.white),
               decoration: const InputDecoration(
                 hintText: '투표 제목을 입력해주세요.',
               ),
@@ -167,6 +170,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
             TextField(
               controller: _descController,
               maxLines: 3,
+              style: const TextStyle(color: AppColors.white),
               decoration: const InputDecoration(
                 hintText: '투표에 대한 설명을 입력해주세요.',
               ),
@@ -184,6 +188,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
                     Expanded(
                       child: TextField(
                         controller: _optionControllers[index],
+                        style: const TextStyle(color: AppColors.white),
                         decoration: InputDecoration(
                           hintText: '선택지 ${index + 1}',
                         ),
@@ -194,7 +199,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
                       IconButton(
                         icon: const Icon(
                           Icons.close,
-                          color: AppColors.danger,
+                          color: AppColors.coral,
                           size: 20,
                         ),
                         onPressed: () => _removeOption(index),
@@ -209,7 +214,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
               icon: const Icon(Icons.add, size: 18),
               label: const Text('선택지 추가'),
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
+                foregroundColor: AppColors.lime,
                 alignment: Alignment.centerLeft,
               ),
             ),
@@ -218,8 +223,8 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
             // 설정
             Container(
               decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Column(
                 children: [
@@ -229,47 +234,66 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
+                        color: AppColors.white,
                       ),
                     ),
                     subtitle: const Text(
                       '누가 뭘 선택했는지 숨겨집니다.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textTertiary,
+                        color: AppColors.gray,
                       ),
                     ),
                     value: _isAnonymous,
-                    activeTrackColor: AppColors.primary,
-                    activeThumbColor: Colors.white,
+                    activeColor: AppColors.lime,
+                    activeTrackColor: AppColors.lime.withValues(
+                      alpha: 0.3,
+                    ),
+                    inactiveThumbColor: AppColors.darkGray,
+                    inactiveTrackColor: AppColors.card2,
                     onChanged: (v) => setState(() => _isAnonymous = v),
                   ),
-                  const Divider(height: 1, color: AppColors.neutralBg),
+                  Container(
+                    height: 0.5,
+                    color: AppColors.border,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
                   SwitchListTile(
                     title: const Text(
                       '마감 시간 설정',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
+                        color: AppColors.white,
                       ),
                     ),
                     subtitle: const Text(
                       '끄면 임원이 수동으로 종료합니다.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textTertiary,
+                        color: AppColors.gray,
                       ),
                     ),
                     value: _hasDeadline,
-                    activeTrackColor: AppColors.primary,
-                    activeThumbColor: Colors.white,
+                    activeColor: AppColors.lime,
+                    activeTrackColor: AppColors.lime.withValues(
+                      alpha: 0.3,
+                    ),
+                    inactiveThumbColor: AppColors.darkGray,
+                    inactiveTrackColor: AppColors.card2,
                     onChanged: (v) => setState(() => _hasDeadline = v),
                   ),
-                  if (_hasDeadline)
+                  if (_hasDeadline) ...[
+                    Container(
+                      height: 0.5,
+                      color: AppColors.border,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
                     ListTile(
                       leading: const Icon(
                         Icons.calendar_today,
                         size: 18,
-                        color: AppColors.primary,
+                        color: AppColors.lime,
                       ),
                       title: Text(
                         _closedAt == null
@@ -279,12 +303,44 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: _closedAt == null
-                              ? AppColors.textTertiary
-                              : AppColors.ink,
+                              ? AppColors.gray
+                              : AppColors.white,
                         ),
                       ),
                       onTap: _pickDeadline,
                     ),
+                  ],
+                  Container(
+                    height: 0.5,
+                    color: AppColors.border,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  SwitchListTile(
+                    title: const Text(
+                      '알림 보내기',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: AppColors.white,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      '전체 부원에게 새 투표 알림을 전송합니다.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.gray,
+                      ),
+                    ),
+                    value: _sendNotification,
+                    activeColor: AppColors.lime,
+                    activeTrackColor: AppColors.lime.withValues(
+                      alpha: 0.3,
+                    ),
+                    inactiveThumbColor: AppColors.darkGray,
+                    inactiveTrackColor: AppColors.card2,
+                    onChanged: (v) =>
+                        setState(() => _sendNotification = v),
+                  ),
                 ],
               ),
             ),
@@ -295,7 +351,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
                   state.errorMessage!,
-                  style: const TextStyle(color: AppColors.danger),
+                  style: const TextStyle(color: AppColors.coral),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -310,7 +366,7 @@ class _PollCreatePageState extends ConsumerState<PollCreatePage> {
     style: const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w700,
-      color: AppColors.textTertiary,
+      color: AppColors.gray,
     ),
   );
 }
