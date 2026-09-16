@@ -13,7 +13,7 @@ class AssignmentPage extends ConsumerWidget {
     final state = ref.watch(assignmentProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(title: const Text('자동 배정')),
       body: state.confirmed
           ? const _ConfirmedView()
@@ -32,7 +32,7 @@ class _StartView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: isLoading
-          ? const CircularProgressIndicator()
+          ? const CircularProgressIndicator(color: AppColors.lime)
           : ElevatedButton.icon(
               onPressed: () =>
                   ref.read(assignmentProvider.notifier).loadPreview(),
@@ -55,15 +55,15 @@ class _ConfirmedView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.check_circle,
-            color: AppColors.freeActivity,
-            size: 48,
-          ),
+          Icon(Icons.check_circle, color: AppColors.green, size: 48),
           SizedBox(height: 12),
           Text(
             '배정이 확정되었습니다.',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+              color: AppColors.white,
+            ),
           ),
         ],
       ),
@@ -149,7 +149,7 @@ class _PreviewView extends ConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
                     state.errorMessage!,
-                    style: const TextStyle(color: AppColors.danger),
+                    style: const TextStyle(color: AppColors.coral),
                   ),
                 ),
               ElevatedButton(
@@ -159,23 +159,42 @@ class _PreviewView extends ConsumerWidget {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
+                            backgroundColor: AppColors.card,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(24),
                             ),
-                            title: const Text('배정 확정'),
+                            title: const Text(
+                              '배정 확정',
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                             content: Text(
                               '${preview.assignments.length}명의 배정을 확정할까요?\n확정 후에는 되돌릴 수 없습니다.',
+                              style: const TextStyle(
+                                color: AppColors.gray,
+                              ),
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(false),
-                                child: const Text('취소'),
+                                child: const Text(
+                                  '취소',
+                                  style: TextStyle(color: AppColors.gray),
+                                ),
                               ),
                               TextButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(true),
-                                child: const Text('확정'),
+                                child: const Text(
+                                  '확정',
+                                  style: TextStyle(
+                                    color: AppColors.lime,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -192,7 +211,7 @@ class _PreviewView extends ConsumerWidget {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: Color(0xFF111111),
                         ),
                       )
                     : const Text('배정 확정하기'),
@@ -209,6 +228,7 @@ class _StatCard extends StatelessWidget {
   final int count;
   final String label;
   final bool accent;
+
   const _StatCard({
     required this.count,
     required this.label,
@@ -220,7 +240,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
-        color: accent ? AppColors.amberBg : AppColors.cardBg,
+        color: accent
+            ? AppColors.coral.withValues(alpha: 0.15)
+            : AppColors.card,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -230,7 +252,7 @@ class _StatCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: accent ? AppColors.amber : AppColors.ink,
+              color: accent ? AppColors.coral : AppColors.white,
             ),
           ),
           const SizedBox(height: 2),
@@ -239,7 +261,7 @@ class _StatCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: accent ? AppColors.amber : AppColors.textTertiary,
+              color: accent ? AppColors.coral : AppColors.gray,
             ),
           ),
         ],
@@ -251,6 +273,7 @@ class _StatCard extends StatelessWidget {
 class _AssignmentTile extends ConsumerWidget {
   final AssignmentItem item;
   final Map<int, String> groupLabels;
+
   const _AssignmentTile({required this.item, required this.groupLabels});
 
   @override
@@ -259,7 +282,7 @@ class _AssignmentTile extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -270,6 +293,7 @@ class _AssignmentTile extends ConsumerWidget {
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 14,
+              color: AppColors.white,
             ),
           ),
           Container(
@@ -278,17 +302,18 @@ class _AssignmentTile extends ConsumerWidget {
               vertical: 6,
             ),
             decoration: BoxDecoration(
-              color: AppColors.neutralBg,
+              color: AppColors.card2,
               borderRadius: BorderRadius.circular(8),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
                 value: item.assignedGroupId,
                 isDense: true,
+                dropdownColor: AppColors.card,
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: AppColors.lime,
                 ),
                 items: item.availableGroupIds.map((groupId) {
                   return DropdownMenuItem(
@@ -314,6 +339,7 @@ class _AssignmentTile extends ConsumerWidget {
 class _UnassignedTile extends ConsumerWidget {
   final UnassignedItem item;
   final Map<int, String> groupLabels;
+
   const _UnassignedTile({required this.item, required this.groupLabels});
 
   @override
@@ -322,9 +348,9 @@ class _UnassignedTile extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.amberBg.withOpacity(0.5),
+        color: AppColors.coral.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.amberBg),
+        border: Border.all(color: AppColors.coral.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -335,15 +361,15 @@ class _UnassignedTile extends ConsumerWidget {
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: AppColors.amber,
+                color: AppColors.coral,
               ),
             ),
           ),
           TextButton(
             onPressed: () => _showGroupPicker(context, ref),
             style: TextButton.styleFrom(
-              backgroundColor: AppColors.amberBg,
-              foregroundColor: AppColors.amber,
+              backgroundColor: AppColors.coral.withValues(alpha: 0.15),
+              foregroundColor: AppColors.coral,
               padding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 6,
@@ -363,10 +389,17 @@ class _UnassignedTile extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: Text('${item.name} 조 배정'),
+        title: Text(
+          '${item.name} 조 배정',
+          style: const TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         children: groupLabels.entries.map((entry) {
           return SimpleDialogOption(
             onPressed: () {
@@ -375,7 +408,10 @@ class _UnassignedTile extends ConsumerWidget {
                   .read(assignmentProvider.notifier)
                   .assignUnassignedMember(item.userId, entry.key);
             },
-            child: Text(entry.value),
+            child: Text(
+              entry.value,
+              style: const TextStyle(color: AppColors.white),
+            ),
           );
         }).toList(),
       ),

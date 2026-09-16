@@ -73,21 +73,37 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('사진 삭제'),
-        content: const Text('이 사진을 삭제할까요?'),
+        title: const Text(
+          '사진 삭제',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: const Text(
+          '이 사진을 삭제할까요?',
+          style: TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '삭제',
-              style: TextStyle(color: AppColors.danger),
+              style: TextStyle(
+                color: AppColors.coral,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -122,15 +138,17 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(title: Text(widget.activityLabel)),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : _photos.isEmpty
           ? const Center(
               child: Text(
                 '등록된 사진이 없습니다.',
-                style: TextStyle(color: AppColors.textTertiary),
+                style: TextStyle(color: AppColors.gray),
               ),
             )
           : GridView.builder(
@@ -156,10 +174,10 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
                           photo.url,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.neutralBg,
+                            color: AppColors.card2,
                             child: const Icon(
                               Icons.broken_image,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                           ),
                         ),
@@ -191,9 +209,12 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.lime,
         onPressed: _uploadPhotos,
-        child: const Icon(Icons.add_photo_alternate, color: Colors.white),
+        child: const Icon(
+          Icons.add_photo_alternate,
+          color: Color(0xFF111111),
+        ),
       ),
     );
   }

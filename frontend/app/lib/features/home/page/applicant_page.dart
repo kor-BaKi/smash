@@ -27,21 +27,37 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('불합격 처리'),
-        content: Text('${member.name}(${member.studentNo})님을 불합격 처리할까요?'),
+        title: const Text(
+          '불합격 처리',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Text(
+          '${member.name}(${member.studentNo})님을 불합격 처리할까요?',
+          style: const TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
               '불합격',
-              style: TextStyle(color: AppColors.danger),
+              style: TextStyle(
+                color: AppColors.coral,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -56,25 +72,91 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Text('불합격 취소'),
-        content: Text('${member.name}(${member.studentNo})님의 불합격을 취소할까요?'),
+        title: const Text(
+          '불합격 취소',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Text(
+          '${member.name}(${member.studentNo})님의 불합격을 취소할까요?',
+          style: const TextStyle(color: AppColors.gray),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('되돌리기'),
+            child: const Text(
+              '되돌리기',
+              style: TextStyle(
+                color: AppColors.lime,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
     );
     if (confirmed == true) {
       await ref.read(memberRegisterProvider.notifier).restore(member.id);
+    }
+  }
+
+  Future<void> _confirmDelete(RegisteredMember member) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        title: const Text(
+          '지원자 삭제',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Text(
+          '${member.name}(${member.studentNo})님을 삭제할까요?\n복구할 수 없습니다.',
+          style: const TextStyle(color: AppColors.gray),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              '삭제',
+              style: TextStyle(
+                color: AppColors.coral,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref
+          .read(memberRegisterProvider.notifier)
+          .deleteMember(member.id);
     }
   }
 
@@ -92,23 +174,23 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
     final pendingCount = sorted.where((m) => m.status == 'PENDING').length;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('지원자 관리'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: AppColors.primary),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => const _RegisterTextDialog(),
-              );
-            },
+            icon: const Icon(Icons.add, color: AppColors.lime),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => const _RegisterTextDialog(),
+            ),
           ),
         ],
       ),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : Column(
               children: [
                 Padding(
@@ -119,7 +201,7 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                       text: TextSpan(
                         style: const TextStyle(
                           fontSize: 13,
-                          color: AppColors.textTertiary,
+                          color: AppColors.gray,
                           fontFamily: 'BMJUA',
                         ),
                         children: [
@@ -127,7 +209,7 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                           TextSpan(
                             text: '$pendingCount',
                             style: const TextStyle(
-                              color: AppColors.ink,
+                              color: AppColors.white,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -139,8 +221,15 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                 ),
                 Expanded(
                   child: sorted.isEmpty
-                      ? const Center(child: Text('등록된 지원자가 없습니다.'))
+                      ? const Center(
+                          child: Text(
+                            '등록된 지원자가 없습니다.',
+                            style: TextStyle(color: AppColors.gray),
+                          ),
+                        )
                       : RefreshIndicator(
+                          color: AppColors.lime,
+                          backgroundColor: AppColors.card,
                           onRefresh: () => ref
                               .read(memberRegisterProvider.notifier)
                               .loadPendingApplicants(),
@@ -161,7 +250,7 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                                   vertical: 14,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.cardBg,
+                                  color: AppColors.card,
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: Row(
@@ -173,9 +262,12 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                                         children: [
                                           Text(
                                             member.name,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontWeight: FontWeight.w700,
                                               fontSize: 15,
+                                              color: isRejected
+                                                  ? AppColors.darkGray
+                                                  : AppColors.white,
                                             ),
                                           ),
                                           const SizedBox(height: 2),
@@ -183,8 +275,7 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                                             member.studentNo,
                                             style: const TextStyle(
                                               fontSize: 12,
-                                              color:
-                                                  AppColors.textTertiary,
+                                              color: AppColors.gray,
                                             ),
                                           ),
                                         ],
@@ -197,7 +288,7 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                                         child: const Text(
                                           '불합격 취소',
                                           style: TextStyle(
-                                            color: AppColors.textTertiary,
+                                            color: AppColors.gray,
                                           ),
                                         ),
                                       )
@@ -207,16 +298,18 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
                                         children: [
                                           _CircleActionButton(
                                             icon: Icons.close,
-                                            bg: AppColors.dangerBg,
-                                            fg: AppColors.danger,
+                                            bg: AppColors.coral.withValues(
+                                              alpha: 0.15,
+                                            ),
+                                            fg: AppColors.coral,
                                             onTap: () =>
                                                 _confirmReject(member),
                                           ),
                                           const SizedBox(width: 8),
                                           _CircleActionButton(
                                             icon: Icons.delete_outline,
-                                            bg: AppColors.neutralBg,
-                                            fg: AppColors.textTertiary,
+                                            bg: AppColors.card2,
+                                            fg: AppColors.gray,
                                             onTap: () =>
                                                 _confirmDelete(member),
                                           ),
@@ -232,39 +325,6 @@ class _ApplicantPageState extends ConsumerState<ApplicantPage> {
               ],
             ),
     );
-  }
-
-  Future<void> _confirmDelete(member) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text('지원자 삭제'),
-        content: Text(
-          '${member.name}(${member.studentNo})님을 삭제할까요?\n복구할 수 없습니다.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              '삭제',
-              style: TextStyle(color: AppColors.danger),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await ref
-          .read(memberRegisterProvider.notifier)
-          .deleteMember(member.id);
-    }
   }
 }
 
@@ -351,9 +411,9 @@ class _RegisterTextDialogState extends ConsumerState<_RegisterTextDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.cardBg,
+      backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
       ),
       insetPadding: const EdgeInsets.symmetric(
         horizontal: 24,
@@ -371,6 +431,7 @@ class _RegisterTextDialogState extends ConsumerState<_RegisterTextDialog> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 20),
@@ -406,6 +467,13 @@ class _RegisterTextDialogState extends ConsumerState<_RegisterTextDialog> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.gray,
+                        side: const BorderSide(color: AppColors.border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
                       child: const Text('취소'),
                     ),
                   ),
@@ -413,11 +481,6 @@ class _RegisterTextDialogState extends ConsumerState<_RegisterTextDialog> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                      ),
                       child: const Text(
                         '등록',
                         style: TextStyle(fontWeight: FontWeight.w700),
@@ -461,12 +524,13 @@ class _Field extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
+                color: AppColors.gray,
               ),
             ),
             if (required)
               const Text(
                 ' *',
-                style: TextStyle(color: AppColors.danger, fontSize: 13),
+                style: TextStyle(color: AppColors.coral, fontSize: 13),
               ),
           ],
         ),
@@ -474,20 +538,8 @@ class _Field extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.textTertiary),
-            filled: true,
-            fillColor: AppColors.scaffoldBg,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 12,
-            ),
-          ),
+          style: const TextStyle(color: AppColors.white),
+          decoration: InputDecoration(hintText: hint),
         ),
       ],
     );

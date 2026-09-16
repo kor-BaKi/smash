@@ -38,12 +38,12 @@ class _GroupManagementPageState
     final state = ref.watch(groupManagementProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('조 편성 관리'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: AppColors.primary),
+            icon: const Icon(Icons.add, color: AppColors.lime),
             onPressed: () => showDialog(
               context: context,
               builder: (context) => const _CreateGroupDialog(),
@@ -52,10 +52,19 @@ class _GroupManagementPageState
         ],
       ),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.lime),
+            )
           : state.groups.isEmpty
-          ? const Center(child: Text('생성된 조가 없습니다.'))
+          ? const Center(
+              child: Text(
+                '생성된 조가 없습니다.',
+                style: TextStyle(color: AppColors.gray),
+              ),
+            )
           : RefreshIndicator(
+              color: AppColors.lime,
+              backgroundColor: AppColors.card,
               onRefresh: () =>
                   ref.read(groupManagementProvider.notifier).loadAll(),
               child: ListView.builder(
@@ -87,7 +96,7 @@ class _GroupTile extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
@@ -110,13 +119,15 @@ class _GroupTile extends ConsumerWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
+                      color: AppColors.white,
                     ),
                   ),
                   PopupMenuButton<String>(
                     icon: const Icon(
                       Icons.more_horiz,
-                      color: AppColors.textTertiary,
+                      color: AppColors.gray,
                     ),
+                    color: AppColors.card2,
                     onSelected: (value) {
                       if (value == 'assign') {
                         _showLeaderPicker(context, ref);
@@ -131,6 +142,7 @@ class _GroupTile extends ConsumerWidget {
                         value: 'assign',
                         child: Text(
                           leaderName == null ? '조장 지정' : '조장 변경',
+                          style: const TextStyle(color: AppColors.white),
                         ),
                       ),
                       if (leaderName != null)
@@ -138,7 +150,7 @@ class _GroupTile extends ConsumerWidget {
                           value: 'remove',
                           child: Text(
                             '조장 취소',
-                            style: TextStyle(color: AppColors.danger),
+                            style: TextStyle(color: AppColors.coral),
                           ),
                         ),
                     ],
@@ -154,8 +166,8 @@ class _GroupTile extends ConsumerWidget {
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: leaderName == null
-                          ? AppColors.amber
-                          : AppColors.primary,
+                          ? AppColors.coral
+                          : AppColors.lime,
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -163,7 +175,7 @@ class _GroupTile extends ConsumerWidget {
                     '· ${group.memberCount}명',
                     style: const TextStyle(
                       fontSize: 13,
-                      color: AppColors.textTertiary,
+                      color: AppColors.gray,
                     ),
                   ),
                 ],
@@ -185,10 +197,17 @@ class _GroupTile extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: Text('${group.label} 조장 지정'),
+        title: Text(
+          '${group.label} 조장 지정',
+          style: const TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         children: admins.map((admin) {
           return SimpleDialogOption(
             onPressed: () {
@@ -197,7 +216,10 @@ class _GroupTile extends ConsumerWidget {
                   .read(groupManagementProvider.notifier)
                   .assignLeader(group.id, admin.id);
             },
-            child: Text(admin.name),
+            child: Text(
+              admin.name,
+              style: const TextStyle(color: AppColors.white),
+            ),
           );
         }).toList(),
       ),
@@ -235,9 +257,9 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
     final state = ref.watch(groupManagementProvider);
 
     return Dialog(
-      backgroundColor: AppColors.cardBg,
+      backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -250,6 +272,7 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
+                color: AppColors.white,
               ),
             ),
             const SizedBox(height: 16),
@@ -257,33 +280,47 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
               widget.leaderName == null
                   ? '조장: 미지정'
                   : '조장: ${widget.leaderName}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
+                color: widget.leaderName == null
+                    ? AppColors.coral
+                    : AppColors.lime,
               ),
             ),
-            const Divider(height: 24, color: AppColors.neutralBg),
+            Container(
+              height: 0.5,
+              color: AppColors.border,
+              margin: const EdgeInsets.symmetric(vertical: 16),
+            ),
             const Text(
               '조원 목록',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textTertiary,
+                color: AppColors.gray,
               ),
             ),
             const SizedBox(height: 8),
             state.isLoadingMembers
                 ? const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.lime,
+                      ),
+                    ),
                   )
                 : state.selectedGroupMembers.isEmpty
                 ? const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Text('소속된 부원이 없습니다.'),
+                    child: Text(
+                      '소속된 부원이 없습니다.',
+                      style: TextStyle(color: AppColors.gray),
+                    ),
                   )
                 : SizedBox(
-                    height: 500, // 최대 높이 제한
+                    height: 300,
                     child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: state.selectedGroupMembers.length,
@@ -295,11 +332,13 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
                             children: [
                               CircleAvatar(
                                 radius: 15,
-                                backgroundColor: AppColors.primaryBg,
+                                backgroundColor: AppColors.lime.withValues(
+                                  alpha: 0.15,
+                                ),
                                 child: Text(
                                   m.name.substring(0, 1),
                                   style: const TextStyle(
-                                    color: AppColors.primary,
+                                    color: AppColors.lime,
                                     fontWeight: FontWeight.w800,
                                     fontSize: 13,
                                   ),
@@ -311,6 +350,7 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
+                                  color: AppColors.white,
                                 ),
                               ),
                             ],
@@ -325,11 +365,11 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
-                  backgroundColor: AppColors.neutralBg,
-                  foregroundColor: AppColors.textSecondary,
+                  backgroundColor: AppColors.card2,
+                  foregroundColor: AppColors.gray,
                   minimumSize: const Size.fromHeight(48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 child: const Text('닫기'),
@@ -391,9 +431,9 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
     final available = _availableCombinations(state.groups);
 
     return Dialog(
-      backgroundColor: AppColors.cardBg,
+      backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -403,7 +443,11 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
           children: [
             const Text(
               '조 생성',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.white,
+              ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -411,7 +455,10 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
               child: available.isEmpty
                   ? const Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Text('생성 가능한 조합이 없습니다. (이미 전부 생성됨)'),
+                      child: Text(
+                        '생성 가능한 조합이 없습니다. (이미 전부 생성됨)',
+                        style: TextStyle(color: AppColors.gray),
+                      ),
                     )
                   : SingleChildScrollView(
                       child: Column(
@@ -420,9 +467,15 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                           final isChecked = _selected.contains(entry.key);
                           return CheckboxListTile(
                             contentPadding: EdgeInsets.zero,
-                            title: Text(entry.value),
+                            title: Text(
+                              entry.value,
+                              style: const TextStyle(
+                                color: AppColors.white,
+                              ),
+                            ),
                             value: isChecked,
-                            activeColor: AppColors.primary,
+                            activeColor: AppColors.lime,
+                            checkColor: const Color(0xFF111111),
                             onChanged: (_) {
                               setState(() {
                                 if (isChecked) {
@@ -443,7 +496,10 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                 Expanded(
                   child: TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('취소'),
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(color: AppColors.gray),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -458,7 +514,7 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: Color(0xFF111111),
                             ),
                           )
                         : Text('생성 (${_selected.length}개)'),
