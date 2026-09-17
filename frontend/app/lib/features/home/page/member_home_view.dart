@@ -753,6 +753,7 @@ Future<void> _showTravelTypeDialog(
             onPressed: () async {
               Navigator.of(context).pop();
               await ActivityApi.updateTravelType(activityId, 'TOGETHER');
+              ref.invalidate(activityProvider);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.lime,
@@ -775,6 +776,7 @@ Future<void> _showTravelTypeDialog(
             onPressed: () async {
               Navigator.of(context).pop();
               await ActivityApi.updateTravelType(activityId, 'ALONE');
+              ref.invalidate(activityProvider);
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.gray,
