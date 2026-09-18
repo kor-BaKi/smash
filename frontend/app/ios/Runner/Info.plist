@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"\>
 <plist version="1.0">
 <dict>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -26,16 +31,16 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>활동 사진을 업로드하기 위해 사진 라이브러리에 접근합니다.</string>
-    <key>NSCameraUsageDescription</key>
-    <string>활동 사진을 촬영하기 위해 카메라에 접근합니다.</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>활동 사진을 저장하기 위해 사진 라이브러리에 접근합니다.</string>
-    <key>LSApplicationQueriesSchemes</key>
-    <array>
-        <string>supertoss</string>
-    </array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>활동 사진을 업로드하기 위해 사진 라이브러리에 접근합니다.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>활동 사진을 촬영하기 위해 카메라에 접근합니다.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>활동 사진을 저장하기 위해 사진 라이브러리에 접근합니다.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>supertoss</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
