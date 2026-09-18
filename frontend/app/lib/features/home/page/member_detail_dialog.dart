@@ -15,16 +15,14 @@ class MemberDetailDialog extends ConsumerStatefulWidget {
   const MemberDetailDialog({super.key, required this.userId});
 
   @override
-  ConsumerState<MemberDetailDialog> createState() =>
-      _MemberDetailDialogState();
+  ConsumerState<MemberDetailDialog> createState() => _MemberDetailDialogState();
 }
 
 class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
   Map<String, dynamic>? _detail;
   bool _isLoading = true;
   final TextEditingController _noteController = TextEditingController();
-  final TextEditingController _departmentController =
-      TextEditingController();
+  final TextEditingController _departmentController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   bool _isEditing = false;
 
@@ -84,15 +82,10 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '부원 탈퇴',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: Text(
           '${_detail!['name']}님을 탈퇴 처리할까요?\n모든 데이터가 삭제됩니다.',
@@ -101,10 +94,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -145,15 +135,10 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '권한 변경',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: Text(
           '${_detail!['name']}님을 ${newRole == 'ADMIN' ? '임원' : '부원'}으로 변경할까요?',
@@ -162,19 +147,14 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(
               '변경',
               style: TextStyle(
-                color: newRole == 'ADMIN'
-                    ? AppColors.lime
-                    : AppColors.coral,
+                color: newRole == 'ADMIN' ? AppColors.lime : AppColors.coral,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -206,9 +186,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
       context: context,
       builder: (context) => SimpleDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           '${_detail!['name']} 조 변경',
           style: const TextStyle(
@@ -222,10 +200,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                 onPressed: () async {
                   Navigator.of(context).pop();
                   try {
-                    await AssignmentApi.assignMember(
-                      widget.userId,
-                      group.id,
-                    );
+                    await AssignmentApi.assignMember(widget.userId, group.id);
                     await _loadDetail();
                     await ref
                         .read(memberRegisterProvider.notifier)
@@ -298,13 +273,8 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Dialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        insetPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 40,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
         child: _isLoading
             ? const SizedBox(
                 height: 200,
@@ -386,10 +356,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                           onPressed: _deleteMember,
                         ),
                         IconButton(
-                          icon: const Icon(
-                            Icons.close,
-                            color: AppColors.gray,
-                          ),
+                          icon: const Icon(Icons.close, color: AppColors.gray),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
@@ -519,9 +486,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  _detail!['role'] == 'ADMIN'
-                                      ? '임원'
-                                      : '부원',
+                                  _detail!['role'] == 'ADMIN' ? '임원' : '부원',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
@@ -575,8 +540,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                             children: [
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       note['createdAt'],
@@ -634,7 +598,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog> {
                             ),
                             child: const Icon(
                               Icons.send,
-                              color: Color(0xFF111111),
+                              color: AppColors.onPrimary,
                               size: 18,
                             ),
                           ),

@@ -172,9 +172,7 @@ class _PreviewView extends ConsumerWidget {
                             ),
                             content: Text(
                               '${preview.assignments.length}명의 배정을 확정할까요?\n확정 후에는 되돌릴 수 없습니다.',
-                              style: const TextStyle(
-                                color: AppColors.gray,
-                              ),
+                              style: const TextStyle(color: AppColors.gray),
                             ),
                             actions: [
                               TextButton(
@@ -200,9 +198,7 @@ class _PreviewView extends ConsumerWidget {
                           ),
                         );
                         if (confirmed == true) {
-                          await ref
-                              .read(assignmentProvider.notifier)
-                              .confirm();
+                          await ref.read(assignmentProvider.notifier).confirm();
                         }
                       },
                 child: state.isConfirming
@@ -211,7 +207,7 @@ class _PreviewView extends ConsumerWidget {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Color(0xFF111111),
+                          color: AppColors.onPrimary,
                         ),
                       )
                     : const Text('배정 확정하기'),
@@ -297,10 +293,7 @@ class _AssignmentTile extends ConsumerWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.card2,
               borderRadius: BorderRadius.circular(8),
@@ -370,10 +363,7 @@ class _UnassignedTile extends ConsumerWidget {
             style: TextButton.styleFrom(
               backgroundColor: AppColors.coral.withValues(alpha: 0.15),
               foregroundColor: AppColors.coral,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             ),
             child: const Text(
               '수동 배정',
@@ -390,9 +380,7 @@ class _UnassignedTile extends ConsumerWidget {
       context: context,
       builder: (context) => SimpleDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           '${item.name} 조 배정',
           style: const TextStyle(

@@ -86,9 +86,7 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
                           children: [
                             TextSpan(
                               text: user?.name ?? '',
-                              style: const TextStyle(
-                                color: AppColors.white,
-                              ),
+                              style: const TextStyle(color: AppColors.white),
                             ),
                             const TextSpan(
                               text: ' •',
@@ -113,7 +111,7 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF111111),
+                      color: AppColors.onPrimary,
                     ),
                   ),
                 ),
@@ -247,10 +245,7 @@ class _ActivityCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            _subtitle,
-            style: TextStyle(fontSize: 13, color: _subColor),
-          ),
+          Text(_subtitle, style: TextStyle(fontSize: 13, color: _subColor)),
 
           const SizedBox(height: 18),
 
@@ -266,11 +261,7 @@ class _ActivityCard extends ConsumerWidget {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.lock_outline,
-                    size: 16,
-                    color: AppColors.gray,
-                  ),
+                  Icon(Icons.lock_outline, size: 16, color: AppColors.gray),
                   SizedBox(width: 8),
                   Text(
                     '투표가 마감되었습니다',
@@ -287,20 +278,19 @@ class _ActivityCard extends ConsumerWidget {
             // 액션 버튼
             Row(
               children: activity.availableButtons.map((type) {
-                final isPrimary =
-                    type == 'ATTEND' || type == 'FREE_ATTEND';
+                final isPrimary = type == 'ATTEND' || type == 'FREE_ATTEND';
                 Color btnBg;
                 Color btnFg;
 
                 if (_isColorCard) {
                   btnBg = isPrimary
-                      ? Colors.white.withValues(alpha: 0.25)
-                      : Colors.white.withValues(alpha: 0.1);
+                      ? AppColors.white.withValues(alpha: 0.25)
+                      : AppColors.white.withValues(alpha: 0.1);
                   btnFg = AppColors.white;
                 } else {
                   btnBg = isPrimary
                       ? AppColors.lime
-                      : Colors.white.withValues(alpha: 0.1);
+                      : AppColors.white.withValues(alpha: 0.1);
                   btnFg = AppColors.white;
                 }
 
@@ -373,7 +363,7 @@ class _ActivityCard extends ConsumerWidget {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: _isColorCard
-                    ? Colors.black.withValues(alpha: 0.08)
+                    ? AppColors.overlay.withValues(alpha: 0.08)
                     : AppColors.card2,
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -387,7 +377,7 @@ class _ActivityCard extends ConsumerWidget {
                         height: 20,
                         decoration: BoxDecoration(
                           color: _isColorCard
-                              ? const Color(0xFF111111)
+                              ? AppColors.onPrimary
                               : AppColors.lime,
                           shape: BoxShape.circle,
                         ),
@@ -396,7 +386,7 @@ class _ActivityCard extends ConsumerWidget {
                           size: 13,
                           color: _isColorCard
                               ? AppColors.lime
-                              : const Color(0xFF111111),
+                              : AppColors.onPrimary,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -450,9 +440,7 @@ class _ActivityCard extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color:
-                                activity.myParticipation!.travelType ==
-                                    null
+                            color: activity.myParticipation!.travelType == null
                                 ? AppColors.coral
                                 : _subColor,
                           ),
@@ -471,7 +459,7 @@ class _ActivityCard extends ConsumerWidget {
                             ),
                             decoration: BoxDecoration(
                               color: _isColorCard
-                                  ? Colors.black.withValues(alpha: 0.1)
+                                  ? AppColors.overlay.withValues(alpha: 0.1)
                                   : AppColors.card,
                               borderRadius: BorderRadius.circular(999),
                             ),
@@ -530,8 +518,8 @@ class _PollCard extends ConsumerWidget {
     AppColors.green,
     AppColors.coral,
     AppColors.lime,
-    Color(0xFF7B5EA7),
-    Color(0xFF3A7BD5),
+    AppColors.accentViolet,
+    AppColors.accentBlue,
   ];
 
   List<List<PollOptionResult>> _groupOptions() {
@@ -613,11 +601,9 @@ class _PollCard extends ConsumerWidget {
                                       .read(pollProvider.notifier)
                                       .vote(poll.id, option.id),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 13,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 13),
                               decoration: BoxDecoration(
-                                color: Colors.black.withValues(
+                                color: AppColors.overlay.withValues(
                                   alpha: 0.12,
                                 ),
                                 borderRadius: BorderRadius.circular(14),
@@ -644,12 +630,9 @@ class _PollCard extends ConsumerWidget {
           else ...[
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: AppColors.overlay.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -731,9 +714,7 @@ Future<void> _showTravelTypeDialog(
     barrierDismissible: false,
     builder: (context) => AlertDialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: const Text(
         '이동 방법을 선택해주세요',
         style: TextStyle(
@@ -757,7 +738,7 @@ Future<void> _showTravelTypeDialog(
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.lime,
-              foregroundColor: const Color(0xFF111111),
+              foregroundColor: AppColors.onPrimary,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -801,8 +782,7 @@ class _MyTransportGroup extends ConsumerStatefulWidget {
   const _MyTransportGroup({required this.activityId});
 
   @override
-  ConsumerState<_MyTransportGroup> createState() =>
-      _MyTransportGroupState();
+  ConsumerState<_MyTransportGroup> createState() => _MyTransportGroupState();
 }
 
 class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
@@ -831,7 +811,7 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.08),
+          color: AppColors.overlay.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
         ),
         child: const Row(
@@ -859,7 +839,7 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.08),
+        color: AppColors.overlay.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -870,7 +850,7 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
               const Icon(
                 Icons.directions_car,
                 size: 14,
-                color: Color(0xFF111111),
+                color: AppColors.onPrimary,
               ),
               const SizedBox(width: 6),
               Text(
@@ -878,15 +858,15 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF111111),
+                  color: AppColors.onPrimary,
                 ),
               ),
               const SizedBox(width: 6),
               Text(
                 '${myGroup.members.length}명',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: Color(0x88111111),
+                  color: AppColors.onPrimary.withValues(alpha: 0x88 / 0xFF),
                 ),
               ),
             ],
@@ -898,14 +878,11 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
             children: myGroup.members.map((m) {
               final isMe = m.userId == userId;
               return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: isMe
-                      ? const Color(0xFF111111)
-                      : Colors.black.withValues(alpha: 0.1),
+                      ? AppColors.onPrimary
+                      : AppColors.overlay.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -913,7 +890,7 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: isMe ? AppColors.lime : const Color(0xFF111111),
+                    color: isMe ? AppColors.lime : AppColors.onPrimary,
                   ),
                 ),
               );
@@ -936,7 +913,7 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 11),
               decoration: BoxDecoration(
-                color: const Color(0xFF111111),
+                color: AppColors.onPrimary,
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
@@ -963,8 +940,8 @@ Color pollOptionColor(String content, int index) {
     AppColors.lime,
     AppColors.coral,
     AppColors.green,
-    Color(0xFF7C3AED),
-    Color(0xFF0891B2),
+    AppColors.accentPurple,
+    AppColors.accentCyan,
   ];
   return palette[index % palette.length];
 }

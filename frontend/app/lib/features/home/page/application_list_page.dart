@@ -77,7 +77,7 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
         ).then((_) => ref.read(applicationProvider.notifier).load()),
         child: const Icon(
           Icons.person_add_outlined,
-          color: Color(0xFF111111),
+          color: AppColors.onPrimary,
         ),
       ),
       appBar: AppBar(
@@ -91,9 +91,7 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: form.isActive
-                        ? AppColors.green
-                        : AppColors.gray,
+                    color: form.isActive ? AppColors.green : AppColors.gray,
                   ),
                 ),
                 Switch(
@@ -102,9 +100,8 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
                   activeTrackColor: AppColors.lime.withValues(alpha: 0.3),
                   inactiveThumbColor: AppColors.darkGray,
                   inactiveTrackColor: AppColors.card2,
-                  onChanged: (val) => ref
-                      .read(applicationProvider.notifier)
-                      .toggleForm(val),
+                  onChanged: (val) =>
+                      ref.read(applicationProvider.notifier).toggleForm(val),
                 ),
               ],
             ),
@@ -143,10 +140,7 @@ class _ApplicationListPageState extends ConsumerState<ApplicationListPage>
                     onChanged: (v) => setState(() => _searchQuery = v),
                     decoration: const InputDecoration(
                       hintText: '이름 또는 학번 검색',
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: AppColors.gray,
-                      ),
+                      prefixIcon: Icon(Icons.search, color: AppColors.gray),
                     ),
                   ),
                 ),
@@ -221,7 +215,7 @@ class _ApplicationTabView extends ConsumerWidget {
                 onPressed: () => _confirmAcceptAll(context, ref),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -296,9 +290,7 @@ class _ApplicationTabView extends ConsumerWidget {
                                     color: _statusColor(
                                       app.status,
                                     ).withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(
-                                      999,
-                                    ),
+                                    borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Text(
                                     app.statusLabel,
@@ -319,8 +311,7 @@ class _ApplicationTabView extends ConsumerWidget {
                                 color: AppColors.gray,
                               ),
                             ),
-                            if (app.memo != null &&
-                                app.memo!.isNotEmpty) ...[
+                            if (app.memo != null && app.memo!.isNotEmpty) ...[
                               const SizedBox(height: 4),
                               Text(
                                 '📝 ${app.memo}',
@@ -351,23 +342,15 @@ class _ApplicationTabView extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmAcceptAll(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<void> _confirmAcceptAll(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '전체 합격 처리',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: Text(
           '미처리 ${applications.length}명을 모두 합격 처리할까요?',
@@ -376,10 +359,7 @@ class _ApplicationTabView extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -395,9 +375,7 @@ class _ApplicationTabView extends ConsumerWidget {
       ),
     );
     if (confirmed == true) {
-      final result = await ref
-          .read(applicationProvider.notifier)
-          .acceptAll();
+      final result = await ref.read(applicationProvider.notifier).acceptAll();
       if (context.mounted) {
         final accepted = result['accepted'] ?? 0;
         final skipped = result['skipped'] ?? 0;
@@ -406,10 +384,7 @@ class _ApplicationTabView extends ConsumerWidget {
           msg += '\n($skipped명은 이미 등록된 학번으로 users 등록 제외)';
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            duration: const Duration(seconds: 3),
-          ),
+          SnackBar(content: Text(msg), duration: const Duration(seconds: 3)),
         );
       }
     }

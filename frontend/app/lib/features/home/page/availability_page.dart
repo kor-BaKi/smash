@@ -8,8 +8,7 @@ class AvailabilityPage extends ConsumerStatefulWidget {
   const AvailabilityPage({super.key});
 
   @override
-  ConsumerState<AvailabilityPage> createState() =>
-      _AvailabilityPageState();
+  ConsumerState<AvailabilityPage> createState() => _AvailabilityPageState();
 }
 
 class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
@@ -118,7 +117,7 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                                       ? const Icon(
                                           Icons.check,
                                           size: 16,
-                                          color: Color(0xFF111111),
+                                          color: AppColors.onPrimary,
                                         )
                                       : null,
                                 ),
@@ -166,7 +165,7 @@ class _AvailabilityPageState extends ConsumerState<AvailabilityPage> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Color(0xFF111111),
+                                  color: AppColors.onPrimary,
                                 ),
                               )
                             : const Text('제출하기'),

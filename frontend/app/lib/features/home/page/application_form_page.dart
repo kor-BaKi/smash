@@ -15,8 +15,7 @@ class ApplicationFormPage extends ConsumerStatefulWidget {
       _ApplicationFormPageState();
 }
 
-class _ApplicationFormPageState
-    extends ConsumerState<ApplicationFormPage> {
+class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
   @override
   void initState() {
     super.initState();
@@ -55,36 +54,24 @@ class _ApplicationFormPageState
               const SizedBox(height: 16),
               const Text(
                 '질문 타입',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: questionType,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
                 items: const [
                   DropdownMenuItem(value: 'TEXT', child: Text('한 줄 텍스트')),
-                  DropdownMenuItem(
-                    value: 'MULTILINE',
-                    child: Text('여러 줄 텍스트'),
-                  ),
+                  DropdownMenuItem(value: 'MULTILINE', child: Text('여러 줄 텍스트')),
                   DropdownMenuItem(value: 'SELECT', child: Text('선택형')),
                 ],
-                onChanged: (val) =>
-                    setDialogState(() => questionType = val!),
+                onChanged: (val) => setDialogState(() => questionType = val!),
               ),
               if (questionType == 'SELECT') ...[
                 const SizedBox(height: 12),
                 const Text(
                   '선택지 (쉼표로 구분)',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -100,9 +87,8 @@ class _ApplicationFormPageState
                 children: [
                   Checkbox(
                     value: isRequired,
-                    activeColor: AppColors.primary,
-                    onChanged: (val) =>
-                        setDialogState(() => isRequired = val!),
+                    activeColor: AppColors.lime,
+                    onChanged: (val) => setDialogState(() => isRequired = val!),
                   ),
                   const Text(
                     '필수 항목',
@@ -149,7 +135,7 @@ class _ApplicationFormPageState
               child: const Text(
                 '추가',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: AppColors.lime,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -164,9 +150,7 @@ class _ApplicationFormPageState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('질문 삭제'),
         content: Text('"$content"\n\n이 질문을 삭제할까요?'),
         actions: [
@@ -176,10 +160,7 @@ class _ApplicationFormPageState
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              '삭제',
-              style: TextStyle(color: AppColors.danger),
-            ),
+            child: const Text('삭제', style: TextStyle(color: AppColors.coral)),
           ),
         ],
       ),
@@ -255,10 +236,7 @@ class _ApplicationFormPageState
                 contentPadding: EdgeInsets.zero,
                 title: const Text(
                   '시작일시',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textTertiary,
-                  ),
+                  style: TextStyle(fontSize: 13, color: AppColors.gray),
                 ),
                 subtitle: Text(
                   startDate != null
@@ -303,10 +281,7 @@ class _ApplicationFormPageState
                 contentPadding: EdgeInsets.zero,
                 title: const Text(
                   '마감일시',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textTertiary,
-                  ),
+                  style: TextStyle(fontSize: 13, color: AppColors.gray),
                 ),
                 subtitle: Text(
                   endDate != null
@@ -378,7 +353,7 @@ class _ApplicationFormPageState
               child: const Text(
                 '저장',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: AppColors.lime,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -395,7 +370,7 @@ class _ApplicationFormPageState
     final form = state.form;
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('지원 폼 관리'),
         actions: [
@@ -417,10 +392,7 @@ class _ApplicationFormPageState
                   children: [
                     const Text(
                       'QR코드를 스캔하면 지원 폼으로 연결됩니다.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textTertiary,
-                      ),
+                      style: TextStyle(fontSize: 13, color: AppColors.gray),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
@@ -428,15 +400,13 @@ class _ApplicationFormPageState
                       data: 'https://baki.tailbdb322.ts.net/apply.html',
                       version: QrVersions.auto,
                       size: 220,
+                      // QR 스캔 인식률을 위해 테마와 무관하게 항상 흰색 배경 유지
                       backgroundColor: Colors.white,
                     ),
                     const SizedBox(height: 12),
                     const Text(
                       'baki.tailbdb322.ts.net/apply.html',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textTertiary,
-                      ),
+                      style: TextStyle(fontSize: 11, color: AppColors.gray),
                     ),
                   ],
                 ),
@@ -468,7 +438,7 @@ class _ApplicationFormPageState
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.cardBg,
+                    color: AppColors.card,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Column(
@@ -481,7 +451,7 @@ class _ApplicationFormPageState
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                           ),
                           const Spacer(),
@@ -491,13 +461,13 @@ class _ApplicationFormPageState
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: form.isActive
-                                  ? AppColors.freeActivity
-                                  : AppColors.textTertiary,
+                                  ? AppColors.green
+                                  : AppColors.gray,
                             ),
                           ),
                           Switch(
                             value: form.isActive,
-                            activeColor: AppColors.freeActivity,
+                            activeColor: AppColors.green,
                             onChanged: (val) => ref
                                 .read(applicationProvider.notifier)
                                 .toggleForm(val),
@@ -511,7 +481,7 @@ class _ApplicationFormPageState
                             '지원 기간',
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                           ),
                           const Spacer(),
@@ -530,7 +500,7 @@ class _ApplicationFormPageState
                             child: const Icon(
                               Icons.edit,
                               size: 16,
-                              color: AppColors.textTertiary,
+                              color: AppColors.gray,
                             ),
                           ),
                         ],
@@ -549,16 +519,13 @@ class _ApplicationFormPageState
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textTertiary,
+                        color: AppColors.gray,
                       ),
                     ),
                     const Spacer(),
                     const Text(
                       '길게 눌러서 순서 변경',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textTertiary,
-                      ),
+                      style: TextStyle(fontSize: 11, color: AppColors.gray),
                     ),
                   ],
                 ),
@@ -568,13 +535,13 @@ class _ApplicationFormPageState
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: AppColors.cardBg,
+                      color: AppColors.card,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Center(
                       child: Text(
                         '우측 상단 + 버튼으로 질문을 추가해주세요.',
-                        style: TextStyle(color: AppColors.textTertiary),
+                        style: TextStyle(color: AppColors.gray),
                       ),
                     ),
                   )
@@ -592,7 +559,7 @@ class _ApplicationFormPageState
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: AppColors.cardBg,
+                          color: AppColors.card,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -610,7 +577,7 @@ class _ApplicationFormPageState
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.primary,
+                                    color: AppColors.lime,
                                   ),
                                 ),
                               ),
@@ -618,8 +585,7 @@ class _ApplicationFormPageState
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     q.content,
@@ -635,7 +601,7 @@ class _ApplicationFormPageState
                                         _typeLabel(q.questionType),
                                         style: const TextStyle(
                                           fontSize: 11,
-                                          color: AppColors.textTertiary,
+                                          color: AppColors.gray,
                                         ),
                                       ),
                                       if (q.isRequired) ...[
@@ -644,7 +610,7 @@ class _ApplicationFormPageState
                                           '필수',
                                           style: TextStyle(
                                             fontSize: 11,
-                                            color: AppColors.danger,
+                                            color: AppColors.coral,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -657,11 +623,10 @@ class _ApplicationFormPageState
                             IconButton(
                               icon: const Icon(
                                 Icons.delete_outline,
-                                color: AppColors.textTertiary,
+                                color: AppColors.gray,
                                 size: 20,
                               ),
-                              onPressed: () =>
-                                  _deleteQuestion(q.id, q.content),
+                              onPressed: () => _deleteQuestion(q.id, q.content),
                             ),
                           ],
                         ),

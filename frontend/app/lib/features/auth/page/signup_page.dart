@@ -41,8 +41,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.cardBg,
-      appBar: AppBar(backgroundColor: AppColors.cardBg, elevation: 0),
+      backgroundColor: AppColors.card,
+      appBar: AppBar(backgroundColor: AppColors.card, elevation: 0),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(28, 0, 28, 28),
@@ -57,16 +57,13 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -1,
-                    color: AppColors.ink,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 6),
                 const Text(
                   '동아리에서 받은 가입코드가 필요해요',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textTertiary,
-                  ),
+                  style: TextStyle(fontSize: 14, color: AppColors.gray),
                 ),
                 const SizedBox(height: 32),
                 _buildLabel('가입코드'),
@@ -84,14 +81,14 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: AppColors.primary,
+                        color: AppColors.lime,
                         width: 1.5,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: AppColors.primary,
+                        color: AppColors.lime,
                         width: 1.5,
                       ),
                     ),
@@ -127,7 +124,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     child: Text(
                       authState.errorMessage!,
                       style: const TextStyle(
-                        color: AppColors.danger,
+                        color: AppColors.coral,
                         fontSize: 13,
                       ),
                       textAlign: TextAlign.center,
@@ -142,7 +139,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       : const Text('가입하기'),
@@ -160,7 +157,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     style: const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w700,
-      color: AppColors.textTertiary,
+      color: AppColors.gray,
     ),
   );
 }

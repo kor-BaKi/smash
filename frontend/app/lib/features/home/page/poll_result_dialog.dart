@@ -13,9 +13,9 @@ Color pollOptionColor(String content, int index) {
     AppColors.lime,
     AppColors.coral,
     AppColors.green,
-    Color(0xFF7C3AED),
-    Color(0xFF0891B2),
-    Color(0xFFDB2777),
+    AppColors.accentPurple,
+    AppColors.accentCyan,
+    AppColors.accentPink,
   ];
   return palette[index % palette.length];
 }
@@ -25,8 +25,7 @@ class PollResultDialog extends ConsumerStatefulWidget {
   const PollResultDialog({super.key, required this.pollId});
 
   @override
-  ConsumerState<PollResultDialog> createState() =>
-      _PollResultDialogState();
+  ConsumerState<PollResultDialog> createState() => _PollResultDialogState();
 }
 
 class _PollResultDialogState extends ConsumerState<PollResultDialog> {
@@ -46,9 +45,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
 
     return Dialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: SizedBox(
@@ -57,9 +54,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
                   child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.lime,
-                    ),
+                    child: CircularProgressIndicator(color: AppColors.lime),
                   ),
                 )
               : Column(
@@ -86,9 +81,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                 builder: (context) => AlertDialog(
                                   backgroundColor: AppColors.card,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      24,
-                                    ),
+                                    borderRadius: BorderRadius.circular(24),
                                   ),
                                   title: const Text(
                                     '투표 종료',
@@ -99,9 +92,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                   ),
                                   content: const Text(
                                     '투표를 종료할까요?\n종료 후에는 되돌릴 수 없습니다.',
-                                    style: TextStyle(
-                                      color: AppColors.gray,
-                                    ),
+                                    style: TextStyle(color: AppColors.gray),
                                   ),
                                   actions: [
                                     TextButton(
@@ -109,9 +100,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                           Navigator.of(context).pop(false),
                                       child: const Text(
                                         '취소',
-                                        style: TextStyle(
-                                          color: AppColors.gray,
-                                        ),
+                                        style: TextStyle(color: AppColors.gray),
                                       ),
                                     ),
                                     TextButton(
@@ -221,10 +210,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                       : AppColors.card2,
                                   borderRadius: BorderRadius.circular(12),
                                   border: isMyVote
-                                      ? Border.all(
-                                          color: color,
-                                          width: 1.5,
-                                        )
+                                      ? Border.all(color: color, width: 1.5)
                                       : null,
                                 ),
                                 child: Row(
@@ -295,19 +281,16 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                       index,
                                     );
                                     return Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 8,
-                                      ),
+                                      padding: const EdgeInsets.only(bottom: 8),
                                       child: Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Container(
-                                            padding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 8,
-                                                  vertical: 3,
-                                                ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: color.withValues(
                                                 alpha: 0.12,
@@ -319,8 +302,7 @@ class _PollResultDialogState extends ConsumerState<PollResultDialog> {
                                               option.content,
                                               style: TextStyle(
                                                 fontSize: 11,
-                                                fontWeight:
-                                                    FontWeight.w700,
+                                                fontWeight: FontWeight.w700,
                                                 color: color,
                                               ),
                                             ),

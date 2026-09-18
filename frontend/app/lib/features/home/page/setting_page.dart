@@ -37,8 +37,7 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
       final setting = await NotificationSettingApi.getSetting();
       setState(() {
         _pollNotification = setting['pollNotification'] ?? true;
-        _settlementNotification =
-            setting['settlementNotification'] ?? true;
+        _settlementNotification = setting['settlementNotification'] ?? true;
         _activityNotification = setting['activityNotification'] ?? true;
         _isLoadingSettings = false;
       });
@@ -93,14 +92,11 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                   hintText: '현재 비밀번호',
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscureCurrent
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                      obscureCurrent ? Icons.visibility_off : Icons.visibility,
                       color: AppColors.gray,
                     ),
-                    onPressed: () => setDialogState(
-                      () => obscureCurrent = !obscureCurrent,
-                    ),
+                    onPressed: () =>
+                        setDialogState(() => obscureCurrent = !obscureCurrent),
                   ),
                 ),
               ),
@@ -130,14 +126,11 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                   hintText: '새 비밀번호 확인',
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscureConfirm
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                      obscureConfirm ? Icons.visibility_off : Icons.visibility,
                       color: AppColors.gray,
                     ),
-                    onPressed: () => setDialogState(
-                      () => obscureConfirm = !obscureConfirm,
-                    ),
+                    onPressed: () =>
+                        setDialogState(() => obscureConfirm = !obscureConfirm),
                   ),
                 ),
               ),
@@ -146,10 +139,7 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                '취소',
-                style: TextStyle(color: AppColors.gray),
-              ),
+              child: const Text('취소', style: TextStyle(color: AppColors.gray)),
             ),
             TextButton(
               onPressed: () async {
@@ -194,15 +184,10 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '로그아웃',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: const Text(
           '로그아웃 할까요?',
@@ -211,10 +196,7 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -282,7 +264,7 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF111111),
+                          color: AppColors.onPrimary,
                         ),
                       ),
                     ),
@@ -346,27 +328,21 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                           Container(
                             height: 0.5,
                             color: AppColors.border,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                            ),
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
                           ),
                           _NotificationToggle(
                             label: '정산 알림',
                             subLabel: '택시비 정산 요청이 올 때',
                             value: _settlementNotification,
                             onChanged: (val) {
-                              setState(
-                                () => _settlementNotification = val,
-                              );
+                              setState(() => _settlementNotification = val);
                               _updateNotificationSetting();
                             },
                           ),
                           Container(
                             height: 0.5,
                             color: AppColors.border,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                            ),
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
                           ),
                           _NotificationToggle(
                             label: '활동 알림',
@@ -428,10 +404,7 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                   label: '버전 정보',
                   trailing: Text(
                     _appVersion,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.gray,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: AppColors.gray),
                   ),
                 ),
               ),
@@ -490,10 +463,7 @@ class _NotificationToggle extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subLabel,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.gray,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: AppColors.gray),
                 ),
               ],
             ),

@@ -21,8 +21,7 @@ class TaxiSettlementPage extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TaxiSettlementPage> createState() =>
-      _TaxiSettlementPageState();
+  ConsumerState<TaxiSettlementPage> createState() => _TaxiSettlementPageState();
 }
 
 class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
@@ -124,15 +123,10 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '정산 삭제',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: const Text(
           '정산을 삭제할까요?',
@@ -141,10 +135,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -179,9 +170,10 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
   }
 
   Future<void> _openToss() async {
-    final accountNumber = _settlement!['accountNumber']
-        .toString()
-        .replaceAll('-', '');
+    final accountNumber = _settlement!['accountNumber'].toString().replaceAll(
+      '-',
+      '',
+    );
     final url =
         'supertoss://send?bank=${_settlement!['accountBank']}&accountNo=$accountNumber&amount=${_settlement!['amountPerPerson']}';
     final uri = Uri.parse(url);
@@ -220,10 +212,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
           actions: [
             if (_settlement != null && _isPayer)
               IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: AppColors.coral,
-                ),
+                icon: const Icon(Icons.delete_outline, color: AppColors.coral),
                 onPressed: _deleteSettlement,
               ),
           ],
@@ -280,7 +269,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                   '정산 시작',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF111111),
+                    color: AppColors.onPrimary,
                   ),
                 ),
               ),
@@ -321,9 +310,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
             controller: _accountController,
             keyboardType: TextInputType.number,
             style: const TextStyle(color: AppColors.white),
-            decoration: const InputDecoration(
-              hintText: '예: 3333011234567',
-            ),
+            decoration: const InputDecoration(hintText: '예: 3333011234567'),
           ),
           const SizedBox(height: 24),
           Container(
@@ -420,10 +407,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                   highlight: true,
                 ),
                 _InfoRow(label: '은행', value: _settlement!['accountBank']),
-                _InfoRow(
-                  label: '계좌번호',
-                  value: _settlement!['accountNumber'],
-                ),
+                _InfoRow(label: '계좌번호', value: _settlement!['accountNumber']),
               ],
             ),
           ),
@@ -479,10 +463,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
             final isMe = payment['userId'] == widget.myUserId;
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: AppColors.card,
                 borderRadius: BorderRadius.circular(14),

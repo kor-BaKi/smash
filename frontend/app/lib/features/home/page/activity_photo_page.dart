@@ -74,15 +74,10 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '사진 삭제',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: const Text(
           '이 사진을 삭제할까요?',
@@ -91,10 +86,7 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -153,12 +145,11 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
             )
           : GridView.builder(
               padding: const EdgeInsets.all(12),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                  ),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
               itemCount: _photos.length,
               itemBuilder: (context, index) {
                 final photo = _photos[index];
@@ -190,14 +181,16 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.black54,
+                              color: AppColors.overlay.withValues(
+                                alpha: 0x8A / 0xFF,
+                              ),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               photo.createdAt.substring(0, 10),
                               style: const TextStyle(
                                 fontSize: 10,
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             ),
                           ),
@@ -213,7 +206,7 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
         onPressed: _uploadPhotos,
         child: const Icon(
           Icons.add_photo_alternate,
-          color: Color(0xFF111111),
+          color: AppColors.onPrimary,
         ),
       ),
     );
@@ -228,13 +221,13 @@ class _FullScreenPhoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.overlay,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.overlay,
+        iconTheme: const IconThemeData(color: AppColors.white),
         title: Text(
           photo.createdAt,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          style: const TextStyle(color: AppColors.white, fontSize: 14),
         ),
       ),
       body: Center(
@@ -244,7 +237,7 @@ class _FullScreenPhoto extends StatelessWidget {
             fit: BoxFit.contain,
             errorBuilder: (_, __, ___) => const Icon(
               Icons.broken_image,
-              color: Colors.white,
+              color: AppColors.white,
               size: 60,
             ),
           ),

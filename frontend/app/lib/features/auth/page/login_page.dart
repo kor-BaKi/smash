@@ -96,7 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: Text(
                       authState.errorMessage!,
                       style: const TextStyle(
-                        color: AppColors.danger,
+                        color: AppColors.coral,
                         fontSize: 13,
                       ),
                       textAlign: TextAlign.center,
@@ -111,7 +111,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Color(0xFF111111),
+                            color: AppColors.onPrimary,
                           ),
                         )
                       : const Text(

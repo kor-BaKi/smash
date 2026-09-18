@@ -69,15 +69,10 @@ class _PeriodTile extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '자유활동 기간 삭제',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: Text(
           '${period.startDate} ~ ${period.endDate}\n이 기간을 삭제할까요?',
@@ -86,10 +81,7 @@ class _PeriodTile extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -133,11 +125,7 @@ class _PeriodTile extends ConsumerWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(
-              Icons.close,
-              size: 20,
-              color: AppColors.coral,
-            ),
+            icon: const Icon(Icons.close, size: 20, color: AppColors.coral),
             onPressed: () => _confirmDelete(context, ref),
           ),
         ],
@@ -198,9 +186,7 @@ class _AddPeriodDialogState extends ConsumerState<_AddPeriodDialog> {
 
     return Dialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -231,9 +217,7 @@ class _AddPeriodDialogState extends ConsumerState<_AddPeriodDialog> {
                   ),
                   Container(height: 0.5, color: AppColors.border),
                   _dateRow(
-                    label: _endDate == null
-                        ? '종료일 선택'
-                        : _formatDate(_endDate!),
+                    label: _endDate == null ? '종료일 선택' : _formatDate(_endDate!),
                     onTap: _pickEndDate,
                   ),
                 ],
@@ -244,10 +228,7 @@ class _AddPeriodDialogState extends ConsumerState<_AddPeriodDialog> {
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(
                   state.errorMessage!,
-                  style: const TextStyle(
-                    color: AppColors.coral,
-                    fontSize: 13,
-                  ),
+                  style: const TextStyle(color: AppColors.coral, fontSize: 13),
                 ),
               ),
             const SizedBox(height: 18),
@@ -277,7 +258,7 @@ class _AddPeriodDialogState extends ConsumerState<_AddPeriodDialog> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Color(0xFF111111),
+                              color: AppColors.onPrimary,
                             ),
                           )
                         : const Text('추가'),
@@ -298,11 +279,7 @@ class _AddPeriodDialogState extends ConsumerState<_AddPeriodDialog> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            const Icon(
-              Icons.calendar_today,
-              size: 16,
-              color: AppColors.lime,
-            ),
+            const Icon(Icons.calendar_today, size: 16, color: AppColors.lime),
             const SizedBox(width: 10),
             Text(
               label,

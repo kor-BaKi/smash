@@ -17,15 +17,12 @@ class ActivityDetailDialog extends ConsumerStatefulWidget {
       _ActivityDetailDialogState();
 }
 
-class _ActivityDetailDialogState
-    extends ConsumerState<ActivityDetailDialog> {
+class _ActivityDetailDialogState extends ConsumerState<ActivityDetailDialog> {
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref
-          .read(activityProvider.notifier)
-          .loadActivityDetail(widget.activityId);
+      ref.read(activityProvider.notifier).loadActivityDetail(widget.activityId);
     });
   }
 
@@ -36,9 +33,7 @@ class _ActivityDetailDialogState
 
     return Dialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: SizedBox(
@@ -47,9 +42,7 @@ class _ActivityDetailDialogState
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
                   child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.lime,
-                    ),
+                    child: CircularProgressIndicator(color: AppColors.lime),
                   ),
                 )
               : state.errorMessage != null
@@ -150,10 +143,7 @@ class _DetailBody extends ConsumerWidget {
         if (participants.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text(
-              '참여자가 없습니다.',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: Text('참여자가 없습니다.', style: TextStyle(color: AppColors.gray)),
           )
         else
           ConstrainedBox(
@@ -178,9 +168,7 @@ class _DetailBody extends ConsumerWidget {
                         })()
                         .map(
                           (p) => Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 6,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 6),
                             child: Row(
                               children: [
                                 CircleAvatar(
@@ -218,14 +206,10 @@ class _DetailBody extends ConsumerWidget {
                                               alpha: 0.15,
                                             )
                                           : AppColors.card2,
-                                      borderRadius: BorderRadius.circular(
-                                        999,
-                                      ),
+                                      borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
-                                      p.travelType == 'TOGETHER'
-                                          ? '같이'
-                                          : '따로',
+                                      p.travelType == 'TOGETHER' ? '같이' : '따로',
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
@@ -254,8 +238,7 @@ class _DetailBody extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        TransportGroupPage(activityId: activityId),
+                    builder: (_) => TransportGroupPage(activityId: activityId),
                   ),
                 );
               },
@@ -266,7 +249,7 @@ class _DetailBody extends ConsumerWidget {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.lime,
-                foregroundColor: const Color(0xFF111111),
+                foregroundColor: AppColors.onPrimary,
                 minimumSize: const Size.fromHeight(48),
                 elevation: 0,
                 shape: RoundedRectangleBorder(

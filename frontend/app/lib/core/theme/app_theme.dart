@@ -1,55 +1,8 @@
 import 'package:flutter/material.dart';
 
-class AppColors {
-  AppColors._();
+import 'app_colors.dart';
 
-  // 배경
-  static const bg = Color(0xFF111111);
-  static const card = Color(0xFF1C1C1C);
-  static const card2 = Color(0xFF242424);
-  static const border = Color(0xFF2A2A2A);
-
-  // 포인트 컬러
-  static const lime = Color(0xFFCDD04F);
-  static const green = Color(0xFF5EB58C);
-  static const coral = Color(0xFFD06C52);
-
-  // 텍스트
-  static const white = Color(0xFFFFFFFF);
-  static const gray = Color(0xFF8A8A8A);
-  static const darkGray = Color(0xFF555555);
-
-  // 상태 배지
-  static const limeTag = Color(0xFFCDD04F);
-  static const greenTag = Color(0x335EB58C);
-  static const coralTag = Color(0x33D06C52);
-  static const amberTag = Color(0x33FFB432);
-  static const grayTag = Color(0xFF2A2A2A);
-  static const greenTagText = Color(0xFF5EB58C);
-  static const coralTagText = Color(0xFFD06C52);
-  static const amberTagText = Color(0xFFC8901A);
-  static const grayTagText = Color(0xFF8A8A8A);
-
-  // 레거시 호환
-  static const primary = lime;
-  static const primaryDeep = Color(0xFF9DA030);
-  static const primaryBg = Color(0xFF2A2C10);
-  static const danger = coral;
-  static const dangerBg = Color(0xFF2A1510);
-  static const scaffoldBg = bg;
-  static const cardBg = card;
-  static const ink = white;
-  static const inkSub = Color(0xFFCCCCCC);
-  static const textSecondary = Color(0xFFAAAAAA);
-  static const textTertiary = gray;
-  static const neutralBg = card2;
-  static const divider = border;
-  static const freeActivity = green;
-  static const freeActivityText = Color(0xFF5EB58C);
-  static const freeActivityBg = Color(0xFF1A3028);
-  static const amber = Color(0xFFFFB432);
-  static const amberBg = Color(0xFF2A2010);
-}
+export 'app_colors.dart';
 
 class AppTheme {
   AppTheme._();
@@ -68,7 +21,7 @@ class AppTheme {
         error: AppColors.coral,
         surface: AppColors.card,
         onSurface: AppColors.white,
-        onPrimary: Color(0xFF111111),
+        onPrimary: AppColors.onPrimary,
       ),
 
       textTheme: const TextTheme(
@@ -110,25 +63,20 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.card,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         margin: EdgeInsets.zero,
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.lime,
-          foregroundColor: const Color(0xFF111111),
+          foregroundColor: AppColors.onPrimary,
           elevation: 0,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
 
@@ -163,9 +111,7 @@ class AppTheme {
 
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
 
       chipTheme: ChipThemeData(
@@ -175,9 +121,7 @@ class AppTheme {
           fontWeight: FontWeight.w700,
           color: AppColors.white,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       ),
 
@@ -210,9 +154,7 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         behavior: SnackBarBehavior.floating,
       ),
     );

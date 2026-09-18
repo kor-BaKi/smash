@@ -11,7 +11,7 @@
 class AppConstants {
   // API
   // static const String baseUrl = 'http://localhost:8080/api/v1';
-  static const String baseUrl = 'https://baki.tailbdb322.ts.net/api/v1';
+  static const String baseUrl = 'http://3.38.245.70:8080/api/v1';
 
   // Storage keys
   static const String accessTokenKey = 'access_token';

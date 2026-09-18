@@ -50,9 +50,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.card,
-          border: Border(
-            top: BorderSide(color: AppColors.border, width: 0.5),
-          ),
+          border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
         ),
         child: SafeArea(
           top: false,
@@ -115,7 +113,7 @@ class _NavItem extends StatelessWidget {
         child: Icon(
           icon,
           size: 24,
-          color: isSelected ? const Color(0xFF111111) : AppColors.darkGray,
+          color: isSelected ? AppColors.onPrimary : AppColors.darkGray,
         ),
       ),
     );
@@ -169,9 +167,7 @@ class _NeedGroupNotice extends StatelessWidget {
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const AvailabilityPage(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const AvailabilityPage()),
                 ),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -187,7 +183,7 @@ class _NeedGroupNotice extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF111111),
+                      color: AppColors.onPrimary,
                     ),
                   ),
                 ),
@@ -230,7 +226,7 @@ class _AdminDrawer extends ConsumerWidget {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF111111),
+                        color: AppColors.onPrimary,
                       ),
                     ),
                   ),
@@ -282,20 +278,17 @@ class _AdminDrawer extends ConsumerWidget {
                   _DrawerItem(
                     icon: Icons.person_outline,
                     label: '부원 관리',
-                    onTap: () =>
-                        _push(context, const MemberManagementPage()),
+                    onTap: () => _push(context, const MemberManagementPage()),
                   ),
                   _DrawerItem(
                     icon: Icons.assignment_outlined,
                     label: '지원서 관리',
-                    onTap: () =>
-                        _push(context, const ApplicationListPage()),
+                    onTap: () => _push(context, const ApplicationListPage()),
                   ),
                   _DrawerItem(
                     icon: Icons.edit_document,
                     label: '지원 폼 관리',
-                    onTap: () =>
-                        _push(context, const ApplicationFormPage()),
+                    onTap: () => _push(context, const ApplicationFormPage()),
                   ),
                   _DrawerItem(
                     icon: Icons.key_outlined,

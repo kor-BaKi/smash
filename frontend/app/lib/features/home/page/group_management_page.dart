@@ -6,13 +6,7 @@ import '../model/group_model.dart';
 import '../model/member_register_model.dart';
 import '../provider/group_management_provider.dart';
 
-const _dayLabels = {
-  'MON': '월',
-  'TUE': '화',
-  'WED': '수',
-  'THU': '목',
-  'FRI': '금',
-};
+const _dayLabels = {'MON': '월', 'TUE': '화', 'WED': '수', 'THU': '목', 'FRI': '금'};
 const _timeSlotLabels = {'SLOT_13_15': '1-3시', 'SLOT_15_17': '3-5시'};
 
 class GroupManagementPage extends ConsumerStatefulWidget {
@@ -23,8 +17,7 @@ class GroupManagementPage extends ConsumerStatefulWidget {
       _GroupManagementPageState();
 }
 
-class _GroupManagementPageState
-    extends ConsumerState<GroupManagementPage> {
+class _GroupManagementPageState extends ConsumerState<GroupManagementPage> {
   @override
   void initState() {
     super.initState();
@@ -88,9 +81,7 @@ class _GroupTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final leader = admins
-        .where((a) => a.id == group.leaderUserId)
-        .toList();
+    final leader = admins.where((a) => a.id == group.leaderUserId).toList();
     final leaderName = leader.isEmpty ? null : leader.first.name;
 
     return Container(
@@ -123,10 +114,7 @@ class _GroupTile extends ConsumerWidget {
                     ),
                   ),
                   PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_horiz,
-                      color: AppColors.gray,
-                    ),
+                    icon: const Icon(Icons.more_horiz, color: AppColors.gray),
                     color: AppColors.card2,
                     onSelected: (value) {
                       if (value == 'assign') {
@@ -173,10 +161,7 @@ class _GroupTile extends ConsumerWidget {
                   const SizedBox(width: 6),
                   Text(
                     '· ${group.memberCount}명',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.gray,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: AppColors.gray),
                   ),
                 ],
               ),
@@ -198,9 +183,7 @@ class _GroupTile extends ConsumerWidget {
       context: context,
       builder: (context) => SimpleDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           '${group.label} 조장 지정',
           style: const TextStyle(
@@ -231,14 +214,10 @@ class _GroupDetailDialog extends ConsumerStatefulWidget {
   final GroupDetail group;
   final String? leaderName;
 
-  const _GroupDetailDialog({
-    required this.group,
-    required this.leaderName,
-  });
+  const _GroupDetailDialog({required this.group, required this.leaderName});
 
   @override
-  ConsumerState<_GroupDetailDialog> createState() =>
-      _GroupDetailDialogState();
+  ConsumerState<_GroupDetailDialog> createState() => _GroupDetailDialogState();
 }
 
 class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
@@ -258,9 +237,7 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
 
     return Dialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -306,9 +283,7 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
                 ? const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.lime,
-                      ),
+                      child: CircularProgressIndicator(color: AppColors.lime),
                     ),
                   )
                 : state.selectedGroupMembers.isEmpty
@@ -386,8 +361,7 @@ class _CreateGroupDialog extends ConsumerStatefulWidget {
   const _CreateGroupDialog();
 
   @override
-  ConsumerState<_CreateGroupDialog> createState() =>
-      _CreateGroupDialogState();
+  ConsumerState<_CreateGroupDialog> createState() => _CreateGroupDialogState();
 }
 
 class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
@@ -432,9 +406,7 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
 
     return Dialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -469,13 +441,11 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               entry.value,
-                              style: const TextStyle(
-                                color: AppColors.white,
-                              ),
+                              style: const TextStyle(color: AppColors.white),
                             ),
                             value: isChecked,
                             activeColor: AppColors.lime,
-                            checkColor: const Color(0xFF111111),
+                            checkColor: AppColors.onPrimary,
                             onChanged: (_) {
                               setState(() {
                                 if (isChecked) {
@@ -514,7 +484,7 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Color(0xFF111111),
+                              color: AppColors.onPrimary,
                             ),
                           )
                         : Text('생성 (${_selected.length}개)'),

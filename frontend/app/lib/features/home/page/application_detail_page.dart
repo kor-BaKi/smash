@@ -16,8 +16,7 @@ class ApplicationDetailPage extends ConsumerStatefulWidget {
       _ApplicationDetailPageState();
 }
 
-class _ApplicationDetailPageState
-    extends ConsumerState<ApplicationDetailPage> {
+class _ApplicationDetailPageState extends ConsumerState<ApplicationDetailPage> {
   ApplicationInfo? _detail;
   bool _isLoading = true;
 
@@ -37,9 +36,7 @@ class _ApplicationDetailPageState
 
   Future<void> _loadDetail() async {
     try {
-      final data = await ApplicationApi.getApplication(
-        widget.applicationId,
-      );
+      final data = await ApplicationApi.getApplication(widget.applicationId);
       setState(() {
         _detail = ApplicationInfo.fromJson(data);
         _isLoading = false;
@@ -77,15 +74,10 @@ class _ApplicationDetailPageState
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '합격 처리',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: Text(
           '${_detail?.name}님을 합격 처리할까요?\nusers 테이블에 자동으로 등록됩니다.',
@@ -94,10 +86,7 @@ class _ApplicationDetailPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -113,9 +102,7 @@ class _ApplicationDetailPageState
       ),
     );
     if (confirmed == true) {
-      await ref
-          .read(applicationProvider.notifier)
-          .accept(widget.applicationId);
+      await ref.read(applicationProvider.notifier).accept(widget.applicationId);
       setState(
         () => _detail = ApplicationInfo.fromJson(_detailJson('ACCEPTED')),
       );
@@ -132,15 +119,10 @@ class _ApplicationDetailPageState
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '불합격 처리',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: Text(
           '${_detail?.name}님을 불합격 처리할까요?',
@@ -149,10 +131,7 @@ class _ApplicationDetailPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -168,9 +147,7 @@ class _ApplicationDetailPageState
       ),
     );
     if (confirmed == true) {
-      await ref
-          .read(applicationProvider.notifier)
-          .reject(widget.applicationId);
+      await ref.read(applicationProvider.notifier).reject(widget.applicationId);
       setState(
         () => _detail = ApplicationInfo.fromJson(_detailJson('REJECTED')),
       );
@@ -187,15 +164,10 @@ class _ApplicationDetailPageState
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '불합격 취소',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: Text(
           '${_detail?.name}님의 불합격을 취소하고 미처리로 되돌릴까요?',
@@ -204,10 +176,7 @@ class _ApplicationDetailPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -284,9 +253,7 @@ class _ApplicationDetailPageState
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: AppColors.bg,
-        body: Center(
-          child: CircularProgressIndicator(color: AppColors.lime),
-        ),
+        body: Center(child: CircularProgressIndicator(color: AppColors.lime)),
       );
     }
     if (_detail == null) {
@@ -340,10 +307,7 @@ class _ApplicationDetailPageState
                   const Spacer(),
                   Text(
                     d.createdAt.substring(0, 10),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.gray,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: AppColors.gray),
                   ),
                 ],
               ),
@@ -358,10 +322,7 @@ class _ApplicationDetailPageState
                 _InfoRow(label: '학번', value: d.studentNo),
                 _InfoRow(label: '학과', value: d.department),
                 _InfoRow(label: '전화번호', value: d.phone),
-                _InfoRow(
-                  label: '희망 활동 시간',
-                  value: d.availabilitiesFormatted,
-                ),
+                _InfoRow(label: '희망 활동 시간', value: d.availabilitiesFormatted),
               ],
             ),
             const SizedBox(height: 12),
@@ -478,7 +439,7 @@ class _ApplicationDetailPageState
                           ),
                           child: const Icon(
                             Icons.send,
-                            color: Color(0xFF111111),
+                            color: AppColors.onPrimary,
                             size: 18,
                           ),
                         ),
@@ -638,10 +599,7 @@ class _InfoRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.gray,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: AppColors.gray),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -661,10 +619,7 @@ class _InfoRow extends StatelessWidget {
                   width: 100,
                   child: Text(
                     label,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.gray,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: AppColors.gray),
                   ),
                 ),
                 Expanded(

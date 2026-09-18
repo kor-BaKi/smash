@@ -12,8 +12,7 @@ class TransportGroupPage extends ConsumerStatefulWidget {
   const TransportGroupPage({super.key, required this.activityId});
 
   @override
-  ConsumerState<TransportGroupPage> createState() =>
-      _TransportGroupPageState();
+  ConsumerState<TransportGroupPage> createState() => _TransportGroupPageState();
 }
 
 class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
@@ -28,9 +27,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
       await ref
           .read(activityProvider.notifier)
           .loadParticipants(widget.activityId);
-      await ref
-          .read(transportProvider.notifier)
-          .loadGroups(widget.activityId);
+      await ref.read(transportProvider.notifier).loadGroups(widget.activityId);
       _initFromSaved();
     });
   }
@@ -61,9 +58,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
   void _assignToGroup(int userId, int? groupIndex, {bool isMove = false}) {
     if (groupIndex != null) {
       final currentSize = _groupSelections[groupIndex].length;
-      final isAlreadyInGroup = _groupSelections[groupIndex].contains(
-        userId,
-      );
+      final isAlreadyInGroup = _groupSelections[groupIndex].contains(userId);
       final effectiveSize = isAlreadyInGroup
           ? currentSize
           : currentSize + (isMove ? 0 : 1);
@@ -98,9 +93,9 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
         .toList();
 
     if (nonEmpty.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('그룹에 최소 1명 이상 배정해주세요.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('그룹에 최소 1명 이상 배정해주세요.')));
       return;
     }
 
@@ -120,15 +115,10 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           '배정 초기화',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
         ),
         content: const Text(
           '모든 택시 그룹 배정을 초기화할까요?',
@@ -137,10 +127,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.gray),
-            ),
+            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -166,10 +153,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
     }
   }
 
-  void _showGroupPicker(
-    BuildContext context,
-    ActivityParticipant participant,
-  ) {
+  void _showGroupPicker(BuildContext context, ActivityParticipant participant) {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.card,
@@ -193,10 +177,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
             const SizedBox(height: 16),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text(
-                '미배정',
-                style: TextStyle(color: AppColors.gray),
-              ),
+              title: const Text('미배정', style: TextStyle(color: AppColors.gray)),
               trailing: _getGroupIndex(participant.userId) == null
                   ? const Icon(Icons.check, color: AppColors.lime)
                   : null,
@@ -322,7 +303,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF111111),
+                              color: AppColors.onPrimary,
                             ),
                           ),
                         ),
@@ -335,8 +316,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
                             ..._groupSelections.asMap().entries.map(
                               (e) => GestureDetector(
                                 onTap: () => setState(() {
-                                  _activeGroupIndex =
-                                      _activeGroupIndex == e.key
+                                  _activeGroupIndex = _activeGroupIndex == e.key
                                       ? null
                                       : e.key;
                                 }),
@@ -365,8 +345,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
                                   ),
                                 ),
                                 child: const Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.add, color: AppColors.gray),
                                     SizedBox(height: 4),
@@ -414,7 +393,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                               color: groupIndex != null
-                                  ? const Color(0xFF111111)
+                                  ? AppColors.onPrimary
                                   : AppColors.gray,
                             ),
                           ),
@@ -456,9 +435,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
-                            groupIndex != null
-                                ? '${groupIndex + 1}호차'
-                                : '미배정',
+                            groupIndex != null ? '${groupIndex + 1}호차' : '미배정',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -479,9 +456,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
                                 builder: (context) => AlertDialog(
                                   backgroundColor: AppColors.card,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      24,
-                                    ),
+                                    borderRadius: BorderRadius.circular(24),
                                   ),
                                   title: const Text(
                                     '호차 변경',
@@ -502,9 +477,7 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
                                           Navigator.of(context).pop(false),
                                       child: const Text(
                                         '취소',
-                                        style: TextStyle(
-                                          color: AppColors.gray,
-                                        ),
+                                        style: TextStyle(color: AppColors.gray),
                                       ),
                                     ),
                                     TextButton(
@@ -554,13 +527,10 @@ class _TransportGroupPageState extends ConsumerState<TransportGroupPage> {
               ),
             ),
             child: transportState.isSubmitting
-                ? const CircularProgressIndicator(color: Color(0xFF111111))
+                ? const CircularProgressIndicator(color: AppColors.onPrimary)
                 : const Text(
                     '배정 완료',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                   ),
           ),
         ),
@@ -619,9 +589,7 @@ class _GroupCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: isActive
-                      ? const Color(0xFF111111)
-                      : AppColors.lime,
+                  color: isActive ? AppColors.onPrimary : AppColors.lime,
                 ),
               ),
               const SizedBox(width: 4),
@@ -630,7 +598,7 @@ class _GroupCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   color: isActive
-                      ? const Color(0xFF111111).withValues(alpha: 0.6)
+                      ? AppColors.onPrimary.withValues(alpha: 0.6)
                       : AppColors.lime,
                 ),
               ),
@@ -642,7 +610,7 @@ class _GroupCard extends StatelessWidget {
                     Icons.close,
                     size: 14,
                     color: isActive
-                        ? const Color(0xFF111111).withValues(alpha: 0.5)
+                        ? AppColors.onPrimary.withValues(alpha: 0.5)
                         : AppColors.darkGray,
                   ),
                 ),
@@ -661,7 +629,7 @@ class _GroupCard extends StatelessWidget {
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: isActive
-                              ? const Color(0xFF111111)
+                              ? AppColors.onPrimary
                               : AppColors.lime,
                         ),
                         overflow: TextOverflow.ellipsis,

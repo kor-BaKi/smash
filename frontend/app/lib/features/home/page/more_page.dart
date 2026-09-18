@@ -9,7 +9,7 @@ class MorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(title: const Text('더보기')),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -20,19 +20,16 @@ class MorePage extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const SettingPage()),
             ),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: AppColors.cardBg,
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Row(
                 children: [
                   Icon(
                     Icons.settings_outlined,
-                    color: AppColors.primary,
+                    color: AppColors.lime,
                     size: 20,
                   ),
                   SizedBox(width: 12),
@@ -41,14 +38,14 @@ class MorePage extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      color: AppColors.ink,
+                      color: AppColors.white,
                     ),
                   ),
                   Spacer(),
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 14,
-                    color: AppColors.textTertiary,
+                    color: AppColors.gray,
                   ),
                 ],
               ),

@@ -32,9 +32,8 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
     // 기간 내림차순 정렬 후 슬롯 부여
     final sorted = List.generate(_polls.length, (i) => i)
       ..sort(
-        (a, b) => _getPollDuration(
-          _polls[b],
-        ).compareTo(_getPollDuration(_polls[a])),
+        (a, b) =>
+            _getPollDuration(_polls[b]).compareTo(_getPollDuration(_polls[a])),
       );
 
     _pollSlots = {};
@@ -48,12 +47,11 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
     AppColors.green,
     AppColors.coral,
     AppColors.lime,
-    Color(0xFF7B5EA7),
-    Color(0xFF3A7BD5),
+    AppColors.accentViolet,
+    AppColors.accentBlue,
   ];
 
-  Color _getPollColor(int index) =>
-      _pollColors[index % _pollColors.length];
+  Color _getPollColor(int index) => _pollColors[index % _pollColors.length];
 
   @override
   void initState() {
@@ -378,17 +376,15 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
                   await CalendarApi.create(
                     titleController.text,
                     selectedDate.toIso8601String().substring(0, 10),
-                    memoController.text.isEmpty
-                        ? null
-                        : memoController.text,
+                    memoController.text.isEmpty ? null : memoController.text,
                   );
                   if (mounted) Navigator.pop(context);
                   await _loadEvents();
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('일정 추가 실패')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('일정 추가 실패')));
                   }
                 }
               },
@@ -405,7 +401,7 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF111111),
+                    color: AppColors.onPrimary,
                   ),
                 ),
               ),
@@ -593,7 +589,7 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
                       fontWeight: FontWeight.w600,
                       fontFamily: 'BMJUA',
                       color: isSelected
-                          ? const Color(0xFF111111)
+                          ? AppColors.onPrimary
                           : isToday
                           ? AppColors.lime
                           : isWeekend
@@ -648,7 +644,7 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
                         ),
                         child: const Icon(
                           Icons.add,
-                          color: Color(0xFF111111),
+                          color: AppColors.onPrimary,
                           size: 20,
                         ),
                       ),
@@ -661,9 +657,7 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
             Expanded(
               child: _isLoading
                   ? const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.lime,
-                      ),
+                      child: CircularProgressIndicator(color: AppColors.lime),
                     )
                   : TableCalendar(
                       rowHeight: _kRowHeight,
@@ -741,9 +735,7 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
                           Icons.chevron_right,
                           color: AppColors.white,
                         ),
-                        decoration: const BoxDecoration(
-                          color: AppColors.bg,
-                        ),
+                        decoration: const BoxDecoration(color: AppColors.bg),
                       ),
                       daysOfWeekStyle: const DaysOfWeekStyle(
                         weekdayStyle: TextStyle(
