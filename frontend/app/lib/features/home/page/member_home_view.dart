@@ -86,7 +86,9 @@ class _MemberHomeViewState extends ConsumerState<MemberHomeView> {
                           children: [
                             TextSpan(
                               text: user?.name ?? '',
-                              style: const TextStyle(color: AppColors.white),
+                              style: const TextStyle(
+                                color: AppColors.white,
+                              ),
                             ),
                             const TextSpan(
                               text: ' •',
@@ -245,7 +247,10 @@ class _ActivityCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(_subtitle, style: TextStyle(fontSize: 13, color: _subColor)),
+          Text(
+            _subtitle,
+            style: TextStyle(fontSize: 13, color: _subColor),
+          ),
 
           const SizedBox(height: 18),
 
@@ -261,7 +266,11 @@ class _ActivityCard extends ConsumerWidget {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline, size: 16, color: AppColors.gray),
+                  Icon(
+                    Icons.lock_outline,
+                    size: 16,
+                    color: AppColors.gray,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     '투표가 마감되었습니다',
@@ -278,7 +287,8 @@ class _ActivityCard extends ConsumerWidget {
             // 액션 버튼
             Row(
               children: activity.availableButtons.map((type) {
-                final isPrimary = type == 'ATTEND' || type == 'FREE_ATTEND';
+                final isPrimary =
+                    type == 'ATTEND' || type == 'FREE_ATTEND';
                 Color btnBg;
                 Color btnFg;
 
@@ -322,6 +332,9 @@ class _ActivityCard extends ConsumerWidget {
                                 type: serverType,
                               )
                               .then((_) {
+                                ref
+                                    .read(activityProvider.notifier)
+                                    .loadTodayActivities();
                                 if (type == 'ATTEND' ||
                                     type == 'CARRYOVER' ||
                                     type == 'OTHER_GROUP') {
@@ -440,7 +453,9 @@ class _ActivityCard extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: activity.myParticipation!.travelType == null
+                            color:
+                                activity.myParticipation!.travelType ==
+                                    null
                                 ? AppColors.coral
                                 : _subColor,
                           ),
@@ -459,7 +474,9 @@ class _ActivityCard extends ConsumerWidget {
                             ),
                             decoration: BoxDecoration(
                               color: _isColorCard
-                                  ? AppColors.overlay.withValues(alpha: 0.1)
+                                  ? AppColors.overlay.withValues(
+                                      alpha: 0.1,
+                                    )
                                   : AppColors.card,
                               borderRadius: BorderRadius.circular(999),
                             ),
@@ -601,7 +618,9 @@ class _PollCard extends ConsumerWidget {
                                       .read(pollProvider.notifier)
                                       .vote(poll.id, option.id),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 13,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.overlay.withValues(
                                   alpha: 0.12,
@@ -630,7 +649,10 @@ class _PollCard extends ConsumerWidget {
           else ...[
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.overlay.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14),
@@ -714,7 +736,9 @@ Future<void> _showTravelTypeDialog(
     barrierDismissible: false,
     builder: (context) => AlertDialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       title: const Text(
         '이동 방법을 선택해주세요',
         style: TextStyle(
@@ -782,7 +806,8 @@ class _MyTransportGroup extends ConsumerStatefulWidget {
   const _MyTransportGroup({required this.activityId});
 
   @override
-  ConsumerState<_MyTransportGroup> createState() => _MyTransportGroupState();
+  ConsumerState<_MyTransportGroup> createState() =>
+      _MyTransportGroupState();
 }
 
 class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
@@ -866,7 +891,9 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
                 '${myGroup.members.length}명',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.onPrimary.withValues(alpha: 0x88 / 0xFF),
+                  color: AppColors.onPrimary.withValues(
+                    alpha: 0x88 / 0xFF,
+                  ),
                 ),
               ),
             ],
@@ -878,7 +905,10 @@ class _MyTransportGroupState extends ConsumerState<_MyTransportGroup> {
             children: myGroup.members.map((m) {
               final isMe = m.userId == userId;
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: isMe
                       ? AppColors.onPrimary
