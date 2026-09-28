@@ -4,6 +4,7 @@ import com.smash.api.fcm.FcmService;
 import com.smash.domain.activity.*;
 import com.smash.domain.group.Group;
 import com.smash.domain.group.GroupRepository;
+import com.smash.domain.group.TimeSlot;
 import com.smash.domain.participation.ParticipationRepository;
 import com.smash.domain.user.User;
 import com.smash.domain.user.UserRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import jakarta.annotation.PostConstruct;
 
@@ -36,36 +38,44 @@ public class ActivityScheduler {
     }
 
     // 알림
-    @Scheduled(cron = "0 0 9 * * * ")
+    // 매 정각마다 실행 (1시간 전 체크)
+    @Scheduled(cron = "0 0 * * * *")
     @Transactional(readOnly = true)
     public void sendActivityReminderNotification() {
         LocalDate today = LocalDate.now();
-        log.info("활동 마감 임박 알림 시작: {}", today);
+        LocalTime nowHour = LocalTime.now().withMinute(0).withSecond(0).withNano(0);
 
-        // 오늘 활동 조회
+        // 1시간 후 시작하는 활동 조회
+        LocalTime targetTime = nowHour.plusHours(1);
+
+        log.info("활동 마감 임박 알림 시작: {} {}시", today, targetTime.getHour());
+
         List<Activity> todayActivities = activityRepository.findByActivityDate(today);
 
         for (Activity activity : todayActivities) {
             if (activity.isVoteClosed()) continue;
 
-            // 해당 황동읠 조 멤버만 조회
+            // 활동 시작 시간 확인
+            TimeSlot timeSlot = activity.getGroup().getTimeSlot();
+            int startHour = timeSlot == TimeSlot.SLOT_13_15 ? 13 : 15;
+
+            if (startHour != targetTime.getHour()) continue;
+
             List<User> members = userRepository.findByGroupId(activity.getGroup().getId());
 
             for (User user : members) {
-                // 이미 응답한 유저는 제외
                 boolean hasParticipated = participationRepository
                         .existsByActivityAndUser(activity, user);
 
                 if (!hasParticipated) {
                     fcmService.sendActivityNotificationToUser(
                             user.getId(),
-                            "오늘 활동 마감 임박",
-                            activity.getGroup().getLabel() + "활동 참여 여부를 선택해주세요."
+                            "오늘 활동 마감 임박 ⏰",
+                            activity.getGroup().getLabel() + " 활동 참여 여부를 선택해주세요."
                     );
                 }
             }
         }
-
     }
 
     // 매일 자정에 실행 : [초] : (0 = 0초) [분] : (0 = 0분) [시] (0 = 0시) [일] : (* = 매일) [월] : * = 매월) [요일] : (* = 매일)
