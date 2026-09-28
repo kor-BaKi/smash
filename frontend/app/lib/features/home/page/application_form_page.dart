@@ -397,7 +397,7 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
                     ),
                     const SizedBox(height: 20),
                     QrImageView(
-                      data: 'https://baki.tailbdb322.ts.net/apply.html',
+                      data: 'http://3.38.245.70:8080/apply.html',
                       version: QrVersions.auto,
                       size: 220,
                       // QR 스캔 인식률을 위해 테마와 무관하게 항상 흰색 배경 유지
@@ -405,7 +405,7 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
                     ),
                     const SizedBox(height: 12),
                     const Text(
-                      'baki.tailbdb322.ts.net/apply.html',
+                      '3.38.245.70:8080/apply.html',
                       style: TextStyle(fontSize: 11, color: AppColors.gray),
                     ),
                   ],
