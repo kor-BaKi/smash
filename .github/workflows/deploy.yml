@@ -38,7 +38,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "backend/app/build/libs/*.jar"
           target: "/home/ubuntu/"
-          strip_components: 2
+          strip_components: 4
 
       - name: Restart Spring Boot
         uses: appleboy/ssh-action@master
