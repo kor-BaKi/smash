@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/application-form").permitAll()
                         .requestMatchers("/api/v1/applications").permitAll()
                         .requestMatchers("/apply.html").permitAll()
+                        .requestMatchers("/privacy.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/files/photos/**").permitAll()
                         .requestMatchers("/api/v1/settlements/**").authenticated()
