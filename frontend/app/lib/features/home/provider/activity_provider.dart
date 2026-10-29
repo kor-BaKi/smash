@@ -135,6 +135,28 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
     }
   }
 
+  // 이동 방법 변경 (낙관적 업데이트, 실패 시 롤백)
+  Future<void> updateTravelType(int activityId, String travelType) async {
+    final original = state.activities;
+    state = state.copyWith(
+      activities: state.activities.map((a) {
+        if (a.activityId != activityId || a.myParticipation == null) return a;
+        return a.copyWith(
+          myParticipation: a.myParticipation!.copyWith(travelType: travelType),
+        );
+      }).toList(),
+    );
+
+    try {
+      await ActivityApi.updateTravelType(activityId, travelType);
+    } catch (e) {
+      state = state.copyWith(
+        activities: original,
+        errorMessage: '이동 방법 변경에 실패했습니다.',
+      );
+    }
+  }
+
   Future<void> loadParticipants(int activityId) async {
     try {
       final data = await ActivityApi.getParticipants(activityId);
@@ -152,7 +174,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
     state = state.copyWith(
       activities: state.activities.map((a) {
         if (a.activityId != activityId) return a;
-        return a.copyWith(myParticipation: null);
+        return a.copyWith(clearParticipation: true);
       }).toList(),
     );
 

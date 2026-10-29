@@ -3,7 +3,6 @@ import 'package:app/features/home/page/taxi_settlement_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/api/activity_api.dart';
 import '../../../core/theme/app_theme.dart';
 import '../model/activity_model.dart';
 import '../model/poll_model.dart';
@@ -332,9 +331,6 @@ class _ActivityCard extends ConsumerWidget {
                                 type: serverType,
                               )
                               .then((_) {
-                                ref
-                                    .read(activityProvider.notifier)
-                                    .loadTodayActivities();
                                 if (type == 'ATTEND' ||
                                     type == 'CARRYOVER' ||
                                     type == 'OTHER_GROUP') {
@@ -757,8 +753,9 @@ Future<void> _showTravelTypeDialog(
           child: ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              await ActivityApi.updateTravelType(activityId, 'TOGETHER');
-              ref.invalidate(activityProvider);
+              ref
+                  .read(activityProvider.notifier)
+                  .updateTravelType(activityId, 'TOGETHER');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.lime,
@@ -780,8 +777,9 @@ Future<void> _showTravelTypeDialog(
           child: OutlinedButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              await ActivityApi.updateTravelType(activityId, 'ALONE');
-              ref.invalidate(activityProvider);
+              ref
+                  .read(activityProvider.notifier)
+                  .updateTravelType(activityId, 'ALONE');
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.gray,
