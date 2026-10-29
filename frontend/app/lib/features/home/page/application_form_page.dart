@@ -15,11 +15,82 @@ class ApplicationFormPage extends ConsumerStatefulWidget {
       _ApplicationFormPageState();
 }
 
-class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
+class _ApplicationFormPageState
+    extends ConsumerState<ApplicationFormPage> {
   @override
   void initState() {
     super.initState();
     Future.microtask(() => ref.read(applicationProvider.notifier).load());
+  }
+
+  Future<void> _showCreateFormDialog() async {
+    bool copyQuestions = true;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            '새 학기 폼 만들기',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '새 폼을 만들면 현재 폼은 마감되고, 지원서 목록은 새 폼 기준으로 바뀝니다.\n'
+                '이전 지원서는 삭제되지 않습니다.',
+                style: TextStyle(fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                activeColor: AppColors.lime,
+                title: const Text('이전 폼의 질문 복사'),
+                value: copyQuestions,
+                onChanged: (val) =>
+                    setDialogState(() => copyQuestions = val ?? true),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                '만들기',
+                style: TextStyle(
+                  color: AppColors.lime,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final ok = await ref
+        .read(applicationProvider.notifier)
+        .createForm(copyQuestions: copyQuestions);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok ? '새 폼이 만들어졌습니다. 기간을 설정하고 접수를 열어주세요.' : '새 폼 생성에 실패했습니다.',
+        ),
+      ),
+    );
   }
 
   Future<void> _showAddQuestionDialog() async {
@@ -54,24 +125,36 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
               const SizedBox(height: 16),
               const Text(
                 '질문 타입',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: questionType,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                ),
                 items: const [
                   DropdownMenuItem(value: 'TEXT', child: Text('한 줄 텍스트')),
-                  DropdownMenuItem(value: 'MULTILINE', child: Text('여러 줄 텍스트')),
+                  DropdownMenuItem(
+                    value: 'MULTILINE',
+                    child: Text('여러 줄 텍스트'),
+                  ),
                   DropdownMenuItem(value: 'SELECT', child: Text('선택형')),
                 ],
-                onChanged: (val) => setDialogState(() => questionType = val!),
+                onChanged: (val) =>
+                    setDialogState(() => questionType = val!),
               ),
               if (questionType == 'SELECT') ...[
                 const SizedBox(height: 12),
                 const Text(
                   '선택지 (쉼표로 구분)',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -88,7 +171,8 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
                   Checkbox(
                     value: isRequired,
                     activeColor: AppColors.lime,
-                    onChanged: (val) => setDialogState(() => isRequired = val!),
+                    onChanged: (val) =>
+                        setDialogState(() => isRequired = val!),
                   ),
                   const Text(
                     '필수 항목',
@@ -150,7 +234,9 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         title: const Text('질문 삭제'),
         content: Text('"$content"\n\n이 질문을 삭제할까요?'),
         actions: [
@@ -160,7 +246,10 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('삭제', style: TextStyle(color: AppColors.coral)),
+            child: const Text(
+              '삭제',
+              style: TextStyle(color: AppColors.coral),
+            ),
           ),
         ],
       ),
@@ -392,7 +481,10 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
                   children: [
                     const Text(
                       'QR코드를 스캔하면 지원 폼으로 연결됩니다.',
-                      style: TextStyle(fontSize: 13, color: AppColors.gray),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.gray,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
@@ -406,7 +498,10 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
                     const SizedBox(height: 12),
                     const Text(
                       '3.38.245.70:8080/apply.html',
-                      style: TextStyle(fontSize: 11, color: AppColors.gray),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.gray,
+                      ),
                     ),
                   ],
                 ),
@@ -419,7 +514,11 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
               ),
             ),
           ),
-          // 질문 추가 버튼
+          IconButton(
+            icon: const Icon(Icons.post_add),
+            onPressed: _showCreateFormDialog,
+            tooltip: '새 학기 폼 만들기',
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _showAddQuestionDialog,
@@ -525,7 +624,10 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
                     const Spacer(),
                     const Text(
                       '길게 눌러서 순서 변경',
-                      style: TextStyle(fontSize: 11, color: AppColors.gray),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.gray,
+                      ),
                     ),
                   ],
                 ),
@@ -585,7 +687,8 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     q.content,
@@ -626,7 +729,8 @@ class _ApplicationFormPageState extends ConsumerState<ApplicationFormPage> {
                                 color: AppColors.gray,
                                 size: 20,
                               ),
-                              onPressed: () => _deleteQuestion(q.id, q.content),
+                              onPressed: () =>
+                                  _deleteQuestion(q.id, q.content),
                             ),
                           ],
                         ),

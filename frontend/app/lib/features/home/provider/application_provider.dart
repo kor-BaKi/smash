@@ -209,6 +209,18 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
       state = state.copyWith(errorMessage: '폼 상태 변경에 실패했습니다.');
     }
   }
+
+  // 새 폼 생성 후 다시 로드
+  Future<bool> createForm({required bool copyQuestions}) async {
+    try {
+      await ApplicationApi.createForm(copyQuestions: copyQuestions);
+      await load(showLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(errorMessage: '새 폼 생성에 실패했습니다.');
+      return false;
+    }
+  }
 }
 
 final applicationProvider =

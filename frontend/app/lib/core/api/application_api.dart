@@ -130,4 +130,15 @@ class ApplicationApi {
     );
     return response.data as List<int>;
   }
+
+  // 새 폼 생성 (새 학기용)
+  static Future<Map<String, dynamic>> createForm({
+    bool copyQuestions = true,
+  }) async {
+    final response = await _dio.post(
+      '/admin/application-form',
+      data: {'copyQuestions': copyQuestions},
+    );
+    return response.data['data'];
+  }
 }
