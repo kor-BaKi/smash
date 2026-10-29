@@ -11,6 +11,7 @@ import 'availability_page.dart';
 import 'calendar_tab_page.dart';
 import 'dues_page.dart';
 import 'free_period_page.dart';
+import 'group_management_page.dart';
 import 'invite_code_page.dart';
 import 'member_home_view.dart';
 import 'member_management_page.dart';
@@ -279,6 +280,11 @@ class _AdminDrawer extends ConsumerWidget {
                     icon: Icons.person_outline,
                     label: '부원 관리',
                     onTap: () => _push(context, const MemberManagementPage()),
+                  ),
+                  _DrawerItem(
+                    icon: Icons.groups_outlined,
+                    label: '조 편성 관리',
+                    onTap: () => _push(context, const GroupManagementPage()),
                   ),
                   _DrawerItem(
                     icon: Icons.assignment_outlined,
