@@ -33,6 +33,92 @@ class _GroupManagementPageState
     );
   }
 
+  Future<void> _confirmResetSemester() async {
+    final assignedCount = ref
+        .read(groupManagementProvider)
+        .groups
+        .fold<int>(0, (sum, g) => sum + g.memberCount);
+    final controller = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: const Text(
+            '새 학기 초기화',
+            style: TextStyle(
+              color: AppColors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '조에 배정된 부원 $assignedCount명의 배정이 해제되고, '
+                '모든 부원의 가용 시간과 조장·부조장이 삭제됩니다.\n'
+                '활동 기록과 회비는 유지됩니다. 되돌릴 수 없습니다.',
+                style: const TextStyle(color: AppColors.gray, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "계속하려면 '초기화'를 입력하세요.",
+                style: TextStyle(color: AppColors.white, fontSize: 13),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller,
+                onChanged: (_) => setDialogState(() {}),
+                style: const TextStyle(color: AppColors.white),
+                decoration: const InputDecoration(hintText: '초기화'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: controller.text.trim() == '초기화'
+                  ? () => Navigator.pop(context, true)
+                  : null,
+              child: const Text(
+                '초기화',
+                style: TextStyle(
+                  color: AppColors.coral,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.dispose();
+
+    if (confirmed != true) return;
+
+    final ok = await ref
+        .read(groupManagementProvider.notifier)
+        .resetSemester();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? '새 학기 초기화가 완료되었습니다. 부원들이 가용 시간을 다시 제출하면 자동 배정을 진행하세요.'
+              : '새 학기 초기화에 실패했습니다.',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(groupManagementProvider);
@@ -42,6 +128,11 @@ class _GroupManagementPageState
       appBar: AppBar(
         title: const Text('조 편성 관리'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.restart_alt, color: AppColors.coral),
+            tooltip: '새 학기 초기화',
+            onPressed: state.isSubmitting ? null : _confirmResetSemester,
+          ),
           IconButton(
             icon: const Icon(Icons.add, color: AppColors.lime),
             onPressed: () => showDialog(

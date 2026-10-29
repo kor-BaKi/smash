@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,6 +61,12 @@ public class AssignmentController {
         return ResponseEntity.ok(ApiResponse.success(
                 assignmentService.getUnassignedMembers()
         ));
+    }
+
+    @PostMapping("/api/v1/admin/semester/reset")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> resetSemester() {
+        int released = assignmentService.resetSemester();
+        return ResponseEntity.ok(ApiResponse.success(Map.of("releasedCount", released)));
     }
 
     @DeleteMapping("/api/v1/admin/availability")

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/assignment_api.dart';
 import '../../../core/api/group_api.dart';
 import '../../../core/api/member_register_api.dart';
 import '../model/group_model.dart';
@@ -154,6 +155,23 @@ class GroupManagementNotifier extends StateNotifier<GroupManagementState> {
       await loadAll();
     } catch (e) {
       state = state.copyWith(errorMessage: '부조장 해제에 실패했습니다.');
+    }
+  }
+
+  // 새 학기 초기화: 성공 시 true
+  Future<bool> resetSemester() async {
+    state = state.copyWith(isSubmitting: true, errorMessage: null);
+    try {
+      await AssignmentApi.resetSemester();
+      await loadAll();
+      state = state.copyWith(isSubmitting: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isSubmitting: false,
+        errorMessage: '새 학기 초기화에 실패했습니다.',
+      );
+      return false;
     }
   }
 }

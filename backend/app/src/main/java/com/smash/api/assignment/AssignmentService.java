@@ -249,4 +249,26 @@ public class AssignmentService {
     public void resetAllAvailability() {
         availabilityRepository.deleteAll();
     }
+
+    // 새 학기 초기화: 전체 부원 조 배정 해제 + 가용 시간 삭제 + 조장/부조장 해제
+    // 활동/참여 기록, 회비는 건드리지 않음. 해제된 부원 수를 반환
+    @Transactional
+    public int resetSemester() {
+        int released = 0;
+        for (User user : userRepository.findAll()) {
+            if (user.getGroupId() != null) {
+                user.assignGroup(null);
+                released++;
+            }
+        }
+
+        availabilityRepository.deleteAll();
+
+        for (Group group : groupRepository.findAll()) {
+            group.assignLeader(null);
+            group.assignViceLeader(null);
+        }
+
+        return released;
+    }
 }
