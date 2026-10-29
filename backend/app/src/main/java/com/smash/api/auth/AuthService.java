@@ -78,15 +78,17 @@ public class AuthService {
         LocalDateTime expiresAt = LocalDateTime.now()
                 .plusSeconds(jwtProvider.getRefreshExpiration() / 1000);
 
+        String hashedToken = hash(refreshToken);
+
         refreshTokenRepository.findByUserId(user.getId())
                 .ifPresentOrElse(
-                        existing -> existing.rotate(refreshToken, expiresAt),
+                        existing -> existing.rotate(hashedToken, expiresAt),
                         () -> refreshTokenRepository.save(
                                 RefreshToken.builder()
-                                    .userId(user.getId())
-                                    .token(hash(refreshToken)) // 해시로 저장
-                                    .expiresAt(expiresAt)
-                                    .build())
+                                        .userId(user.getId())
+                                        .token(hashedToken)
+                                        .expiresAt(expiresAt)
+                                        .build())
                 );
 
         return AuthResponse.builder()
