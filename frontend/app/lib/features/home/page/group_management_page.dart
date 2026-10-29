@@ -6,7 +6,13 @@ import '../model/group_model.dart';
 import '../model/member_register_model.dart';
 import '../provider/group_management_provider.dart';
 
-const _dayLabels = {'MON': '월', 'TUE': '화', 'WED': '수', 'THU': '목', 'FRI': '금'};
+const _dayLabels = {
+  'MON': '월',
+  'TUE': '화',
+  'WED': '수',
+  'THU': '목',
+  'FRI': '금',
+};
 const _timeSlotLabels = {'SLOT_13_15': '1-3시', 'SLOT_15_17': '3-5시'};
 
 class GroupManagementPage extends ConsumerStatefulWidget {
@@ -17,7 +23,8 @@ class GroupManagementPage extends ConsumerStatefulWidget {
       _GroupManagementPageState();
 }
 
-class _GroupManagementPageState extends ConsumerState<GroupManagementPage> {
+class _GroupManagementPageState
+    extends ConsumerState<GroupManagementPage> {
   @override
   void initState() {
     super.initState();
@@ -81,8 +88,15 @@ class _GroupTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final leader = admins.where((a) => a.id == group.leaderUserId).toList();
+    final leader = admins
+        .where((a) => a.id == group.leaderUserId)
+        .toList();
     final leaderName = leader.isEmpty ? null : leader.first.name;
+
+    final vice = admins
+        .where((a) => a.id == group.viceLeaderUserId)
+        .toList();
+    final viceName = vice.isEmpty ? null : vice.first.name;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -114,15 +128,37 @@ class _GroupTile extends ConsumerWidget {
                     ),
                   ),
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_horiz, color: AppColors.gray),
+                    icon: const Icon(
+                      Icons.more_horiz,
+                      color: AppColors.gray,
+                    ),
                     color: AppColors.card2,
                     onSelected: (value) {
+                      final notifier = ref.read(
+                        groupManagementProvider.notifier,
+                      );
                       if (value == 'assign') {
-                        _showLeaderPicker(context, ref);
+                        _showMemberPicker(
+                          context,
+                          title: '${group.label} 조장 지정',
+                          candidates: admins,
+                          onPick: (id) =>
+                              notifier.assignLeader(group.id, id),
+                        );
                       } else if (value == 'remove') {
-                        ref
-                            .read(groupManagementProvider.notifier)
-                            .removeLeader(group.id);
+                        notifier.removeLeader(group.id);
+                      } else if (value == 'assignVice') {
+                        _showMemberPicker(
+                          context,
+                          title: '${group.label} 부조장 지정',
+                          candidates: admins
+                              .where((a) => a.id != group.leaderUserId)
+                              .toList(),
+                          onPick: (id) =>
+                              notifier.assignViceLeader(group.id, id),
+                        );
+                      } else if (value == 'removeVice') {
+                        notifier.removeViceLeader(group.id);
                       }
                     },
                     itemBuilder: (context) => [
@@ -138,6 +174,21 @@ class _GroupTile extends ConsumerWidget {
                           value: 'remove',
                           child: Text(
                             '조장 취소',
+                            style: TextStyle(color: AppColors.coral),
+                          ),
+                        ),
+                      PopupMenuItem(
+                        value: 'assignVice',
+                        child: Text(
+                          viceName == null ? '부조장 지정' : '부조장 변경',
+                          style: const TextStyle(color: AppColors.white),
+                        ),
+                      ),
+                      if (viceName != null)
+                        const PopupMenuItem(
+                          value: 'removeVice',
+                          child: Text(
+                            '부조장 해제',
                             style: TextStyle(color: AppColors.coral),
                           ),
                         ),
@@ -161,9 +212,23 @@ class _GroupTile extends ConsumerWidget {
                   const SizedBox(width: 6),
                   Text(
                     '· ${group.memberCount}명',
-                    style: const TextStyle(fontSize: 13, color: AppColors.gray),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.gray,
+                    ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                viceName == null ? '부조장 미지정' : '부조장 $viceName',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: viceName == null
+                      ? AppColors.gray
+                      : AppColors.lime,
+                ),
               ),
             ],
           ),
@@ -172,35 +237,40 @@ class _GroupTile extends ConsumerWidget {
     );
   }
 
-  void _showLeaderPicker(BuildContext context, WidgetRef ref) {
-    if (admins.isEmpty) {
+  void _showMemberPicker(
+    BuildContext context, {
+    required String title,
+    required List<RegisteredMember> candidates,
+    required void Function(int userId) onPick,
+  }) {
+    if (candidates.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('임원(ADMIN) 계정이 없습니다.')));
+      ).showSnackBar(const SnackBar(content: Text('선택할 수 있는 임원이 없습니다.')));
       return;
     }
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
         title: Text(
-          '${group.label} 조장 지정',
+          title,
           style: const TextStyle(
             color: AppColors.white,
             fontWeight: FontWeight.w800,
           ),
         ),
-        children: admins.map((admin) {
+        children: candidates.map((m) {
           return SimpleDialogOption(
             onPressed: () {
               Navigator.of(context).pop();
-              ref
-                  .read(groupManagementProvider.notifier)
-                  .assignLeader(group.id, admin.id);
+              onPick(m.id);
             },
             child: Text(
-              admin.name,
+              m.name,
               style: const TextStyle(color: AppColors.white),
             ),
           );
@@ -214,10 +284,14 @@ class _GroupDetailDialog extends ConsumerStatefulWidget {
   final GroupDetail group;
   final String? leaderName;
 
-  const _GroupDetailDialog({required this.group, required this.leaderName});
+  const _GroupDetailDialog({
+    required this.group,
+    required this.leaderName,
+  });
 
   @override
-  ConsumerState<_GroupDetailDialog> createState() => _GroupDetailDialogState();
+  ConsumerState<_GroupDetailDialog> createState() =>
+      _GroupDetailDialogState();
 }
 
 class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
@@ -237,7 +311,9 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
 
     return Dialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -283,7 +359,9 @@ class _GroupDetailDialogState extends ConsumerState<_GroupDetailDialog> {
                 ? const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Center(
-                      child: CircularProgressIndicator(color: AppColors.lime),
+                      child: CircularProgressIndicator(
+                        color: AppColors.lime,
+                      ),
                     ),
                   )
                 : state.selectedGroupMembers.isEmpty
@@ -361,7 +439,8 @@ class _CreateGroupDialog extends ConsumerStatefulWidget {
   const _CreateGroupDialog();
 
   @override
-  ConsumerState<_CreateGroupDialog> createState() => _CreateGroupDialogState();
+  ConsumerState<_CreateGroupDialog> createState() =>
+      _CreateGroupDialogState();
 }
 
 class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
@@ -406,7 +485,9 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
 
     return Dialog(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -441,7 +522,9 @@ class _CreateGroupDialogState extends ConsumerState<_CreateGroupDialog> {
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               entry.value,
-                              style: const TextStyle(color: AppColors.white),
+                              style: const TextStyle(
+                                color: AppColors.white,
+                              ),
                             ),
                             value: isChecked,
                             activeColor: AppColors.lime,

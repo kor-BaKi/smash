@@ -136,6 +136,26 @@ class GroupManagementNotifier extends StateNotifier<GroupManagementState> {
       state = state.copyWith(errorMessage: '조장 취소에 실패했습니다.');
     }
   }
+
+  // 부조장 지정
+  Future<void> assignViceLeader(int groupId, int userId) async {
+    try {
+      await MemberRegisterApi.assignViceLeader(groupId, userId);
+      await loadAll();
+    } catch (e) {
+      state = state.copyWith(errorMessage: '부조장 지정에 실패했습니다.');
+    }
+  }
+
+  // 부조장 해제
+  Future<void> removeViceLeader(int groupId) async {
+    try {
+      await MemberRegisterApi.removeViceLeader(groupId);
+      await loadAll();
+    } catch (e) {
+      state = state.copyWith(errorMessage: '부조장 해제에 실패했습니다.');
+    }
+  }
 }
 
 final groupManagementProvider =
