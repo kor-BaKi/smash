@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,14 +45,41 @@ public class ApplicationService {
     // 폼 관리 (ADMIN)
 
     // 폼 생성
+    // 폼 생성 (새 학기용): 이전 폼은 마감하고, 옵션에 따라 질문을 복사
     @Transactional
     public ApplicationFormResponse createForm(ApplicationFormRequest request) {
+        Optional<ApplicationForm> previous = formRepository.findTopByOrderByCreatedAtDesc();
+
+        // 이전 폼 마감 (접수 중인 폼이 둘이 되는 것 방지)
+        previous.ifPresent(p -> p.toggle(false));
+
         ApplicationForm form = formRepository.save(
                 ApplicationForm.builder()
-                        .isActive(false).startDate(request.getStartDate()).endDate(request.getEndDate()).build()
+                        .isActive(false)
+                        .startDate(request.getStartDate())
+                        .endDate(request.getEndDate())
+                        .build()
         );
 
-        return ApplicationFormResponse.of(form, List.of()); // List.of() = 빈 리스트 반환
+        if (request.isCopyQuestions() && previous.isPresent()) {
+            List<FormQuestion> oldQuestions =
+                    questionRepository.findByFormOrderByOrderIndex(previous.get());
+            for (FormQuestion q : oldQuestions) {
+                questionRepository.save(
+                        FormQuestion.builder()
+                                .form(form)
+                                .content(q.getContent())
+                                .questionType(q.getQuestionType())
+                                .isRequired(q.isRequired())
+                                .orderIndex(q.getOrderIndex())
+                                .options(q.getOptions())
+                                .build()
+                );
+            }
+        }
+
+        List<FormQuestion> questions = questionRepository.findByFormOrderByOrderIndex(form);
+        return ApplicationFormResponse.of(form, questions);
     }
 
     // 현재 폼 조회
