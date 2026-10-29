@@ -7,6 +7,7 @@ import '../provider/auth_provider.dart';
 import 'activity_admin_page.dart';
 import 'application_form_page.dart';
 import 'application_list_page.dart';
+import 'attendance_page.dart';
 import 'availability_page.dart';
 import 'calendar_tab_page.dart';
 import 'dues_page.dart';
@@ -311,6 +312,11 @@ class _AdminDrawer extends ConsumerWidget {
                     icon: Icons.event_note_outlined,
                     label: '날짜별 활동 관리',
                     onTap: () => _push(context, const ActivityAdminPage()),
+                  ),
+                  _DrawerItem(
+                    icon: Icons.fact_check_outlined,
+                    label: '출석 현황',
+                    onTap: () => _push(context, const AttendancePage()),
                   ),
                   _DrawerItem(
                     icon: Icons.sports_tennis_outlined,
