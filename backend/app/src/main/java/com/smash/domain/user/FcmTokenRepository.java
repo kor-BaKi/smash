@@ -1,6 +1,9 @@
 package com.smash.domain.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,4 +20,8 @@ public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
     void deleteByUser(User user);
 
     void deleteByUserAndToken(User user, String token);
+
+    @Modifying
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // REQUIRES_NEW가 필요한 이유는 호출하는 스케줄러가 @Transactional(readOnly = true)라서, 같은 트랜잭션에 참여하면 삭제가 반영되지 않기 때문
+    void deleteByToken(String token);
 }

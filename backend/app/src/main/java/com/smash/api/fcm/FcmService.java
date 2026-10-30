@@ -1,9 +1,6 @@
 package com.smash.api.fcm;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import com.smash.domain.user.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -112,8 +109,20 @@ public class FcmService {
             String response = FirebaseMessaging.getInstance().send(message);
             log.info("FCM 전송 성공: {}", response);
         } catch (FirebaseMessagingException e) {
-            log.error("FCM 전송 실패 - token: {}, error: {}", token, e.getMessage());
+            MessagingErrorCode code = e.getMessagingErrorCode();
+            log.error("FCM 전송 실패 - token: {}, code: {}, error: {}",
+                    maskToken(token), code, e.getMessage());
+
+            // 앱 삭제·재설치로 더 이상 유효하지 않은 토큰은 정리한다
+            if (code == MessagingErrorCode.UNREGISTERED) {
+                fcmTokenRepository.deleteByToken(token);
+            }
         }
+    }
+
+    private String maskToken(String token) {
+        if (token == null || token.length() <= 8) return "***";
+        return token.substring(0, 8) + "...";
     }
 
     // 로그아웃 시 토큰 삭제
