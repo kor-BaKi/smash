@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -99,7 +100,7 @@ class ActivityServiceTest {
         activityService.participate(USER_ID, CURRENT_ID, req);
 
         ArgumentCaptor<Participation> captor = ArgumentCaptor.forClass(Participation.class);
-        verify(participationRepository).save(captor.capture());
+        verify(participationRepository).saveAndFlush(captor.capture());
         assertThat(captor.getValue().getType()).isEqualTo(ParticipationType.CARRYOVER);
         assertThat(captor.getValue().getCarryoverTarget()).isSameAs(future);
     }
@@ -115,7 +116,7 @@ class ActivityServiceTest {
                 () -> activityService.participate(USER_ID, CURRENT_ID, req));
 
         assertBusiness(thrown, "INVALID_CARRYOVER_TARGET");
-        verify(participationRepository, never()).save(any());
+        verify(participationRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -133,7 +134,7 @@ class ActivityServiceTest {
                 () -> activityService.participate(USER_ID, CURRENT_ID, req));
 
         assertBusiness(thrown, "INVALID_CARRYOVER_TARGET");
-        verify(participationRepository, never()).save(any());
+        verify(participationRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -157,6 +158,19 @@ class ActivityServiceTest {
                 () -> activityService.participate(USER_ID, CURRENT_ID, req));
 
         assertBusiness(thrown, "VOTE_CLOSED");
-        verify(participationRepository, never()).save(any());
+        verify(participationRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("이월: 검증을 통과해도 DB 유니크 제약에 걸리면 INVALID_CARRYOVER_TARGET (동시 요청 방어)")
+    void carryover_dbConstraintViolation_converted() {
+        given(participationRepository.saveAndFlush(any()))
+                .willThrow(new DataIntegrityViolationException("duplicate"));
+        ParticipationRequest req = request(ParticipationType.CARRYOVER, FUTURE_ID);
+
+        Throwable thrown = catchThrowable(
+                () -> activityService.participate(USER_ID, CURRENT_ID, req));
+
+        assertBusiness(thrown, "INVALID_CARRYOVER_TARGET");
     }
 }
