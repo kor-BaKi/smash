@@ -13,8 +13,11 @@ class FcmApi {
     );
   }
 
-  // FCM 토큰 삭제 (로그아웃 시)
-  static Future<void> deleteToken() async {
-    await _dio.delete('/fcm/token');
+  // FCM 토큰 삭제 (로그아웃 시, 이 기기 토큰만)
+  static Future<void> deleteToken([String? token]) async {
+    await _dio.delete(
+      '/fcm/token',
+      queryParameters: {if (token != null) 'token': token},
+    );
   }
 }

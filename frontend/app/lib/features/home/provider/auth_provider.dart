@@ -1,4 +1,5 @@
 // 로그인한 유저 정보 상태
+import 'dart:async';
 import 'dart:io';
 
 import 'package:app/core/api/auth_api.dart';
@@ -40,6 +41,9 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(const AuthState());
 
+  // FCM 토큰 갱신 감시 구독 (로그인 상태에서 한 번만 등록)
+  StreamSubscription<String>? _tokenRefreshSub;
+
   // 비밀번호 변경
   Future<bool> changePassword({
     required String currentPassword,
@@ -65,6 +69,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final response = await AuthApi.getMe();
       final user = UserInfo.fromJson(response['data']);
       state = state.copyWith(user: user);
+      unawaited(_registerFcmToken()); // 앱 시작 속도에 영향 주지 않도록 기다리지 않음
     } catch (e) {
       // 토큰 만료 or 오류 -> 토큰 삭제 후 로그인 화면
       await TokenStorage.deleteAll();
@@ -92,6 +97,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await TokenStorage.saveRefreshToken(auth.refreshToken);
 
       state = state.copyWith(user: auth.user, isLoading: false);
+      await _registerFcmToken();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -116,17 +122,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await TokenStorage.saveRefreshToken(auth.refreshToken);
 
       state = state.copyWith(user: auth.user, isLoading: false);
-
-      // FCM 토큰 서버 전송
-      try {
-        final fcmToken = await FirebaseMessaging.instance.getToken();
-        if (fcmToken != null) {
-          final deviceType = Platform.isIOS ? 'IOS' : 'ANDROID';
-          await FcmApi.saveToken(fcmToken, deviceType);
-        }
-      } catch (e) {
-        // FCM 토큰 전송 실패해도 로그인은 유지
-      }
+      await _registerFcmToken(); // 실패해도 내부에서 처리되어 로그인은 유지됨
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -137,13 +133,46 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // 로그아웃
   Future<void> logout() async {
+    await _tokenRefreshSub?.cancel(); // 로그아웃 후 갱신 이벤트가 401을 내지 않도록
+    _tokenRefreshSub = null;
     try {
-      await FcmApi.deleteToken(); // FCM 토큰 삭제
+      // FCM 삭제가 실패해도 서버 로그아웃(refresh token 폐기)은 반드시 진행
+      try {
+        final token = await FirebaseMessaging.instance.getToken();
+        await FcmApi.deleteToken(token);
+      } catch (_) {}
       await AuthApi.logout();
     } finally {
       await TokenStorage.deleteAll();
       state = const AuthState();
     }
+  }
+
+  // FCM 토큰 등록 + 갱신 감시. 로그인, 회원가입, 자동 로그인에서 공통 사용
+  Future<void> _registerFcmToken() async {
+    try {
+      final fcm = FirebaseMessaging.instance;
+      final token = await fcm.getToken();
+      if (token != null) await _sendFcmToken(token);
+
+      // 토큰이 갱신되면 서버에 다시 등록 (리스너는 한 번만 등록)
+      _tokenRefreshSub ??= fcm.onTokenRefresh.listen((newToken) {
+        _sendFcmToken(newToken).catchError((_) {});
+      });
+    } catch (_) {
+      // FCM 등록 실패가 로그인을 막으면 안 됨
+    }
+  }
+
+  Future<void> _sendFcmToken(String token) {
+    final deviceType = Platform.isIOS ? 'IOS' : 'ANDROID';
+    return FcmApi.saveToken(token, deviceType);
+  }
+
+  @override
+  void dispose() {
+    _tokenRefreshSub?.cancel();
+    super.dispose();
   }
 }
 
