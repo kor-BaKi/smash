@@ -12,7 +12,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "participation",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"activity_id", "user_id"}))
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"activity_id", "user_id"}),
+                @UniqueConstraint(
+                        name = "uk_participation_user_carryover_target",
+                        columnNames = {"user_id", "carryover_target_activity_id"})
+        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Participation {

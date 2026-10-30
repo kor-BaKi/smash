@@ -13,6 +13,7 @@ import com.smash.domain.user.User;
 import com.smash.domain.user.UserRepository;
 import com.smash.scheduler.ActivityScheduler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,11 +128,20 @@ public class ActivityService {
         Participation participation = participationRepository
                 .findByActivityAndUser(activity, user).orElse(null);
 
-        if (participation == null) {
-            participationRepository.save(Participation.builder()
-                    .activity(activity).user(user).type(request.getType()).carryoverTarget(carryoverTarget).build());
-        } else {
-            participation.updateType(request.getType(), carryoverTarget);
+        try {
+            if (participation == null) {
+                participationRepository.saveAndFlush(Participation.builder()
+                        .activity(activity).user(user).type(request.getType()).carryoverTarget(carryoverTarget).build());
+            } else {
+                participation.updateType(request.getType(), carryoverTarget);
+                participationRepository.saveAndFlush(participation);
+            }
+        } catch (DataIntegrityViolationException e) {
+            // 동시 요청으로 위 검증을 둘 다 통과해도 DB 유니크 제약이 마지막 방어선
+            if (carryoverTarget != null) {
+                throw new BusinessException("INVALID_CARRYOVER_TARGET", "이미 이월에 사용한 날짜입니다.");
+            }
+            throw e;
         }
     }
 
