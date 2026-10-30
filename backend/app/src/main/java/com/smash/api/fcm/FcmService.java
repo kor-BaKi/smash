@@ -35,15 +35,12 @@ public class FcmService {
         );
 
         fcmTokenRepository.findByToken(token).ifPresentOrElse(
-                fcmToken -> fcmToken.updateToken(token),
+                fcmToken -> fcmToken.assignTo(user, deviceType),
                 () -> fcmTokenRepository.save(
-                        FcmToken.builder()
-                                .user(user)
-                                .token(token)
-                                .deviceType(deviceType)
-                                .build()
+                        FcmToken.builder().user(user).token(token).deviceType(deviceType).build()
                 )
         );
+
     }
 
     // 특정 유저에게 알림 전송
@@ -121,9 +118,14 @@ public class FcmService {
 
     // 로그아웃 시 토큰 삭제
     @Transactional
-    public void deleteToken(Long userId) {
+    public void deleteToken(Long userId, String token) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
-        fcmTokenRepository.deleteByUser(user);
+        if (token == null || token.isBlank()) {
+            fcmTokenRepository.deleteByUser(user);
+        } else {
+            fcmTokenRepository.deleteByUserAndToken(user, token);
+
+        }
     }
 }

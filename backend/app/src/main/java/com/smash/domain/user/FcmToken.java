@@ -43,8 +43,10 @@ public class FcmToken {
         this.deviceType = deviceType;
     }
 
-    public void updateToken(String token) {
-        this.token = token;
+    public void assignTo(User user, String deviceType) {
+        this.user = user;
+        this.deviceType = deviceType;
+
     }
 }
 

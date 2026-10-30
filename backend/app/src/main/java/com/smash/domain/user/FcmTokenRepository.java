@@ -15,4 +15,6 @@ public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
 
     // 유저 ID로 모든 토큰 삭제 (로그아웃 시)
     void deleteByUser(User user);
+
+    void deleteByUserAndToken(User user, String token);
 }

@@ -26,9 +26,10 @@ public class FcmController {
     // FCM 토큰 삭제 (로그아웃 시)
     @DeleteMapping("/token")
     public ResponseEntity<ApiResponse<Void>> deleteToken(
-            @AuthenticationPrincipal Long userId
+            @AuthenticationPrincipal Long userId,
+            @RequestParam(required = false) String token
     ) {
-        fcmService.deleteToken(userId);
+        fcmService.deleteToken(userId, token);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
