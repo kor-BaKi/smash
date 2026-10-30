@@ -17,9 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile; // 클라이언트가 업로드한 파일을 받는 인터페이스 -> Flutter가 올린 이미지 파일ㅇ르 받을 때 사용
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path; // 파일 / 디렉토리 경로를 표현하는 객체  -> String을 사용할 수도 있지만 String 경로보다 안전하고 OS 독립적
 import java.nio.file.Paths; // Path 객체를 생성하는 유틸리티 클래스
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID; // 전 세계적으로 유일한 랜덤 문자열 생성 -> 여기서는 사진 파일명 중복 방지를 위해 사용
 
@@ -50,6 +52,19 @@ public class ActivityPhotoService {
                 .orElseThrow(() -> new BusinessException(
                         "RESOURCE_NOT_FOUND", "존재하지 않는 유저입니다."));
 
+        // 저장 전에 모든 파일을 먼저 검증
+        // 확장자는 사용자가 보낸 파일명이 아닌 파일 내용(매직 바이트)으로 서버가 결정
+        List<String> extensions = new ArrayList<>();
+        for (MultipartFile file : files) {
+            String ext = detectExtension(file);
+            if (ext == null) {
+                throw new BusinessException(
+                        "INVALID_FILE", "JPG, PNG, GIF, WEBP 이미지만 업로드할 수 있습니다."
+                );
+            }
+            extensions.add(ext);
+        }
+
         // 활동별 디렉토리 생성
         Path activityDir = Paths.get(uploadDir, String.valueOf(activityId));
         try {
@@ -59,18 +74,12 @@ public class ActivityPhotoService {
         }
 
         // 파일 저장
-        for (MultipartFile file : files) {
-            String ext = getExtension(file.getOriginalFilename());
-            String fileName = UUID.randomUUID() + ext;
+        for (int i = 0; i < files.size(); i++) {
+            String fileName = UUID.randomUUID() + extensions.get(i);
             Path filePath = activityDir.resolve(fileName);
 
-            // 매직 바이트 검증 (보안)
-            if (!isValidImage(file)) {
-                throw new BusinessException("INVALID_FILE", "이미지 파일만 업로드 할 수 있습니다.");
-            }
-
             try {
-                file.transferTo(filePath);
+                files.get(i).transferTo(filePath);
             } catch (IOException e) {
                 throw new BusinessException("FILE_ERROR", "파일 저장에 실패했습니다.");
             }
@@ -163,44 +172,26 @@ public class ActivityPhotoService {
         Flutter: byte[]를 이미지로 디코딩해서 화면에 표시
      */
 
-    // 확장자 추출
-    private String getExtension(String filename) {
-        if (filename == null || !filename.contains(".")) return ".jpg";
-        return filename.substring(filename.lastIndexOf("."));
-    }
-
-    private boolean isValidImage(MultipartFile file) { // 매직 바이트로 사진 파일만 걸러내기
-        try {
-            byte[] bytes = file.getBytes();
-            if (bytes.length < 4) return false;
-
-            // JPEG : FF D8 FF
-            if (bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xD8 && bytes[2] == (byte) 0xFF) {
-                return true;
-            }
-
-            // PNG : 89 50 4E 47
-            if (bytes[0] == (byte) 0x89 && bytes[1] == (byte) 0x50
-                    && bytes[2] == (byte) 0x4E && bytes[3] == (byte) 0x47) {
-                return true;
-            }
-            // GIF: 47 49 46 38
-            if (bytes[0] == (byte) 0x47 && bytes[1] == (byte) 0x49
-                    && bytes[2] == (byte) 0x46 && bytes[3] == (byte) 0x38) {
-                return true;
-            }
-            // WEBP: 52 49 46 46 ... 57 45 42 50
-            if (bytes[0] == (byte) 0x52 && bytes[1] == (byte) 0x49
-                    && bytes[2] == (byte) 0x46 && bytes[3] == (byte) 0x46
-                    && bytes.length >= 12
-                    && bytes[8] == (byte) 0x57 && bytes[9] == (byte) 0x45
-                    && bytes[10] == (byte) 0x42 && bytes[11] == (byte) 0x50) {
-                return true;
-            }
-            return false;
-
+    private String detectExtension(MultipartFile file) {
+        byte[] h;
+        try (InputStream in = file.getInputStream()) {
+            h = in.readNBytes(12);
         } catch (IOException e) {
-            return false;
+            return null;
         }
+        if (h.length < 4) return null;
+
+        // JPEG: FF D8 FF
+        if (h[0] == (byte) 0xFF && h[1] == (byte) 0xD8 && h[2] == (byte) 0xFF) return ".jpg";
+        // PNG: 89 50 4E 47
+        if (h[0] == (byte) 0x89 && h[1] == 0x50 && h[2] == 0x4E && h[3] == 0x47) return ".png";
+        // GIF: 47 49 46 38
+        if (h[0] == 0x47 && h[1] == 0x49 && h[2] == 0x46 && h[3] == 0x38) return ".gif";
+        // WEBP: "RIFF" .... "WEBP"
+        if (h.length >= 12
+                && h[0] == 0x52 && h[1] == 0x49 && h[2] == 0x46 && h[3] == 0x46
+                && h[8] == 0x57 && h[9] == 0x45 && h[10] == 0x42 && h[11] == 0x50) return ".webp";
+
+        return null;
     }
 }
