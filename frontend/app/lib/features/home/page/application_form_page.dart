@@ -489,7 +489,7 @@ class _ApplicationFormPageState
                     ),
                     const SizedBox(height: 20),
                     QrImageView(
-                      data: 'http://3.38.245.70:8080/apply.html',
+                      data: 'https://smash.tailbdb322.ts.net/apply.html',
                       version: QrVersions.auto,
                       size: 220,
                       // QR 스캔 인식률을 위해 테마와 무관하게 항상 흰색 배경 유지
@@ -497,7 +497,7 @@ class _ApplicationFormPageState
                     ),
                     const SizedBox(height: 12),
                     const Text(
-                      '3.38.245.70:8080/apply.html',
+                      'https://smash.tailbdb322.ts.net/apply.html',
                       style: TextStyle(
                         fontSize: 11,
                         color: AppColors.gray,
