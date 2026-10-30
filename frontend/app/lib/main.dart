@@ -36,6 +36,14 @@ void main() async {
     sound: true,
   );
 
+  // iOS에서 앱이 켜져 있을 때도 배너/소리/뱃지 표시
+  await FirebaseMessaging.instance
+      .setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
   // iOS APNs 토큰 대기 후 FCM 토큰 가져오기
   try {
     if (defaultTargetPlatform == TargetPlatform.iOS) {
