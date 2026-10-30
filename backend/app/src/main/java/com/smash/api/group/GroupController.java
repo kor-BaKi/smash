@@ -46,7 +46,7 @@ public class GroupController {
     @PatchMapping("/api/v1/admin/groups/{groupId}/vice-leader")
     public ResponseEntity<ApiResponse<GroupResponse>> assignViceLeader(
             @PathVariable Long groupId,
-            @RequestBody GroupRequest.ViceLeaderRequest request) {
+            @RequestBody @Valid GroupRequest.ViceLeaderRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
                 groupService.assignViceLeader(groupId, request.getViceLeaderUserId())));
     }
