@@ -155,6 +155,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _registerFcmToken() async {
     try {
       final fcm = FirebaseMessaging.instance;
+
+      if (Platform.isIOS) {
+        for (var i = 0; i < 10; i++) {
+          if (await fcm.getAPNSToken() != null) break;
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+      }
+
       final token = await fcm.getToken();
       if (token != null) await _sendFcmToken(token);
 
