@@ -50,17 +50,13 @@ void main() async {
       // APNS 토큰 대기 (최대 5초)
       for (int i = 0; i < 10; i++) {
         final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-        if (apnsToken != null) {
-          print('APNS Token: $apnsToken');
-          break;
-        }
+        if (apnsToken != null) break;
         await Future.delayed(const Duration(milliseconds: 500));
       }
     }
-    final token = await FirebaseMessaging.instance.getToken();
-    print('FCM Token: $token');
+    await FirebaseMessaging.instance.getToken();
   } catch (e) {
-    print('FCM Token 가져오기 실패: $e');
+    if (kDebugMode) debugPrint('FCM Token 가져오기 실패: $e');
   }
 
   final container = ProviderContainer();
