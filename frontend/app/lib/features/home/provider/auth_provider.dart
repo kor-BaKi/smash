@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:app/core/api/auth_api.dart';
 import 'package:app/core/storage/token_storage.dart';
 import 'package:app/features/auth/model/auth_model.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,16 +64,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // 앱 시작 시 토큰 확인
   Future<void> checkToken() async {
     final token = await TokenStorage.getAccessToken();
-    if (token == null) return; // 토큰 없으면 로그인 화면
+    if (token == null) return;
 
     try {
       final response = await AuthApi.getMe();
       final user = UserInfo.fromJson(response['data']);
       state = state.copyWith(user: user);
-      unawaited(_registerFcmToken()); // 앱 시작 속도에 영향 주지 않도록 기다리지 않음
-    } catch (e) {
-      // 토큰 만료 or 오류 -> 토큰 삭제 후 로그인 화면
-      await TokenStorage.deleteAll();
+      unawaited(_registerFcmToken());
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status != null && status >= 400 && status < 500) {
+        await TokenStorage.deleteAll();
+      }
     }
   }
 
