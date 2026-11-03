@@ -15,7 +15,7 @@ spring:
       max-request-size: 100MB
 app:
   upload-dir: /home/baki/smash-files/photos
-  base-url: https://smash.tailbdb322.ts.net
+  base-url: https://cju-smash.duckdns.org
 logging:
   level:
     org.hibernate.SQL: OFF

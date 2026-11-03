@@ -33,10 +33,10 @@ public class ActivityPhotoService {
     private final ActivityRepository activityRepository;
     private final UserRepository userRepository;
 
-    @Value("${app.base-url:https://smash.tailbdb322.ts.net}")
+    @Value("${app.upload-dir:/home/baki/smash-files/photos}")
     private String uploadDir;
 
-    @Value("${app.base-url:https://baki.tailbdb322.ts.net/api/v1}")
+    @Value("${app.base-url:https://cju-smash.duckdns.org}")
     private String baseUrl;
 
     // 사진 업로드

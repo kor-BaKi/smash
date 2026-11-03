@@ -270,7 +270,7 @@ invite_code / free_period / refresh_token
 - **DB**: MariaDB (MySQL 호환)
 - **외부 공개**: Tailscale Funnel (HTTPS)
 - **자동 시작**: systemd 서비스
-- **웹 지원 폼**: `https://baki.tailbdb322.ts.net/apply.html`
+- **웹 지원 폼**: `https://cju-smash.duckdns.org/apply.html`
 - **사진 저장 경로**: `/home/baki/smash-files/photos/{activity_id}/`
 
 ---

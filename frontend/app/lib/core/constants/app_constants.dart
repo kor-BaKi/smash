@@ -9,7 +9,7 @@
 // 나중에 Dio 클라이언트, Provider 등 모든 곳에서 이 값을 가져다 씀
 
 class AppConstants {
-  static const String baseUrl = 'https://smash.tailbdb322.ts.net/api/v1';
+  static const String baseUrl = 'https://cju-smash.duckdns.org/api/v1';
 
   // Storage keys
   static const String accessTokenKey = 'access_token';
