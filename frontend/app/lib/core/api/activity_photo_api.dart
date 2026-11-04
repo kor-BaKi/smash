@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 
 import 'api_client.dart';
@@ -34,5 +36,16 @@ class ActivityPhotoApi {
   // 사진 삭제
   static Future<void> deletePhoto(int photoId) async {
     await _dio.delete('/admin/activities/photos/$photoId');
+  }
+
+  static Future<Uint8List> fetchPhotoBytes(String url) async {
+    final response = await _dio.get<List<int>>(
+      url,
+      options: Options(
+        responseType: ResponseType.bytes,
+        receiveTimeout: const Duration(seconds: 60),
+      ),
+    );
+    return Uint8List.fromList(response.data!);
   }
 }

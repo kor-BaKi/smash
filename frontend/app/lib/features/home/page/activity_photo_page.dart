@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
 import 'package:image_picker/image_picker.dart';
@@ -174,16 +173,10 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.network(
-                          photo.url,
+                        _AuthImage(
+                          url: photo.url,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.card2,
-                            child: const Icon(
-                              Icons.broken_image,
-                              color: AppColors.gray,
-                            ),
-                          ),
+                          cacheWidth: 600,
                         ),
                         Positioned(
                           bottom: 6,
@@ -244,14 +237,10 @@ class _FullScreenPhotoState extends State<_FullScreenPhoto> {
     setState(() => _isSaving = true);
 
     try {
-      final response = await Dio().get<List<int>>(
+      final bytes = await ActivityPhotoApi.fetchPhotoBytes(
         widget.photo.url,
-        options: Options(responseType: ResponseType.bytes),
       );
-      await Gal.putImageBytes(
-        Uint8List.fromList(response.data!),
-        album: 'SMASH',
-      );
+      await Gal.putImageBytes(bytes, album: 'SMASH');
       _showMessage('갤러리에 저장되었습니다.');
     } on GalException catch (e) {
       _showMessage(
@@ -303,17 +292,76 @@ class _FullScreenPhotoState extends State<_FullScreenPhoto> {
       ),
       body: Center(
         child: InteractiveViewer(
-          child: Image.network(
-            widget.photo.url,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const Icon(
-              Icons.broken_image,
-              color: AppColors.white,
-              size: 60,
-            ),
-          ),
+          child: _AuthImage(url: widget.photo.url, fit: BoxFit.contain),
         ),
       ),
+    );
+  }
+}
+
+class _AuthImage extends StatefulWidget {
+  final String url;
+  final BoxFit fit;
+  final int? cacheWidth;
+
+  const _AuthImage({
+    required this.url,
+    this.fit = BoxFit.cover,
+    this.cacheWidth,
+  });
+
+  @override
+  State<_AuthImage> createState() => _AuthImageState();
+}
+
+class _AuthImageState extends State<_AuthImage> {
+  late Future<Uint8List> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = ActivityPhotoApi.fetchPhotoBytes(widget.url);
+  }
+
+  @override
+  void didUpdateWidget(covariant _AuthImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.url != widget.url) {
+      _future = ActivityPhotoApi.fetchPhotoBytes(widget.url);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Uint8List>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Container(
+            color: AppColors.card2,
+            child: const Center(
+              child: Icon(Icons.broken_image, color: AppColors.gray),
+            ),
+          );
+        }
+        if (!snapshot.hasData) {
+          return Container(
+            color: AppColors.card2,
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+        return Image.memory(
+          snapshot.data!,
+          fit: widget.fit,
+          cacheWidth: widget.cacheWidth,
+        );
+      },
     );
   }
 }
