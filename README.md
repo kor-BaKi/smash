@@ -8,14 +8,17 @@
 <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat-square&logo=springboot&logoColor=white"/>
 <img src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white"/>
 <img src="https://img.shields.io/badge/MariaDB-003545?style=flat-square&logo=mariadb&logoColor=white"/>
-<img src="https://img.shields.io/badge/Raspberry Pi-A22846?style=flat-square&logo=raspberrypi&logoColor=white"/>
+<img src="https://img.shields.io/badge/AWS EC2-FF9900?style=flat-square&logo=amazonec2&logoColor=white"/>
+<img src="https://img.shields.io/badge/Nginx-009639?style=flat-square&logo=nginx&logoColor=white"/>
+<img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black"/>
+<img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white"/>
 </p>
 
 ## 📌 Project Overview
 
 SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율적인 수작업을 해결하기 위해 기획된 운영 관리 서비스입니다. 기존의 분산된 도구(카카오톡, 엑셀, 구글 폼)를 통합하여 운영자는 효율적인 관리를, 부원은 편리한 참여를 할 수 있는 환경을 구축합니다.
 
-> 동아리 부회장으로 2년간 직접 운영하며 느낀 불편함을 기반으로 기획 · 설계 · 개발까지 전 과정을 혼자 진행한 개인 포트폴리오 프로젝트입니다.
+> 동아리 부회장으로 2년간 직접 운영하며 느낀 불편함을 기반으로 기획 · 설계 · 개발 · 배포 · 운영까지 전 과정을 혼자 진행한 개인 포트폴리오 프로젝트입니다.
 
 ### 🔄 AS-IS vs TO-BE
 
@@ -24,10 +27,10 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 | **운영 데이터** | 카카오톡, 엑셀, 구글 폼 분산 | **중앙 데이터베이스 통합 관리** |
 | **조 배정** | 수동 작성 및 수작업 공유 | **가능 요일 기반 자동 배정 알고리즘** |
 | **출석 집계** | 엑셀 수기 관리 및 누락 위험 | **이월 시스템 자동 계산 및 시각화** |
-| **공지/투표** | 단체 채팅방 텍스트 공지 | **앱 내 실시간 투표 기능** |
+| **공지/투표** | 단체 채팅방 텍스트 공지 | **앱 내 실시간 투표 + 푸시 알림** |
 | **이동 조율** | 카카오톡으로 수동 파악 | **같이/따로 선택 + 택시 그룹 자동 배정** |
 | **신입 모집** | 구글 폼 + 수동 등록 | **웹 지원 폼 + 합격 시 자동 등록** |
-| **활동 사진** | 단체 채팅방에 산재 | **활동별 사진 업로드 및 모아보기** |
+| **활동 사진** | 단체 채팅방에 산재 | **활동별 업로드, 모아보기, 원본 갤러리 저장** |
 | **정보 접근성** | 운영진만 확인 가능 | **부원 본인의 활동 내역 직접 확인** |
 
 ---
@@ -37,10 +40,11 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 ### ✅ v1 — 핵심 운영 기능
 
 #### 🗳️ 일일 활동 투표 시스템
-- 매일 오전 9시 스케줄러가 당일 활동을 자동 생성 (Spring Scheduler)
+- 평일 자정(0시) 스케줄러가 당일 활동을 자동 생성 (Spring Scheduler)
 - 부원은 정규참여 / 이월 / 타조참여 / 불참 중 선택
 - 시간대별 투표 마감 자동 처리
 - 서버 시작 시 당일 활동 누락 방지 (`@PostConstruct`)
+- 선택 즉시 화면에 반영되는 낙관적 업데이트 (실패 시 롤백)
 
 #### 🔄 출석 이월(Carry-over) 시스템
 - 동아리 고유 운영 규칙 반영: 월 보장 활동 횟수 내에서 다른 날짜로 이월 가능
@@ -51,6 +55,7 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 - 부원의 가능 요일을 수집해 그리디 알고리즘으로 조 자동 배정
 - 배정 미리보기 → 개별 수동 조정 → 확정의 3단계 프로세스
 - 미배정자 개별 수동 배정 지원
+- 새 학기 초기화: 조 배정·가용 시간·조장/부조장을 한 번에 해제
 
 #### 🏖️ 자유활동 기간 관리
 - 시험기간 등 자유활동 기간을 다건 등록/삭제 가능
@@ -61,6 +66,7 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 - 임원이 사전 등록(PENDING) → 부원이 가입코드로 직접 가입(ACTIVE) 전환
 - 학기당 1개 코드 관리, 활성/비활성 토글, 재발급 지원
 - 클립보드 복사 버튼으로 카카오톡 공유 편의성 제공
+- 불합격(REJECTED) 처리된 학번은 가입코드가 있어도 가입 불가
 
 #### 📊 출석 현황 대시보드
 - 조별 참여 현황, 미달자, 타조 참여 현황 3가지 탭으로 시각화
@@ -75,6 +81,7 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
   - 상단 호차 카드 선택 → 하단 명단에서 탭하여 즉시 배정
   - 정원 4명 제한, 호차 변경 시 확인 다이얼로그
 - 부원 홈 화면에서 내 호차 및 동승자 확인
+- 택시비 정산 (결제자가 금액 입력 → N빵 자동 계산, 토스 딥링크 송금)
 
 #### 🗳️ 일반 투표 시스템
 - 임원이 회식/MT/자체대회 등 자유 주제로 투표 생성
@@ -113,11 +120,13 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 - 자동 배정 대상에 PENDING 부원 포함
 
 #### 📸 활동 사진 관리
-- 임원이 활동별 사진 업로드 (원본 저장, Raspberry Pi 로컬)
+- 임원이 활동별 사진 업로드 (원본 그대로 저장)
 - 2열 그리드 형태로 사진 목록 표시
 - 사진 탭 → 전체화면 보기 (핀치 줌 지원)
+- 전체화면에서 **원본 사진을 갤러리(SMASH 앨범)에 저장**
 - 사진 길게 누르기 → 삭제
 - 과거 활동 사진도 조회 가능
+- 사진 파일 접근은 임원 로그인 토큰이 있어야만 가능
 
 #### ⚙️ 설정 페이지
 - 내 정보 확인, 비밀번호 변경 (영문/숫자/특수문자 8자 이상)
@@ -125,14 +134,49 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 
 ---
 
+### ✅ v3 — 운영·안정화
+
+#### 🔔 푸시 알림 (Firebase FCM)
+- 활동 시작 1시간 전, 아직 참여 여부를 선택하지 않은 부원에게 마감 임박 알림 (매 정각 스케줄러)
+- 새 투표 생성 알림, 택시비 정산 알림
+- 사용자별 알림 수신 설정(켜기/끄기)
+- iOS(APNs) / Android 토큰 등록 및 갱신 처리
+
+#### 📅 캘린더
+- 월별 활동·일정 조회, 임원이 일정 등록/삭제
+
+#### ⚡ 시작 성능 개선
+- 자동 로그인 후 홈 화면 진입까지 약 4.5초 → **275ms**
+- 단계별 계측으로 원인이 앱 초기화가 아닌 서버 접속 경로(TLS 핸드셰이크)임을 확인
+- 자세한 과정은 아래 트러블슈팅 참고
+
+---
+
+## 🔐 Security
+
+| 항목 | 내용 |
+| --- | --- |
+| **인증** | JWT Access(30분) / Refresh(180일) 토큰, `typ` 클레임으로 종류 구분, Refresh Token은 SHA-256 해시로 저장 |
+| **인가** | MEMBER / ADMIN 역할 분리, Spring Security로 경로별 접근 제어. 미인증 요청은 401로 응답해 클라이언트가 자동 갱신 가능 |
+| **IDOR** | 정산 API에서 소유권·멤버십 검증 |
+| **파일 업로드** | 확장자가 아닌 매직 바이트로 이미지 형식 검증 (JPG/PNG/GIF/WEBP) |
+| **사진 접근 제어** | `/files/photos/**`는 ADMIN 토큰 필요 |
+| **무차별 대입 방어** | 학번별 로그인 실패 5회 시 10분 잠금(Spring) + IP별 요청 제한(Nginx) |
+| **가입 우회 차단** | 불합격(REJECTED) 학번의 재가입 거부 |
+| **전송 구간** | HTTPS(TLS), HTTP는 HTTPS로 리다이렉트 |
+| **공개 범위 축소** | 운영 환경에서 Swagger 비활성화, 8080 직접 접근 차단, SSH 비밀번호 로그인 차단 |
+
+---
+
 ## 🛠 Tech Stack
 
 | 분류 | 기술 |
 | --- | --- |
-| **Frontend** | Flutter 3, Riverpod, Dio, go_router, flutter_secure_storage, qr_flutter, flutter_file_saver, image_picker |
-| **Backend** | Java 21, Spring Boot 3.5, Gradle, Spring Security, JWT, Spring Scheduler, Apache POI |
-| **Database** | MariaDB 11.8 (MySQL 호환) |
-| **Infra** | Raspberry Pi 4, Tailscale Funnel (HTTPS 공개), systemd 자동 시작 |
+| **Frontend** | Flutter 3, Riverpod, Dio, go_router, flutter_secure_storage, qr_flutter, flutter_file_saver, image_picker, gal, firebase_messaging |
+| **Backend** | Java 21, Spring Boot 3.5, Gradle, Spring Security, JWT, Spring Scheduler, Apache POI, Firebase Admin SDK |
+| **Database** | MariaDB (MySQL 호환) |
+| **Infra** | AWS EC2 (Ubuntu, 서울), Nginx 리버스 프록시, Let's Encrypt(HTTPS), DuckDNS, systemd 자동 시작 |
+| **CI/CD** | GitHub Actions (main push → 빌드 → 배포) |
 | **Test** | JUnit5, Mockito, AssertJ, H2 (인메모리) |
 | **Design** | Pretendard 폰트, 자체 디자인 시스템 (AppColors, AppTheme) |
 
@@ -141,7 +185,7 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 ## 🧰 Development Tools
 - Claude AI (기획 · 설계 · 개발 전반)
 - IntelliJ IDEA (백엔드)
-- Android Studio (Flutter)
+- Android Studio / Xcode (Flutter 빌드·배포)
 - Git / GitHub (모노레포)
 
 ---
@@ -152,20 +196,25 @@ SMASH는 대학교 배드민턴 동아리 운영 과정에서 겪은 비효율�
 flowchart LR
     APP[Flutter App\niOS / Android]
     WEB[웹 지원 폼\nHTML]
-    FUNNEL[Tailscale Funnel\nHTTPS]
-    API[Spring Boot API\nRaspberry Pi]
+    NGINX[Nginx\nHTTPS · 요청 제한]
+    API[Spring Boot API\nAWS EC2]
     SEC[Spring Security\nJWT]
     DB[(MariaDB)]
     FS[파일 시스템\n활동 사진 저장]
-    SCHED[Spring Scheduler\n매일 오전 9시]
+    SCHED[Spring Scheduler\n활동 생성 · 알림]
+    FCM[Firebase FCM\n푸시 알림]
+    GH[GitHub Actions\n빌드 · 배포]
 
-    APP -->|REST API| FUNNEL
-    WEB -->|REST API| FUNNEL
-    FUNNEL --> API
+    APP -->|REST API| NGINX
+    WEB -->|REST API| NGINX
+    NGINX --> API
     API --> SEC
     API --> DB
     API --> FS
     SCHED --> API
+    API --> FCM
+    FCM -.->|푸시| APP
+    GH -.->|배포| API
 ```
 
 ---
@@ -179,18 +228,19 @@ smash/
 │       ├── api/
 │       │   ├── auth/
 │       │   ├── activity/      (ActivityPhotoController, ActivityPhotoService)
-│       │   ├── attendance/
+│       │   ├── attendent/
 │       │   ├── group/
 │       │   ├── invite/
-│       │   ├── schedule/
+│       │   ├── schedule/      (정규 일정, 캘린더)
 │       │   ├── assignment/
 │       │   ├── poll/
 │       │   ├── dues/
-│       │   ├── transport/
+│       │   ├── transport/     (이동 조율, 택시비 정산)
 │       │   ├── application/
+│       │   ├── fcm/           (푸시 토큰, 알림 설정)
 │       │   └── admin/
 │       ├── domain/
-│       │   ├── user/          (User, MemberNote)
+│       │   ├── user/          (User, MemberNote, UserNotificationSetting)
 │       │   ├── activity/      (Activity, ActivityPhoto)
 │       │   ├── group/
 │       │   ├── invite/
@@ -200,43 +250,50 @@ smash/
 │       │   ├── dues/
 │       │   ├── transport/
 │       │   ├── application/
+│       │   ├── schedule/
 │       │   └── token/
 │       ├── scheduler/
-│       ├── auth/
+│       ├── auth/              (JwtProvider, LoginAttemptService)
 │       └── config/
 │
-└── frontend/app/
-    └── lib/
-        ├── core/
-        │   ├── api/
-        │   ├── storage/
-        │   ├── theme/
-        │   └── constants/
-        └── features/
-            ├── auth/
-            └── home/
+├── frontend/app/
+│   └── lib/
+│       ├── core/
+│       │   ├── api/
+│       │   ├── storage/
+│       │   ├── theme/
+│       │   └── constants/
+│       └── features/
+│           ├── auth/
+│           └── home/
+│
+├── .github/workflows/         (deploy.yml)
+└── docs/
 ```
 
 ---
 
-## 🗄 ERD (22개 테이블)
+## 🗄 ERD (27개 테이블)
 
 ```
 users ──── participation ──── activity ──── club_groups
-            │                    │           │
-            └── member_availability  └── activity_photo
-            └── member_note         └── activity_schedule
+   │                            │              │
+   ├── member_availability      ├── activity_photo
+   ├── member_note              └── activity_schedule
+   ├── refresh_token
+   ├── fcm_token
+   └── user_notification_setting
 
 polls ──── poll_options ──── poll_votes
 
 transport_group ──── transport_member
+taxi_settlement ──── taxi_settlement_payment
 
 application_form ──── form_question
 application ──── application_answer
             └── application_memo
 
-dues_payment
-invite_code / free_period / refresh_token
+schedule(캘린더) / dues_payment / invite_code / free_period
 ```
 
 ---
@@ -248,6 +305,7 @@ invite_code / free_period / refresh_token
 | --- | --- |
 | 홈 | 오늘 활동 카드 (이동방법 선택/내 호차 확인) + 진행 중인 투표 카드 |
 | 투표 | 진행 중 / 종료된 투표 탭 구분, 등록일/마감일 표시 |
+| 캘린더 | 월별 활동·일정 |
 | 더보기 | 설정 페이지 연결 |
 
 ### 임원 전용 Drawer (8개 메뉴)
@@ -257,7 +315,7 @@ invite_code / free_period / refresh_token
 | 지원서 관리 | 지원서 목록/상세, 메모, 합격/불합격/전체합격, 엑셀 내보내기 |
 | 회비 관리 | 조별 납부 현황, 체크박스 처리, 초기화 |
 | 가입코드 관리 | 발급, 재발급, 활성/비활성 토글, 복사 |
-| 부원 관리 | 부원 목록/상세/수정/탈퇴, 조변경/권한변경/개인메모, 조 편성 테이블, 자동 배정 |
+| 부원 관리 | 부원 목록/상세/수정/탈퇴, 조변경/권한변경/개인메모, 조 편성 테이블, 자동 배정, 새 학기 초기화 |
 | 정규활동 일정 | 요일별 활성/비활성 스위치 |
 | 날짜별 활동 관리 | 활동 취소/복구, 자유활동 전환, 활동 사진 관리 |
 | 자유활동 기간 설정 | 기간 다건 등록/삭제, 겹침 검증 |
@@ -266,74 +324,86 @@ invite_code / free_period / refresh_token
 
 ## 🚀 Infra & Deployment
 
-- **서버**: Raspberry Pi 4 (ARM64, Raspberry Pi OS)
+- **서버**: AWS EC2 (Ubuntu, 서울 리전), Spring Boot JAR을 systemd 서비스로 실행
 - **DB**: MariaDB (MySQL 호환)
-- **외부 공개**: Tailscale Funnel (HTTPS)
-- **자동 시작**: systemd 서비스
+- **HTTPS**: Nginx 리버스 프록시 + Let's Encrypt 인증서(자동 갱신), DuckDNS 도메인
+- **배포**: GitHub Actions — main 브랜치 push 시 빌드 후 EC2에 배포하고 서비스 재시작
+- **설정 분리**: 운영 설정(DB 접속 정보, JWT 시크릿, 업로드 경로 등)은 코드 저장소 밖의 서버 설정 파일에서 읽음
 - **웹 지원 폼**: `https://cju-smash.duckdns.org/apply.html`
-- **사진 저장 경로**: `/home/baki/smash-files/photos/{activity_id}/`
+- **사진 저장 경로**: `/home/ubuntu/smash-files/photos/{activity_id}/`
+- **앱 배포**: iOS는 TestFlight, Android는 릴리스 빌드(서명·Firebase 연동)까지 완료
 
 ---
 
 ## 🐛 주요 트러블슈팅
 
-### boolean vs Boolean — Jackson 역직렬화 버그
-**문제**: 가입코드 활성화/비활성화 토글이 항상 `false`로만 처리되는 버그  
-**원인**: `boolean` primitive 타입에서 Lombok이 생성하는 getter 이름이 `setActive()`가 되어 Jackson이 `setIsActive()`를 찾지 못함  
-**해결**: `boolean` → `Boolean` 래퍼 클래스로 변경
+### 앱 시작 지연 — 추측 대신 측정으로 원인 찾기
+**문제**: 자동 로그인 후 홈 화면이 뜨기까지 약 4.5초 소요
+**분석**: 시작 단계별로 시간을 측정하고 요청별 소요 시간을 기록. Firebase 초기화 등 앱 초기화는 합계 9ms로 병목이 아니었고, 지연은 서버 요청(TLS 핸드셰이크 중앙값 약 2.8초)에서 발생
+**원인**: 서버를 Tailscale Funnel로 공개하던 접속 경로의 연결 수립 지연. 내부망에 연결된 PC에서 재면 이 지연이 보이지 않아(약 50ms) 처음에 잘못 판단했고, 공개 DNS를 직접 조회해 외부 사용자와 같은 조건으로 재측정해 확인
+**해결**: Nginx 리버스 프록시 + Let's Encrypt로 직접 HTTPS 전환 (앱 코드는 주소 상수 한 줄만 변경)
+**결과**: TLS 약 2.8초 → 약 0.02초, 홈 진입 전 인증 확인 4,565ms → 275ms (94% 감소)
+
+### 서버 시간대(UTC) — 투표 마감이 어긋나는 문제
+**문제**: 오후 2시가 지나면 마감되어야 하는 활동 투표가 마감되지 않음
+**원인**: EC2 서버 시간대가 UTC여서 `LocalTime.now()`가 9시간 어긋남
+**해결**: 애플리케이션 시작 시 `TimeZone.setDefault(Asia/Seoul)` 지정
+
+### 외부 설정 파일 미반영 — 사진 업로드 실패
+**문제**: 사진 업로드가 "업로드 실패"로만 응답, 서버 로그에는 원인이 보이지 않음
+**원인**: 서버가 `--spring.config.location`으로 외부 설정 파일만 읽어 저장소의 `application.yaml`(업로드 용량 설정)이 적용되지 않았고, Spring 기본값 1MB 제한에 걸림. 업로드 폴더도 서버에 없었음
+**해결**: 서버 설정 파일에 용량 제한 추가, 폴더 생성. 업로드 용량 초과 등 프레임워크 예외가 500으로 응답되던 전역 예외 처리도 405/404/413/400으로 정리
+
+### 만료 토큰 재발급이 동작하지 않던 문제
+**문제**: Access Token 만료 후 자동 갱신이 되지 않고 로그아웃됨
+**원인**: 미인증 요청에 Spring Security 기본 응답이 403이어서 클라이언트의 401 기반 갱신 로직이 실행되지 않음. 동시에 여러 요청이 갱신을 중복 호출하는 문제도 있었음
+**해결**: 인증 진입점을 401로 설정, 클라이언트에서 갱신 요청을 하나로 합치고(single-flight) 4xx일 때만 토큰을 삭제하도록 수정
 
 ### JPA N+1 문제 해결
-**문제**: 오늘 활동 목록 조회 시 활동 수에 비례해 쿼리가 2N+1번 발생  
-**해결**: `@EntityGraph`로 group을 JOIN 조회, Participation은 IN 쿼리로 일괄 조회 후 Map으로 변환  
+**문제**: 오늘 활동 목록 조회 시 활동 수에 비례해 쿼리가 2N+1번 발생
+**해결**: `@EntityGraph`로 group을 JOIN 조회, Participation은 IN 쿼리로 일괄 조회 후 Map으로 변환
 **결과**: 쿼리 수 2N+1 → 3번(고정)으로 개선
 
+### boolean vs Boolean — Jackson 역직렬화 버그
+**문제**: 가입코드 활성화/비활성화 토글이 항상 `false`로만 처리되는 버그
+**원인**: `boolean` primitive 타입에서 Lombok이 생성하는 getter 이름이 `setActive()`가 되어 Jackson이 `setIsActive()`를 찾지 못함
+**해결**: `boolean` → `Boolean` 래퍼 클래스로 변경
+
 ### isActive 직렬화 — Jackson boolean getter 네이밍 버그
-**문제**: 서버 응답에서 `isActive`가 `active`로 내려와 Flutter에서 파싱 실패  
+**문제**: 서버 응답에서 `isActive`가 `active`로 내려와 Flutter에서 파싱 실패
 **해결**: `@JsonProperty("isActive")`를 명시한 getter를 직접 작성
 
-### MariaDB 마이그레이션
-**문제**: 라즈베리파이(ARM64)에서 MySQL 패키지를 찾을 수 없음  
-**해결**: `mariadb-server` 설치, JDBC URL 및 드라이버 변경
-
 ### Enum 충돌 — java.time.DayOfWeek vs 커스텀 DayOfWeek
-**문제**: 지원 폼 제출 시 `"MON"` 값이 Java 표준 `DayOfWeek`로 역직렬화되어 파싱 실패  
+**문제**: 지원 폼 제출 시 `"MON"` 값이 Java 표준 `DayOfWeek`로 역직렬화되어 파싱 실패
 **해결**: import를 `com.smash.domain.group.DayOfWeek`로 변경
 
 ### 외래 키 제약 — 지원자 삭제
-**문제**: users 삭제 시 member_availability 외래 키 제약으로 실패  
+**문제**: users 삭제 시 member_availability 외래 키 제약으로 실패
 **해결**: 연관 테이블 순서대로 삭제 후 users 삭제
 
 ### @Transactional 누락 — 회원가입 DB 미반영
-**문제**: 가입코드로 회원가입 시 성공 응답은 오지만 DB에 반영되지 않음  
-**원인**: `signup()` 메서드에 `@Transactional` 누락으로 JPA 더티 체킹 미작동  
+**문제**: 가입코드로 회원가입 시 성공 응답은 오지만 DB에 반영되지 않음
+**원인**: `signup()` 메서드에 `@Transactional` 누락으로 JPA 더티 체킹 미작동
 **해결**: `@Transactional` 추가
 
 ### 회비 체크박스 중복 탭 문제
-**문제**: 체크박스를 빠르게 두 번 탭하면 상태가 꼬이는 문제  
-**원인**: 낙관적 업데이트 중 중복 API 요청 발생  
+**문제**: 체크박스를 빠르게 두 번 탭하면 상태가 꼬이는 문제
+**원인**: 낙관적 업데이트 중 중복 API 요청 발생
 **해결**: 부원별 `_processingIds` Set으로 처리 중인 부원만 선택적으로 비활성화
 
 ---
 
-## 🔮 추후 계획 (v3)
+## 🔮 추후 계획
 
 ### 배포 및 인프라
-- Raspberry Pi → **AWS 마이그레이션** (EC2 + RDS)
-- **CI/CD 파이프라인** 구축 (GitHub Actions)
-- **TestFlight / 앱스토어 배포**
-- 활동 사진 **AWS S3 마이그레이션**
+- Google Play 스토어 등록 (릴리스 빌드 완료)
+- 활동 사진 **AWS S3 마이그레이션** 및 썸네일 생성
+- DB 분리 (RDS) 검토
 
-### 기능 추가
-- **Push Notification** (FCM)
-  - 투표 마감 1시간 전 알림
-  - 회비 미납자 알림
-  - 신규 지원자 알림
-- **택시비 정산** 기능 (결제자가 계좌/금액 입력 → N빵 자동 계산)
-- **활동 사진 모아보기** 화면
-
-### 품질 개선
-- **UI/UX 다듬기**
-- **테스트 커버리지 확대** (현재 43개 → 목표 60개+)
+### 보안·품질
+- 부조장 지정, 참여 응답 등 사용자 입력에 대한 서버 검증 보강
+- 잠금 해제 시간 검증을 위한 `Clock` 주입 및 테스트 확대
+- Android 관리자 메뉴 접근성 개선 (제스처 내비게이션 대응)
 
 ---
 
@@ -341,42 +411,34 @@ invite_code / free_period / refresh_token
 
 **v1 (완료)**
 - [x] 서비스 기획 및 요구사항 정의
-- [x] ERD 설계 (8개 테이블)
-- [x] API 설계 및 개발 (Spring Boot)
+- [x] ERD 설계 및 API 설계, 개발 (Spring Boot)
 - [x] Flutter 앱 개발
 - [x] 디자인 시스템 적용 (Pretendard, AppTheme)
-- [x] 실서버 배포 (Raspberry Pi + Tailscale Funnel)
-- [x] iOS / Android 배포
-- [x] JUnit5 + Mockito 단위/통합 테스트 (25개)
+- [x] JUnit5 + Mockito 단위/통합 테스트
 - [x] N+1 문제 해결 (@EntityGraph + IN 쿼리)
 
 **v2 (완료)**
-- [x] 일반 투표 기능 (날짜 표시 포함)
-- [x] 회비 관리 (중복 탭 방지)
-- [x] 이동 조율 시스템 (같이/따로, 택시 그룹 배정)
-- [x] 설정 페이지
-- [x] 동아리 지원 폼 시스템 (웹 폼 + QR코드 + 엑셀 내보내기)
-- [x] 지원서 메모 타임라인
-- [x] 부원 상세 다이얼로그 (정보 수정/복사/탈퇴/권한변경/개인메모)
-- [x] 조 편성 테이블 UI (조장/부조장/부원)
-- [x] 부조장 지정/해제 기능
+- [x] 일반 투표 기능, 회비 관리, 이동 조율, 택시비 정산
+- [x] 동아리 지원 폼 시스템 (웹 폼 + QR코드 + 엑셀 내보내기), 지원서 메모
+- [x] 부원 상세·조 편성 테이블·부조장 지정
 - [x] 활동 사진 업로드/조회/삭제 (원본 저장)
-- [x] Drawer 메뉴 정리 (13개 → 8개)
-- [x] 회비 체크박스 중복 탭 버그 수정
-- [x] 타조참/이월 호차 카드 표시 버그 수정
-- [x] 투표 화면 마감 날짜 표시
-- [x] 홈 화면 하단 패딩 추가
-- [x] 부원 정보 수정/복사 기능
-- [x] signup @Transactional 누락 버그 수정
-- [x] 택시비 정산 (토스 딥링크 송금)
-- [x] 테이블 22개, API 88개, 테스트 43개
+- [x] 설정 페이지, Drawer 메뉴 정리
 
-**v3 (예정)**
-- [ ] AWS 마이그레이션 (EC2 + RDS + S3)
-- [ ] CI/CD 파이프라인 (GitHub Actions)
-- [ ] Push Notification (FCM)
-- [ ] TestFlight / 앱스토어 배포
-- [ ] UI/UX 개선 및 버그 수정
+**v3 (완료)**
+- [x] Raspberry Pi → **AWS EC2 이전**
+- [x] **CI/CD 파이프라인** (GitHub Actions)
+- [x] **Push Notification** (FCM, 마감 임박·새 투표·정산 알림, 수신 설정)
+- [x] **TestFlight 배포**, Android 릴리스 빌드
+- [x] 직접 HTTPS 전환 및 **시작 성능 개선** (4.5초 → 275ms)
+- [x] 보안 강화 (사진 접근 제어, 로그인 시도 제한, Swagger 비공개, 재가입 우회 차단)
+- [x] 캘린더, 새 학기 초기화, 활동 사진 원본 갤러리 저장
+- [x] 낙관적 업데이트 (투표·이동 방법)
+
+**현재 규모**: 테이블 27개 · API 100개 · 단위 테스트 약 70개
+
+**진행 예정**
+- [ ] Google Play 스토어 등록
+- [ ] 사진 S3 이전 및 썸네일
 - [ ] 실제 동아리 배포 후 피드백 기반 개선
 
 ---
@@ -385,7 +447,7 @@ invite_code / free_period / refresh_token
 
 **김동현** · GitHub: [@kor-BaKi](https://github.com/kor-BaKi)
 
-> 배드민턴 동아리 운영 경험을 바탕으로 문제 정의부터 서비스 설계, 개발, 배포까지 전 과정을 진행한 개인 프로젝트입니다.
+> 배드민턴 동아리 운영 경험을 바탕으로 문제 정의부터 서비스 설계, 개발, 배포, 운영까지 전 과정을 진행한 개인 프로젝트입니다.
 
 **담당 영역**
 - 서비스 기획 및 사용자 흐름 설계
@@ -393,4 +455,4 @@ invite_code / free_period / refresh_token
 - 백엔드 개발 (Spring Boot)
 - 프론트엔드 개발 (Flutter)
 - 디자인 시스템 구축
-- 인프라 구성 및 배포 (Raspberry Pi)
+- 인프라 구성·배포·운영 (AWS EC2, Nginx, GitHub Actions)
