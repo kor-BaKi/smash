@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:gal/gal.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/activity_photo_api.dart';
@@ -74,10 +78,15 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
         title: const Text(
           '사진 삭제',
-          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         content: const Text(
           '이 사진을 삭제할까요?',
@@ -86,7 +95,10 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -145,11 +157,12 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
             )
           : GridView.builder(
               padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
+              gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
               itemCount: _photos.length,
               itemBuilder: (context, index) {
                 final photo = _photos[index];
@@ -213,10 +226,52 @@ class _ActivityPhotoPageState extends State<ActivityPhotoPage> {
   }
 }
 
-class _FullScreenPhoto extends StatelessWidget {
+class _FullScreenPhoto extends StatefulWidget {
   final ActivityPhotoInfo photo;
 
   const _FullScreenPhoto({required this.photo});
+
+  @override
+  State<_FullScreenPhoto> createState() => _FullScreenPhotoState();
+}
+
+class _FullScreenPhotoState extends State<_FullScreenPhoto> {
+  bool _isSaving = false;
+
+  // 원본 바이트를 내려받아 갤러리에 저장
+  Future<void> _savePhoto() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+
+    try {
+      final response = await Dio().get<List<int>>(
+        widget.photo.url,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      await Gal.putImageBytes(
+        Uint8List.fromList(response.data!),
+        album: 'SMASH',
+      );
+      _showMessage('갤러리에 저장되었습니다.');
+    } on GalException catch (e) {
+      _showMessage(
+        e.type == GalExceptionType.accessDenied
+            ? '사진 저장 권한이 필요합니다. 설정에서 허용해 주세요.'
+            : '저장에 실패했습니다.',
+      );
+    } catch (_) {
+      _showMessage('저장에 실패했습니다.');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  void _showMessage(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(text)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,14 +281,30 @@ class _FullScreenPhoto extends StatelessWidget {
         backgroundColor: AppColors.overlay,
         iconTheme: const IconThemeData(color: AppColors.white),
         title: Text(
-          photo.createdAt,
+          widget.photo.createdAt,
           style: const TextStyle(color: AppColors.white, fontSize: 14),
         ),
+        actions: [
+          _isSaving
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.download),
+                  tooltip: '갤러리에 저장',
+                  onPressed: _savePhoto,
+                ),
+        ],
       ),
       body: Center(
         child: InteractiveViewer(
           child: Image.network(
-            photo.url,
+            widget.photo.url,
             fit: BoxFit.contain,
             errorBuilder: (_, __, ___) => const Icon(
               Icons.broken_image,
