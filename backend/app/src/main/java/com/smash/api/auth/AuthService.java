@@ -1,6 +1,7 @@
 
 package com.smash.api.auth;
 import com.smash.auth.JwtProvider;
+import com.smash.auth.LoginAttemptService;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.invite.InviteCodeRepository;
 import com.smash.domain.token.RefreshToken;
@@ -28,6 +29,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final InviteCodeRepository inviteCodeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final LoginAttemptService loginAttemptService;
 
 
     @Transactional
@@ -59,17 +61,35 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByStudentNo(request.getStudentNo())
-                .orElseThrow(() -> new BusinessException(
-                        "STUDENT_NO_NOT_FOUND", "학번 또는 비밀번호가 올바르지 않습니다."));
+        String attemptKey = request.getStudentNo();
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (loginAttemptService.isLocked(attemptKey)) {
             throw new BusinessException(
-                    "INVALID_PASSWORD", "학번 또는 비밀번호가 올바르지 않습니다.");
+                    "TOO_MANY_ATTEMPTS", "로그인 시도가 너무 많습니다. 잠시 후 시도해 주세요."
+            );
         }
 
+        User user = userRepository.findByStudentNo(request.getStudentNo())
+                .orElseThrow(() -> {
+                    loginAttemptService.recordFailure(attemptKey);
+                    return new BusinessException(
+                            "STUDENT_NOT_FOUND", "학번 또는 비밀번호가 올바르지 않습니다."
+                    );
+                });
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            loginAttemptService.recordFailure(attemptKey);
+            throw new BusinessException(
+                    "INVAILD_PASSWORD", "학번 또는 비밀번호가 올바르지 않습니다."
+            );
+        }
+
+        loginAttemptService.recordSuccess(attemptKey);
+
         if (user.getStatus() != Status.ACTIVE) {
-            throw new BusinessException("NOT_ACTIVE", "가입이 완료되지 않은 계정입니다.");
+            throw new BusinessException(
+                    "NOT_ACTIVE", "가입이 완료되지 않은 계정입니다."
+            );
         }
 
         return buildAuthResponse(user);

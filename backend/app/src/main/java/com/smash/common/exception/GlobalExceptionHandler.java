@@ -90,6 +90,9 @@ public class GlobalExceptionHandler {
             // 401 — 인증 실패
             case "INVALID_REFRESH_TOKEN"  -> HttpStatus.UNAUTHORIZED;
 
+            // 429 - 요청이 너무 많음 (로그인 시도 제한)
+            case "TOO_MANY_ATTEMPTS"      -> HttpStatus.TOO_MANY_REQUESTS;
+
             // 403 — 접근 권한 없음
             case "NOT_ACTIVE"             -> HttpStatus.FORBIDDEN;
             case "FORBIDDEN"              -> HttpStatus.FORBIDDEN;
