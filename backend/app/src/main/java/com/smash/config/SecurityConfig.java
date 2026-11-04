@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/apply.html").permitAll()
                         .requestMatchers("/privacy.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/files/photos/**").permitAll()
+                        .requestMatchers("/files/photos/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/settlements/**").authenticated()
                         .requestMatchers("/api/v1/activities/*/transport-groups/*/settlement").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/calendar").authenticated()
