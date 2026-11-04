@@ -46,6 +46,12 @@ public class AuthService {
             throw new BusinessException("ALREADY_REGISTERED", "이미 가입된 학번입니다.");
         }
 
+        if (user.getStatus() == Status.REJECTED) {
+            throw new BusinessException(
+                    "NOT_ALLOWED", "가입할 수 없는 계정입니다. 임원에게 문의해 주세요."
+            );
+        }
+
         user.signup(passwordEncoder.encode(request.getPassword()));
 
         return buildAuthResponse(user);
