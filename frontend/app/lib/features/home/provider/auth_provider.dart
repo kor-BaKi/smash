@@ -126,6 +126,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = state.copyWith(user: auth.user, isLoading: false);
       await _registerFcmToken(); // 실패해도 내부에서 처리되어 로그인은 유지됨
+    } on DioException catch (e) {
+      final message = e.response?.statusCode == 429
+          ? '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.'
+          : '로그인에 실패했습니다.';
+      state = state.copyWith(isLoading: false, errorMessage: message);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

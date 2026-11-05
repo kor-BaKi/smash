@@ -48,11 +48,30 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       drawer: user.isAdmin ? const _AdminDrawer() : null,
-      body: SafeArea(child: pages[_currentIndex]),
+      body: SafeArea(
+        child: Column(
+          children: [
+            if (user.isAdmin && _currentIndex == 0)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.menu, color: AppColors.white),
+                    tooltip: '운영 메뉴',
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                ),
+              ),
+            Expanded(child: pages[_currentIndex]),
+          ],
+        ),
+      ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.card,
-          border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
+          border: Border(
+            top: BorderSide(color: AppColors.border, width: 0.5),
+          ),
         ),
         child: SafeArea(
           top: false,
@@ -169,7 +188,9 @@ class _NeedGroupNotice extends StatelessWidget {
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AvailabilityPage()),
+                  MaterialPageRoute(
+                    builder: (_) => const AvailabilityPage(),
+                  ),
                 ),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -280,22 +301,26 @@ class _AdminDrawer extends ConsumerWidget {
                   _DrawerItem(
                     icon: Icons.person_outline,
                     label: '부원 관리',
-                    onTap: () => _push(context, const MemberManagementPage()),
+                    onTap: () =>
+                        _push(context, const MemberManagementPage()),
                   ),
                   _DrawerItem(
                     icon: Icons.groups_outlined,
                     label: '조 편성 관리',
-                    onTap: () => _push(context, const GroupManagementPage()),
+                    onTap: () =>
+                        _push(context, const GroupManagementPage()),
                   ),
                   _DrawerItem(
                     icon: Icons.assignment_outlined,
                     label: '지원서 관리',
-                    onTap: () => _push(context, const ApplicationListPage()),
+                    onTap: () =>
+                        _push(context, const ApplicationListPage()),
                   ),
                   _DrawerItem(
                     icon: Icons.edit_document,
                     label: '지원 폼 관리',
-                    onTap: () => _push(context, const ApplicationFormPage()),
+                    onTap: () =>
+                        _push(context, const ApplicationFormPage()),
                   ),
                   _DrawerItem(
                     icon: Icons.key_outlined,
