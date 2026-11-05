@@ -1,6 +1,7 @@
 package com.smash.api.auth;
 
 import com.smash.auth.JwtProvider;
+import com.smash.auth.LoginAttemptService;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.invite.InviteCodeRepository;
 import com.smash.domain.token.RefreshToken;
@@ -47,6 +48,8 @@ class AuthServiceTest {
     @Mock JwtProvider jwtProvider;
     @Mock InviteCodeRepository inviteCodeRepository;
     @Mock RefreshTokenRepository refreshTokenRepository;
+    @Mock
+    LoginAttemptService loginAttemptService;
 
     @InjectMocks AuthService authService;
 

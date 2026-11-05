@@ -73,14 +73,14 @@ public class AuthService {
                 .orElseThrow(() -> {
                     loginAttemptService.recordFailure(attemptKey);
                     return new BusinessException(
-                            "STUDENT_NOT_FOUND", "학번 또는 비밀번호가 올바르지 않습니다."
+                            "STUDENT_NO_NOT_FOUND", "학번 또는 비밀번호가 올바르지 않습니다."
                     );
                 });
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             loginAttemptService.recordFailure(attemptKey);
             throw new BusinessException(
-                    "INVAILD_PASSWORD", "학번 또는 비밀번호가 올바르지 않습니다."
+                    "INVALID_PASSWORD", "학번 또는 비밀번호가 올바르지 않습니다."
             );
         }
 
