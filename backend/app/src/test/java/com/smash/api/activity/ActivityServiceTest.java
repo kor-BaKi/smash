@@ -3,6 +3,8 @@ package com.smash.api.activity;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.activity.Activity;
 import com.smash.domain.activity.ActivityRepository;
+import com.smash.domain.activity.ActivityType;
+import com.smash.domain.group.Group;
 import com.smash.domain.participation.Participation;
 import com.smash.domain.participation.ParticipationRepository;
 import com.smash.domain.participation.ParticipationType;
@@ -47,6 +49,7 @@ class ActivityServiceTest {
 
     private static final Long USER_ID = 1L;
     private static final Long GROUP_ID = 5L;
+    private static final Long OTHER_GROUP_ID = 9L;
     private static final Long CURRENT_ID = 100L;
     private static final Long FUTURE_ID = 101L;
 
@@ -60,7 +63,7 @@ class ActivityServiceTest {
         given(user.getGroupId()).willReturn(GROUP_ID);
         given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
 
-        current = activity(CURRENT_ID, LocalDate.of(2026, 10, 14));
+        current = activity(CURRENT_ID, LocalDate.of(2026, 10, 14), OTHER_GROUP_ID);
         future = activity(FUTURE_ID, LocalDate.of(2026, 10, 21));
         given(activityRepository.findById(CURRENT_ID)).willReturn(Optional.of(current));
         given(activityRepository.findById(FUTURE_ID)).willReturn(Optional.of(future));
@@ -73,9 +76,18 @@ class ActivityServiceTest {
 
     // 주의: given(...) 인자 위치에서 호출하지 말고 변수에 먼저 담아 사용할 것
     private Activity activity(Long id, LocalDate date) {
+        return activity(id, date, GROUP_ID);
+    }
+
+    private Activity activity(Long id, LocalDate date, Long groupId) {
+        Group group = mock(Group.class);
+        given(group.getId()).willReturn(groupId);
+
         Activity a = mock(Activity.class);
         given(a.getId()).willReturn(id);
         given(a.getActivityDate()).willReturn(date);
+        given(a.getGroup()).willReturn(group);
+        given(a.getActivityType()).willReturn(ActivityType.REGULAR);
         given(a.isVoteClosed()).willReturn(false);
         return a;
     }
@@ -172,5 +184,43 @@ class ActivityServiceTest {
                 () -> activityService.participate(USER_ID, CURRENT_ID, req));
 
         assertBusiness(thrown, "INVALID_CARRYOVER_TARGET");
+    }
+
+    @Test
+    @DisplayName("다른 조의 활동에 정규 참여(REGULAR)로 응답하면 INVALID_REQUEST (출석 조작 방지)")
+    void participate_regularOnOtherGroupActivity_rejected() {
+        // current는 다른 조 활동이므로 서버가 내려주는 버튼은 CARRYOVER / OTHER_GROUP 뿐
+        ParticipationRequest req = request(ParticipationType.REGULAR, null);
+
+        Throwable thrown = catchThrowable(
+                () -> activityService.participate(USER_ID, CURRENT_ID, req));
+
+        assertBusiness(thrown, "INVALID_REQUEST");
+        verify(participationRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("취소된 활동에는 응답할 수 없다 (INVALID_REQUEST)")
+    void participate_cancelledActivity_rejected() {
+        given(current.isCancelled()).willReturn(true);
+        ParticipationRequest req = request(ParticipationType.OTHER_GROUP, null);
+
+        Throwable thrown = catchThrowable(
+                () -> activityService.participate(USER_ID, CURRENT_ID, req));
+
+        assertBusiness(thrown, "INVALID_REQUEST");
+        verify(participationRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("다른 조의 활동에 타조 참여(OTHER_GROUP)로 응답하면 저장된다")
+    void participate_otherGroupOnOtherGroupActivity_saved() {
+        ParticipationRequest req = request(ParticipationType.OTHER_GROUP, null);
+
+        activityService.participate(USER_ID, CURRENT_ID, req);
+
+        ArgumentCaptor<Participation> captor = ArgumentCaptor.forClass(Participation.class);
+        verify(participationRepository).saveAndFlush(captor.capture());
+        assertThat(captor.getValue().getType()).isEqualTo(ParticipationType.OTHER_GROUP);
     }
 }

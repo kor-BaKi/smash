@@ -106,6 +106,22 @@ public class ActivityService {
             throw new BusinessException("VOTE_CLOSED", "투표가 마감되었습니다.");
         }
 
+        // 취소된 활동 확인
+        if (activity.isCancelled()) {
+            throw new BusinessException(
+                    "INVALID_REQUEST", "취소된 활동입니다."
+            );
+        }
+
+        // 서버가 내려준 버튼 목록에 없는 응답 거부
+        boolean isMyGroup = user.getGroupId() != null && user.getGroupId().equals(activity.getGroup().getId());
+        String requestedButton = request.getType() == ParticipationType.REGULAR ? "ATTEND" : request.getType().name();
+        if (!resolvedButtons(user, activity, isMyGroup).contains(requestedButton)) {
+            throw new BusinessException(
+                    "INVALID_REQUEST", "선택할 수 없는 응답입니다."
+            );
+        }
+
         // CARRYOVER 추가 검증
         Activity carryoverTarget = null;
         if (request.getType() == ParticipationType.CARRYOVER) {
