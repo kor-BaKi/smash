@@ -1,5 +1,6 @@
 package com.smash.domain.transport;
 
+import com.smash.common.crypto.AccountNumberConverter;
 import com.smash.domain.activity.Activity;
 import com.smash.domain.user.User;
 import jakarta.persistence.*;
@@ -41,8 +42,9 @@ public class TaxiSettlement { // 결제자 테이블
     @Column
     private String accountBank; // 은행명
 
+    @Convert(converter = AccountNumberConverter.class)
     @Column
-    private String accountNumber; // 계좌번호
+    private String accountNumber; // 계좌번호 (DB에는 AES-GCM으로 암호화되어 저장)
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
