@@ -8,6 +8,7 @@ import com.smash.domain.transport.*;
 import com.smash.domain.user.User;
 import com.smash.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,17 +64,22 @@ public class TaxiSettlementService {
 
         int amountPerPerson = request.getTotalAmount() / members.size();
 
-        TaxiSettlement settlement = settlementRepository.save(
-                TaxiSettlement.builder()
-                        .transportGroup(group)
-                        .activity(activity)
-                        .payer(payer)
-                        .totalAmount(request.getTotalAmount())
-                        .amountPerPerson(amountPerPerson)
-                        .accountBank(request.getAccountBank())
-                        .accountNumber(request.getAccountNumber())
-                        .build()
-        );
+        TaxiSettlement settlement;
+        try {
+            settlement = settlementRepository.save(
+                    TaxiSettlement.builder()
+                            .transportGroup(group)
+                            .activity(activity)
+                            .payer(payer)
+                            .totalAmount(request.getTotalAmount())
+                            .amountPerPerson(amountPerPerson)
+                            .accountBank(request.getAccountBank())
+                            .accountNumber(request.getAccountNumber())
+                            .build()
+            );
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException("ALREADY_EXISTS", "이미 정산이 등록되어 있습니다.");
+        }
 
         // 결제자 제외 동승자 납부 현황 생성
         for (TransportMember member : members) {

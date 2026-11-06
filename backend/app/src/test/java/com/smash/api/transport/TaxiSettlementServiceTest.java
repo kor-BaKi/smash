@@ -16,7 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -138,5 +140,32 @@ class TaxiSettlementServiceTest {
 
         verify(paymentRepository).deleteBySettlement(settlement);
         verify(settlementRepository).delete(settlement);
+    }
+
+    @Test
+    @DisplayName("정산 생성: 동시 요청으로 DB 유니크 제약에 걸리면 ALREADY_EXISTS (500이 아님)")
+    void create_duplicateRequest_convertedToAlreadyExists() {
+        User payer = mock(User.class);
+        given(payer.getId()).willReturn(PAYER_ID);
+        given(activityRepository.findById(1L)).willReturn(Optional.of(mock(Activity.class)));
+        given(userRepository.findById(PAYER_ID)).willReturn(Optional.of(payer));
+        given(transportMemberRepository.existsByTransportGroupAndUserId(group, PAYER_ID))
+                .willReturn(true);
+        given(settlementRepository.findByTransportGroup(group)).willReturn(Optional.empty());
+        given(transportMemberRepository.findByTransportGroup(group))
+                .willReturn(List.of(mock(TransportMember.class)));
+        given(settlementRepository.save(any()))
+                .willThrow(new DataIntegrityViolationException("duplicate"));
+
+        TaxiSettlementRequest request = mock(TaxiSettlementRequest.class);
+        given(request.getTotalAmount()).willReturn(10000);
+
+        Throwable thrown = catchThrowable(
+                () -> settlementService.create(1L, 1L, request, PAYER_ID));
+
+        assertThat(thrown).isInstanceOf(BusinessException.class);
+        assertThat(((BusinessException) thrown).getCode()).isEqualTo("ALREADY_EXISTS");
+        // 정산 저장이 실패했으므로 납부 현황은 만들어지지 않아야 함
+        verify(paymentRepository, never()).save(any());
     }
 }
