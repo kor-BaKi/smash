@@ -37,7 +37,8 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
       final setting = await NotificationSettingApi.getSetting();
       setState(() {
         _pollNotification = setting['pollNotification'] ?? true;
-        _settlementNotification = setting['settlementNotification'] ?? true;
+        _settlementNotification =
+            setting['settlementNotification'] ?? true;
         _activityNotification = setting['activityNotification'] ?? true;
         _isLoadingSettings = false;
       });
@@ -92,11 +93,14 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                   hintText: '현재 비밀번호',
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscureCurrent ? Icons.visibility_off : Icons.visibility,
+                      obscureCurrent
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: AppColors.gray,
                     ),
-                    onPressed: () =>
-                        setDialogState(() => obscureCurrent = !obscureCurrent),
+                    onPressed: () => setDialogState(
+                      () => obscureCurrent = !obscureCurrent,
+                    ),
                   ),
                 ),
               ),
@@ -126,11 +130,14 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                   hintText: '새 비밀번호 확인',
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                      obscureConfirm
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: AppColors.gray,
                     ),
-                    onPressed: () =>
-                        setDialogState(() => obscureConfirm = !obscureConfirm),
+                    onPressed: () => setDialogState(
+                      () => obscureConfirm = !obscureConfirm,
+                    ),
                   ),
                 ),
               ),
@@ -139,7 +146,10 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('취소', style: TextStyle(color: AppColors.gray)),
+              child: const Text(
+                '취소',
+                style: TextStyle(color: AppColors.gray),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -184,10 +194,15 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
         title: const Text(
           '로그아웃',
-          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         content: const Text(
           '로그아웃 할까요?',
@@ -196,7 +211,10 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -213,6 +231,119 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
     );
     if (confirmed == true) {
       ref.read(authProvider.notifier).logout();
+    }
+  }
+
+  Future<void> _showWithdrawDialog() async {
+    final passwordController = TextEditingController();
+    bool obscure = true;
+    bool submitting = false;
+    String? errorText;
+
+    final withdrawn = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: const Text(
+            '회원 탈퇴',
+            style: TextStyle(
+              color: AppColors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '탈퇴하면 계정 정보와 알림 설정이 삭제되며 되돌릴 수 없습니다.\n'
+                '활동·정산 기록은 이름 없이 남습니다.\n\n'
+                '계속하려면 비밀번호를 입력해 주세요.',
+                style: TextStyle(color: AppColors.gray, height: 1.5),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: obscure,
+                enabled: !submitting,
+                style: const TextStyle(color: AppColors.white),
+                decoration: InputDecoration(
+                  hintText: '비밀번호',
+                  errorText: errorText,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      obscure ? Icons.visibility_off : Icons.visibility,
+                      color: AppColors.gray,
+                    ),
+                    onPressed: () =>
+                        setDialogState(() => obscure = !obscure),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: submitting
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(false),
+              child: const Text(
+                '취소',
+                style: TextStyle(color: AppColors.gray),
+              ),
+            ),
+            TextButton(
+              onPressed: submitting
+                  ? null
+                  : () async {
+                      if (passwordController.text.isEmpty) {
+                        setDialogState(() => errorText = '비밀번호를 입력해 주세요.');
+                        return;
+                      }
+                      setDialogState(() {
+                        submitting = true;
+                        errorText = null;
+                      });
+                      final error = await ref
+                          .read(authProvider.notifier)
+                          .withdraw(passwordController.text);
+                      if (!dialogContext.mounted) return;
+                      if (error == null) {
+                        Navigator.of(dialogContext).pop(true);
+                      } else {
+                        setDialogState(() {
+                          submitting = false;
+                          errorText = error;
+                        });
+                      }
+                    },
+              child: submitting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text(
+                      '탈퇴',
+                      style: TextStyle(
+                        color: AppColors.coral,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // 다이얼로그가 닫힌 뒤에 로그인 정보를 정리해야 화면 전환과 충돌하지 않는다.
+    if (withdrawn == true) {
+      await ref.read(authProvider.notifier).clearSessionAfterWithdrawal();
     }
   }
 
@@ -328,21 +459,27 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                           Container(
                             height: 0.5,
                             color: AppColors.border,
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                            ),
                           ),
                           _NotificationToggle(
                             label: '정산 알림',
                             subLabel: '택시비 정산 요청이 올 때',
                             value: _settlementNotification,
                             onChanged: (val) {
-                              setState(() => _settlementNotification = val);
+                              setState(
+                                () => _settlementNotification = val,
+                              );
                               _updateNotificationSetting();
                             },
                           ),
                           Container(
                             height: 0.5,
                             color: AppColors.border,
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                            ),
                           ),
                           _NotificationToggle(
                             label: '활동 알림',
@@ -385,6 +522,17 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                       color: AppColors.coral,
                       onTap: _confirmLogout,
                     ),
+                    Container(
+                      height: 0.5,
+                      color: AppColors.border,
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                    ),
+                    _SettingRow(
+                      icon: Icons.person_remove_outlined,
+                      label: '회원 탈퇴',
+                      color: AppColors.coral,
+                      onTap: _showWithdrawDialog,
+                    ),
                   ],
                 ),
               ),
@@ -404,7 +552,10 @@ class _SettingsPageState extends ConsumerState<SettingPage> {
                   label: '버전 정보',
                   trailing: Text(
                     _appVersion,
-                    style: const TextStyle(fontSize: 13, color: AppColors.gray),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.gray,
+                    ),
                   ),
                 ),
               ),
@@ -463,7 +614,10 @@ class _NotificationToggle extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subLabel,
-                  style: const TextStyle(fontSize: 12, color: AppColors.gray),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.gray,
+                  ),
                 ),
               ],
             ),

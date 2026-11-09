@@ -54,4 +54,9 @@ class AuthApi {
       },
     );
   }
+
+  // 회원 탈퇴 (비밀번호 재확인)
+  static Future<void> withdraw({required String password}) async {
+    await _dio.post('/me/withdraw', data: {'password': password});
+  }
 }

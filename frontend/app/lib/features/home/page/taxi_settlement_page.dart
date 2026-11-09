@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,13 +22,15 @@ class TaxiSettlementPage extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TaxiSettlementPage> createState() => _TaxiSettlementPageState();
+  ConsumerState<TaxiSettlementPage> createState() =>
+      _TaxiSettlementPageState();
 }
 
 class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
   Map<String, dynamic>? _settlement;
   bool _isLoading = true;
   bool _isCreating = false;
+  bool _isSubmitting = false; // 정산 생성 요청이 진행 중인지 (중복 탭 방지)
   bool _sendNotification = true;
 
   final TextEditingController _amountController = TextEditingController();
@@ -64,6 +67,8 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
   }
 
   Future<void> _createSettlement() async {
+    if (_isSubmitting) return;
+
     if (_amountController.text.isEmpty ||
         _bankController.text.isEmpty ||
         _accountController.text.isEmpty) {
@@ -83,6 +88,7 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
       return;
     }
 
+    setState(() => _isSubmitting = true);
     try {
       final data = await TaxiSettlementApi.create(
         widget.activityId,
@@ -92,16 +98,36 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
         _accountController.text.trim(),
         sendNotification: _sendNotification,
       );
+      if (!mounted) return;
       setState(() {
         _settlement = data;
         _isCreating = false;
       });
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 409) {
+        // 이미 정산이 만들어져 있으면(중복 요청 등) 기존 정산을 불러와 보여준다.
+        await _loadSettlement();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('이미 등록된 정산을 불러왔습니다.')),
+        );
+      } else {
+        final message = e.response == null
+            ? '네트워크 연결을 확인해 주세요.'
+            : '정산 생성에 실패했습니다.';
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('정산 생성에 실패했습니다.')));
       }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -123,10 +149,15 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
         title: const Text(
           '정산 삭제',
-          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.w800),
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         content: const Text(
           '정산을 삭제할까요?',
@@ -135,7 +166,10 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소', style: TextStyle(color: AppColors.gray)),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.gray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -170,10 +204,9 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
   }
 
   Future<void> _openToss() async {
-    final accountNumber = _settlement!['accountNumber'].toString().replaceAll(
-      '-',
-      '',
-    );
+    final accountNumber = _settlement!['accountNumber']
+        .toString()
+        .replaceAll('-', '');
     final url =
         'supertoss://send?bank=${_settlement!['accountBank']}&accountNo=$accountNumber&amount=${_settlement!['amountPerPerson']}';
     final uri = Uri.parse(url);
@@ -212,7 +245,10 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
           actions: [
             if (_settlement != null && _isPayer)
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: AppColors.coral),
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.coral,
+                ),
                 onPressed: _deleteSettlement,
               ),
           ],
@@ -310,7 +346,9 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
             controller: _accountController,
             keyboardType: TextInputType.number,
             style: const TextStyle(color: AppColors.white),
-            decoration: const InputDecoration(hintText: '예: 3333011234567'),
+            decoration: const InputDecoration(
+              hintText: '예: 3333011234567',
+            ),
           ),
           const SizedBox(height: 24),
           Container(
@@ -343,11 +381,17 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _createSettlement,
-              child: const Text(
-                '정산 시작',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
+              onPressed: _isSubmitting ? null : _createSettlement,
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text(
+                      '정산 시작',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
             ),
           ),
         ],
@@ -407,7 +451,10 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
                   highlight: true,
                 ),
                 _InfoRow(label: '은행', value: _settlement!['accountBank']),
-                _InfoRow(label: '계좌번호', value: _settlement!['accountNumber']),
+                _InfoRow(
+                  label: '계좌번호',
+                  value: _settlement!['accountNumber'],
+                ),
               ],
             ),
           ),
@@ -463,7 +510,10 @@ class _TaxiSettlementPageState extends ConsumerState<TaxiSettlementPage> {
             final isMe = payment['userId'] == widget.myUserId;
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.card,
                 borderRadius: BorderRadius.circular(14),

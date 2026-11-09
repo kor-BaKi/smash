@@ -61,6 +61,45 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  // 회원 탈퇴 요청. 성공하면 null, 실패하면 사용자에게 보여 줄 메시지를 돌려준다.
+  // 로컬 세션 정리는 화면이 다이얼로그를 닫은 뒤 clearSessionAfterWithdrawal()로 한다.
+  Future<String?> withdraw(String password) async {
+    try {
+      await AuthApi.withdraw(password: password);
+      return null;
+    } on DioException catch (e) {
+      return _withdrawErrorMessage(e);
+    } catch (_) {
+      return '탈퇴에 실패했습니다.';
+    }
+  }
+
+  // 탈퇴가 서버에서 끝난 뒤 이 기기의 로그인 정보를 정리한다.
+  Future<void> clearSessionAfterWithdrawal() async {
+    await _tokenRefreshSub?.cancel();
+    _tokenRefreshSub = null;
+    try {
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (_) {}
+    await TokenStorage.deleteAll();
+    state = const AuthState();
+  }
+
+  String _withdrawErrorMessage(DioException e) {
+    final response = e.response;
+    if (response == null) return '네트워크 연결을 확인해 주세요.';
+
+    final data = response.data;
+    if (data is Map && data['error'] is Map) {
+      final message = data['error']['message'];
+      if (message is String && message.isNotEmpty) return message;
+    }
+    if (response.statusCode == 429) {
+      return '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+    }
+    return '탈퇴에 실패했습니다.';
+  }
+
   // 앱 시작 시 토큰 확인
   Future<void> checkToken() async {
     final token = await TokenStorage.getAccessToken();
@@ -127,9 +166,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(user: auth.user, isLoading: false);
       await _registerFcmToken(); // 실패해도 내부에서 처리되어 로그인은 유지됨
     } on DioException catch (e) {
-      final message = e.response?.statusCode == 429
-          ? '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.'
-          : '로그인에 실패했습니다.';
+      final String message;
+      if (e.response == null) {
+        message = '네트워크 연결을 확인해 주세요.';
+      } else if (e.response!.statusCode == 429) {
+        message = '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+      } else {
+        message = '로그인에 실패했습니다.';
+      }
       state = state.copyWith(isLoading: false, errorMessage: message);
     } catch (e) {
       state = state.copyWith(
