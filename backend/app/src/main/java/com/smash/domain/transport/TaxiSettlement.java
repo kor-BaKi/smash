@@ -66,4 +66,10 @@ public class TaxiSettlement { // 결제자 테이블
         this.accountBank = accountBank;
         this.accountNumber = accountNumber;
     }
+
+    // 결제자가 탈퇴하면 계좌 정보를 지움
+    public void clearAccount() {
+        this.accountBank = "-";
+        this.accountNumber = "-";
+    }
 }

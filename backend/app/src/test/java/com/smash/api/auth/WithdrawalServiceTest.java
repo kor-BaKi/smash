@@ -10,6 +10,8 @@ import com.smash.domain.availability.MemberAvailabilityRepository;
 import com.smash.domain.group.Group;
 import com.smash.domain.group.GroupRepository;
 import com.smash.domain.token.RefreshTokenRepository;
+import com.smash.domain.transport.TaxiSettlement;
+import com.smash.domain.transport.TaxiSettlementRepository;
 import com.smash.domain.user.FcmTokenRepository;
 import com.smash.domain.user.MemberNoteRepository;
 import com.smash.domain.user.Role;
@@ -57,6 +59,7 @@ class WithdrawalServiceTest {
     @Mock ApplicationRepository applicationRepository;
     @Mock ApplicationAnswerRepository applicationAnswerRepository;
     @Mock ApplicationMemoRepository applicationMemoRepository;
+    @Mock TaxiSettlementRepository taxiSettlementRepository;
 
     @InjectMocks WithdrawalService withdrawalService;
 
@@ -195,5 +198,16 @@ class WithdrawalServiceTest {
         verify(applicationAnswerRepository).deleteByApplication(application);
         verify(applicationMemoRepository).deleteByApplication(application);
         verify(application).anonymize();
+    }
+
+    @Test
+    @DisplayName("결제자로 올린 정산의 계좌 정보는 탈퇴 시 지워진다")
+    void withdraw_clearsAccountOfSettlementsPaidByUser() {
+        TaxiSettlement settlement = mock(TaxiSettlement.class);
+        given(taxiSettlementRepository.findByPayer(user)).willReturn(List.of(settlement));
+
+        withdrawalService.withdraw(USER_ID, request);
+
+        verify(settlement).clearAccount();
     }
 }

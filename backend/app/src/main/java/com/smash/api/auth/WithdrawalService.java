@@ -10,6 +10,8 @@ import com.smash.domain.availability.MemberAvailabilityRepository;
 import com.smash.domain.group.Group;
 import com.smash.domain.group.GroupRepository;
 import com.smash.domain.token.RefreshTokenRepository;
+import com.smash.domain.transport.TaxiSettlement;
+import com.smash.domain.transport.TaxiSettlementRepository;
 import com.smash.domain.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +34,7 @@ public class WithdrawalService {
     private final ApplicationRepository applicationRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
     private final ApplicationMemoRepository applicationMemoRepository;
+    private final TaxiSettlementRepository taxiSettlementRepository;
 
     @Transactional
     public void withdraw(Long userId, WithdrawRequest request) {
@@ -82,6 +85,11 @@ public class WithdrawalService {
         }
         for (Group group : groupRepository.findByViceLeaderUserId(userId)) {
             group.assignViceLeader(null);
+        }
+
+        // 결제자로 올린 정산의 계좌 정보 삭제
+        for (TaxiSettlement settlement : taxiSettlementRepository.findByPayer(user)) {
+            settlement.clearAccount();
         }
 
         for (Application application : applicationRepository.findByStudentNo(user.getStudentNo())) {
