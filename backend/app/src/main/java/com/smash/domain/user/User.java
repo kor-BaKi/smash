@@ -98,4 +98,18 @@ public class User {
         if (department != null) this.department = department;
         if (phone != null) this.phone = phone;
     }
+
+    // 탈퇴용 메서드
+    public void withdraw() {
+        this.studentNo = "withdrawn-" + this.id; // 학번은 유니크라서 id로 치환
+        this.name = "탈퇴한 회원";
+        this.password = null;
+        this.department = null;
+        this.phone = null;
+        this.joinTerm = null;
+        this.groupId = null;
+        this.role = Role.MEMBER;
+        this.isLeader = false;
+        this.deletedAt = LocalDateTime.now();
+    }
 }

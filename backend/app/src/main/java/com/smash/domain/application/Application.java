@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "application")
@@ -68,4 +69,13 @@ public class Application { // 지원서
     public void accept() { this.status = ApplicationStatus.ACCEPTED; }
     public void reject() { this.status = ApplicationStatus.REJECTED; }
     public void updateMemo(String memo) { this.memo = memo; } // 메모 수정
+
+    // 지원자 탈퇴 시 개인정보 지움 (필수 컬럼이라 대체 값 넣음)
+    public void anonymize() {
+        this.name = "탈퇴한 지원자";
+        this.studentNo = "withdraw-app-" + this.id;
+        this.department = "-";
+        this.phone = "-";
+        this.memo = null;
+    }
 }

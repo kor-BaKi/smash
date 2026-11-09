@@ -6,4 +6,7 @@ import java.util.List;
 public interface MemberNoteRepository extends JpaRepository<MemberNote, Long> {
     List<MemberNote> findByMemberAndAdminOrderByCreatedAtAsc(User member, User admin);
     void deleteById(Long id);
+
+    void deleteByMember(User member);
+    void deleteByAdmin(User admin);
 }

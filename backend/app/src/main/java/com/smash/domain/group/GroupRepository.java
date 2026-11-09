@@ -16,4 +16,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     List<Group> findAllOrderByDayOfWeek();
 
     Optional<Group> findByDayOfWeekAndTimeSlot(DayOfWeek dayOfWeek, TimeSlot timeSlot);
+
+    List<Group> findByLeaderUserId(Long leaderUserId);
+    List<Group> findByViceLeaderUserId(Long viceLeaderUserId);
 }

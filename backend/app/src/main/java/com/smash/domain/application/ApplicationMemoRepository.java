@@ -8,4 +8,5 @@ public interface ApplicationMemoRepository extends JpaRepository<ApplicationMemo
     List<ApplicationMemo> findByApplicationOrderByCreatedAtAsc(Application application);
 
     void deleteById(Long id);
+    void deleteByApplication(Application application);
 }
