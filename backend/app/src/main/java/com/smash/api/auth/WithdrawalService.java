@@ -40,18 +40,17 @@ public class WithdrawalService {
     public void withdraw(Long userId, WithdrawRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(
-                        "RESOURCE_NOT_FOUND", "유저를 찾을 수 없습니다."
-                ));
+                        "RESOURCE_NOT_FOUND", "사용자를 찾을 수 없습니다."));
+
         if (user.getDeletedAt() != null) {
             throw new BusinessException("RESOURCE_NOT_FOUND", "이미 탈퇴한 계정입니다.");
         }
 
-        // 비밀번호 확인
+        // 비밀번호 확인 (로그인과 같은 횟수 제한 적용)
         String attemptKey = user.getStudentNo();
         if (loginAttemptService.isLocked(attemptKey)) {
             throw new BusinessException(
-                    "TOO_MANY_ATTEMPTS", "시도가 너무 많습니다. 잠시 후 다시 시도해주세요."
-            );
+                    "TOO_MANY_ATTEMPTS", "시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.");
         }
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             loginAttemptService.recordFailure(attemptKey);
@@ -59,17 +58,18 @@ public class WithdrawalService {
         }
         loginAttemptService.recordSuccess(attemptKey);
 
-        // 마지막 임원은 탈퇴불가
-        if (user.getRole() == Role.ADMIN) {
-            long activeAdmins = userRepository.findAllActiveMembers().stream()
-                    .filter(u -> u.getRole() == Role.ADMIN)
-                    .count();
-            if (activeAdmins <= 1) {
-                throw new BusinessException(
-                        "INVALID_REQUEST", "마지막 임원은 탈퇴할 수 없습니다. 다른 임원을 먼저 지정해 주세요."
-                );
-            }
+        eraseAccount(user);
+    }
+
+    // 계정의 개인정보를 삭제·익명화한다. 본인 탈퇴와 임원의 부원 삭제가 함께 사용한다.
+    @Transactional
+    public void eraseAccount(User user) {
+        if (user.getDeletedAt() != null) {
+            throw new BusinessException("RESOURCE_NOT_FOUND", "이미 삭제된 계정입니다.");
         }
+        assertNotLastAdmin(user);
+
+        Long userId = user.getId();
 
         // 개인 데이터 삭제
         refreshTokenRepository.deleteByUserId(userId);
@@ -79,7 +79,7 @@ public class WithdrawalService {
         memberNoteRepository.deleteByMember(user);
         memberNoteRepository.deleteByAdmin(user);
 
-        // 조장, 부조장 자리 비움
+        // 조장·부조장 자리 비움
         for (Group group : groupRepository.findByLeaderUserId(userId)) {
             group.assignLeader(null);
         }
@@ -92,13 +92,28 @@ public class WithdrawalService {
             settlement.clearAccount();
         }
 
+        // 지원서의 개인정보와 답변·메모 정리 (익명화 전의 원래 학번으로 찾는다)
         for (Application application : applicationRepository.findByStudentNo(user.getStudentNo())) {
             applicationAnswerRepository.deleteByApplication(application);
             applicationMemoRepository.deleteByApplication(application);
             application.anonymize();
         }
 
-        // 계정 익명화
+        // 계정 익명화 (학번은 withdrawn-{id}로 바뀌어 같은 학번을 다시 등록할 수 있음)
         user.withdraw();
+    }
+
+    // 마지막 임원은 삭제·탈퇴할 수 없다.
+    private void assertNotLastAdmin(User user) {
+        if (user.getRole() != Role.ADMIN) {
+            return;
+        }
+        long activeAdmins = userRepository.findAllActiveMembers().stream()
+                .filter(u -> u.getRole() == Role.ADMIN)
+                .count();
+        if (activeAdmins <= 1) {
+            throw new BusinessException(
+                    "INVALID_REQUEST", "마지막 임원은 탈퇴할 수 없습니다. 다른 임원을 먼저 지정해 주세요.");
+        }
     }
 }

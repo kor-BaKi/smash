@@ -70,8 +70,10 @@ public class AdminMemberController {
 
     // 지원자 삭제
     @DeleteMapping("/api/v1/admin/members/{userId}")
-    public ResponseEntity<ApiResponse<Void>> deleteMember(@PathVariable Long userId) {
-        adminMemberService.deleteMember(userId);
+    public ResponseEntity<ApiResponse<Void>> deleteMember(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal Long adminId
+            ) {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 

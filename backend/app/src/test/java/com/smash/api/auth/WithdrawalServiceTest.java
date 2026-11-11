@@ -210,4 +210,27 @@ class WithdrawalServiceTest {
 
         verify(settlement).clearAccount();
     }
+
+    @Test
+    @DisplayName("임원 삭제 경로(eraseAccount)는 비밀번호를 묻지 않고 삭제·익명화한다")
+    void eraseAccount_noPasswordCheck_anonymizes() {
+        withdrawalService.eraseAccount(user);
+
+        verify(passwordEncoder, never()).matches(any(), any());
+        verify(refreshTokenRepository).deleteByUserId(USER_ID);
+        assertThat(user.getName()).isEqualTo("탈퇴한 회원");
+        assertThat(user.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("임원 삭제 경로도 마지막 임원은 삭제할 수 없다")
+    void eraseAccount_lastAdmin_rejected() {
+        User admin = newUser(USER_ID, STUDENT_NO, Role.ADMIN);
+        given(userRepository.findAllActiveMembers()).willReturn(List.of(admin));
+
+        Throwable thrown = catchThrowable(() -> withdrawalService.eraseAccount(admin));
+
+        assertBusiness(thrown, "INVALID_REQUEST");
+        assertThat(admin.getDeletedAt()).isNull();
+    }
 }

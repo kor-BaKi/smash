@@ -2,6 +2,7 @@ package com.smash.api.admin;
 
 import com.smash.api.auth.MemberRegisterRequest;
 import com.smash.api.auth.MemberRegisterResponse;
+import com.smash.api.auth.WithdrawalService;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.availability.MemberAvailabilityRepository;
 import com.smash.domain.group.Group;
@@ -22,6 +23,7 @@ public class AdminMemberService {
     private final MemberAvailabilityRepository availabilityRepository;
     private final MemberNoteRepository memberNoteRepository;
     private final GroupRepository groupRepository;
+    private final WithdrawalService withdrawalService;
 
     // A-1. 단건 등록
     @Transactional
@@ -179,13 +181,17 @@ public class AdminMemberService {
     }
 
     @Transactional
-    public void deleteMember(Long userId) {
+    public void deleteMember(Long userId, Long adminId) {
+        if (userId.equals(adminId)) {
+            throw new BusinessException(
+                    "INVALID_REQUEST", "본인 게정은 설정의 회원 탈퇴를 이용해 주세요."
+            );
+        }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(
-                        "RESOURCE_NOT_FOUND", "존재하지 않는 부원입니다."));
-        // 연관 데이터 먼저 삭제 (외래 키 제약)
-        availabilityRepository.deleteByUser(user);
-        userRepository.delete(user);
+                        "RESOURCE_NOT_FOUND", "존재하지 않는 부원입니다."
+                ));
+        withdrawalService.eraseAccount(user);
     }
 
     // 부원 상세 조회

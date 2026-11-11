@@ -24,10 +24,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.status = 'ACTIVE' AND u.deletedAt IS NULL")
     List<User> findAllActiveMembers();
 
-    @Query("SELECT u FROM User u WHERE u.status = 'PENDING' ORDER BY u.createdAt DESC")
+    @Query("SELECT u FROM User u WHERE u.status = 'PENDING' AND u.deletedAt IS NULL ORDER BY u.createdAt DESC")
     List<User> findAllPending();
 
-    @Query("SELECT u FROM User u WHERE u.status IN ('PENDING', 'REJECTED') ORDER BY u.createdAt DESC")
+    @Query("SELECT u FROM User u WHERE u.status IN ('PENDING', 'REJECTED') AND u.deletedAt IS NULL ORDER BY u.createdAt DESC")
     List<User> findAllApplicants();
     @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL ORDER BY u.name ASC")
     List<User> findAllMembers();
