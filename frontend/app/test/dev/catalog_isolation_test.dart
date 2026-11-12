@@ -50,6 +50,39 @@ void main() {
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
 
+  // SmashForcePressed는 카탈로그와 테스트에서 "눌림" 모양을 손가락 없이 보여주기 위한 것이다.
+  // 앱 화면이 쓰면 화면의 버튼이 항상 눌린 모양이 되므로, 정의된 곳(lib/core/design)과
+  // 카탈로그(lib/dev) 밖에서는 이름도 import도 나오지 않아야 한다. (components.dart 같은
+  // 묶음 파일로 가져와도 쓰려면 이름을 적어야 하므로 이름 검사로 걸러진다)
+  group('SmashForcePressed 사용 범위', () {
+    bool mentionsForcePressed(File file) {
+      final text = file.readAsStringSync();
+      return text.contains('SmashForcePressed') || text.contains('smash_force_pressed');
+    }
+
+    bool isAllowedLocation(File file) =>
+        file.path.startsWith('lib/dev/') || file.path.startsWith('lib/core/design/');
+
+    test('lib/dev와 lib/core/design 밖의 어떤 파일도 참조하지 않는다', () {
+      final offenders = [
+        for (final file in dartFiles('lib'))
+          if (!isAllowedLocation(file) && mentionsForcePressed(file)) file.path,
+      ];
+
+      expect(offenders, isEmpty, reason: offenders.join('\n'));
+    });
+
+    test('검사가 실제로 동작한다: 허용된 위치에는 참조가 있다 (경로가 바뀌어 검사가 비게 되는 것을 막음)', () {
+      final allowed = [
+        for (final file in dartFiles('lib'))
+          if (isAllowedLocation(file) && mentionsForcePressed(file)) file.path,
+      ];
+
+      expect(allowed, contains('lib/core/design/components/smash_force_pressed.dart'));
+      expect(allowed.any((path) => path.startsWith('lib/dev/')), isTrue);
+    });
+  });
+
   test('진입점 파일이 존재한다', () {
     expect(File('lib/dev/catalog_main.dart').existsSync(), isTrue);
   });
