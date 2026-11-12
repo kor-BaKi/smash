@@ -7,3 +7,4 @@
 CLAUDE.local.md
 **/resources/firebase-service-account.json
 frontend/app/lib/firebase_options.dart
+skills-lock.json
