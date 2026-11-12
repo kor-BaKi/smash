@@ -77,6 +77,7 @@ flutter:
   assets:
     - assets/icon/app_icon.png  # 일반 로고
     - assets/icon/logo_transparent.png # 누끼 로고
+    - assets/licenses/Pretendard-OFL.txt # 글꼴 라이선스 전문 (OFL 1.1)
 
   fonts:
     - family: Pretendard

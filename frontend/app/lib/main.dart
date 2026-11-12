@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app.dart';
+import 'core/licenses/font_licenses.dart';
 import 'firebase_options.dart';
 
 @pragma('vm:entry-point')
@@ -19,6 +20,7 @@ Future<void> _firebaseMessagingBackgroundHandler(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerFontLicenses(); // 라이선스 화면에 글꼴 라이선스 등록 (전문은 화면을 열 때 읽음)
   await initializeDateFormatting('ko_KR', null);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
