@@ -12,6 +12,7 @@ import java.util.List;
 public class TaxiSettlementResponse {
     private Long id;
     private String payerName;
+    private Long payerUserId; // 앱이 "내가 결제자인가"를 판단하는 데 사용 (이름 비교는 동명이인에 취약)
     private int totalAmount;
     private int amountPerPerson;
     private String accountBank;
@@ -44,6 +45,7 @@ public class TaxiSettlementResponse {
         return TaxiSettlementResponse.builder()
                 .id(settlement.getId())
                 .payerName(settlement.getPayer().getName())
+                .payerUserId(settlement.getPayer().getId())
                 .totalAmount(settlement.getTotalAmount())
                 .amountPerPerson(settlement.getAmountPerPerson())
                 .accountBank(settlement.getAccountBank())
