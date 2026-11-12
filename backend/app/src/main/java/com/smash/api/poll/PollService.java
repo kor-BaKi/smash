@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,8 @@ public class PollService {
     // 투표 생성 (임원)
     @Transactional
     public PollResponse create(Long userId, PollRequest request) {
+        validateClosedAt(request.getClosedAt());
+
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException("RESOURCE_NOT_FOUND", "사용자를 찾을 수 없습니다."));
 
@@ -56,6 +59,14 @@ public class PollService {
         }
 
         return getDetail(userId, poll.getId());
+    }
+
+    // 마감 시각은 지금보다 이후여야 한다. null이면 수동 종료라서 검증하지 않는다.
+    private void validateClosedAt(LocalDateTime closedAt) {
+        if (closedAt != null && !closedAt.isAfter(LocalDateTime.now())) {
+            throw new BusinessException(
+                    "INVALID_CLOSE_TIME", "마감 시각은 지금보다 이후로 설정해 주세요.");
+        }
     }
 
     // 투표 목록 조회

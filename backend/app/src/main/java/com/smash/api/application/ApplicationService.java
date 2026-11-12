@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -48,6 +49,8 @@ public class ApplicationService {
     // 폼 생성 (새 학기용): 이전 폼은 마감하고, 옵션에 따라 질문을 복사
     @Transactional
     public ApplicationFormResponse createForm(ApplicationFormRequest request) {
+        validatePeriod(request.getStartDate(), request.getEndDate());
+
         Optional<ApplicationForm> previous = formRepository.findTopByOrderByCreatedAtDesc();
 
         // 이전 폼 마감 (접수 중인 폼이 둘이 되는 것 방지)
@@ -100,8 +103,18 @@ public class ApplicationService {
     // 폼 기간 수정
     @Transactional
     public void updateFormPeriod(ApplicationFormRequest request) {
+        validatePeriod(request.getStartDate(), request.getEndDate());
+
         ApplicationForm form = getLatestForm();
         form.updatePeriod(request.getStartDate(), request.getEndDate());
+    }
+
+    // 시작과 종료가 모두 있으면 종료가 시작보다 이후여야 한다. 하나라도 비어 있으면 검증하지 않는다.
+    private void validatePeriod(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate != null && endDate != null && !endDate.isAfter(startDate)) {
+            throw new BusinessException(
+                    "INVALID_PERIOD", "모집 종료 시각은 시작 시각보다 이후로 설정해 주세요.");
+        }
     }
 
     // 질문 관리 (ADMIN)
