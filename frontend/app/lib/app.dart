@@ -1,6 +1,7 @@
 import 'package:app/features/auth/page/login_page.dart';
 import 'package:app/features/home/page/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -52,6 +53,13 @@ class SmashApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'SMASH',
       theme: AppTheme.dark(),
+      locale: const Locale('ko', 'KR'),
+      supportedLocales: const [Locale('ko', 'KR')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       debugShowCheckedModeBanner: false,
       routerConfig: router,
     );
