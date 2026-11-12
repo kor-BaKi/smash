@@ -1,6 +1,7 @@
 package com.smash.api.transport;
 
 import com.smash.api.fcm.FcmService;
+import com.smash.api.fcm.PushData;
 import com.smash.domain.activity.Activity;
 import com.smash.domain.activity.ActivityRepository;
 import com.smash.domain.transport.TaxiSettlement;
@@ -31,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -55,6 +57,8 @@ class TaxiSettlementNotificationTest {
 
     private static final Long PAYER_ID = 1L;
     private static final Long RIDER_ID = 2L;
+    private static final Long ACTIVITY_ID = 5L; // 활동 id와 호차 id를 다르게 해야 서로 바뀌는 실수를 잡는다
+    private static final Long GROUP_ID = 3L;
     private static final String TITLE = "택시비 정산 요청";
 
     private final Locale originalLocale = Locale.getDefault();
@@ -67,8 +71,8 @@ class TaxiSettlementNotificationTest {
         TransportMember payerMember = member(payer);
         TransportMember riderMember = member(rider);
 
-        given(transportGroupRepository.findById(1L)).willReturn(Optional.of(group));
-        given(activityRepository.findById(1L)).willReturn(Optional.of(mock(Activity.class)));
+        given(transportGroupRepository.findById(GROUP_ID)).willReturn(Optional.of(group));
+        given(activityRepository.findById(ACTIVITY_ID)).willReturn(Optional.of(mock(Activity.class)));
         given(userRepository.findById(PAYER_ID)).willReturn(Optional.of(payer));
         given(transportMemberRepository.existsByTransportGroupAndUserId(group, PAYER_ID)).willReturn(true);
         given(settlementRepository.findByTransportGroup(group)).willReturn(Optional.empty());
@@ -107,27 +111,29 @@ class TaxiSettlementNotificationTest {
     @Test
     @DisplayName("알림 문구: 천 단위 구분과 띄어쓰기가 들어간다 (6,500원을 김결제님께 송금해 주세요.)")
     void notification_message_formatted() {
-        settlementService.create(1L, 1L, request(13000, true), PAYER_ID);
+        settlementService.create(ACTIVITY_ID, GROUP_ID, request(13000, true), PAYER_ID);
 
+        // 활동 id 5, 호차 id 3 이 data에 문자열로 담긴다
         verify(fcmService).sendSettlementNotification(
-                RIDER_ID, TITLE, "6,500원을 김결제님께 송금해 주세요.");
+                RIDER_ID, TITLE, "6,500원을 김결제님께 송금해 주세요.", PushData.settlement(ACTIVITY_ID, GROUP_ID));
     }
 
     @Test
     @DisplayName("알림 문구: 결제자 본인에게는 보내지 않는다")
     void notification_notSentToPayer() {
-        settlementService.create(1L, 1L, request(13000, true), PAYER_ID);
+        settlementService.create(ACTIVITY_ID, GROUP_ID, request(13000, true), PAYER_ID);
 
         verify(fcmService, never()).sendSettlementNotification(
-                eq(PAYER_ID), anyString(), anyString());
+                eq(PAYER_ID), anyString(), anyString(), anyMap());
     }
 
     @Test
     @DisplayName("알림 옵션이 꺼져 있으면 보내지 않는다")
     void notification_off_notSent() {
-        settlementService.create(1L, 1L, request(13000, false), PAYER_ID);
+        settlementService.create(ACTIVITY_ID, GROUP_ID, request(13000, false), PAYER_ID);
 
-        verify(fcmService, never()).sendSettlementNotification(anyLong(), anyString(), anyString());
+        verify(fcmService, never()).sendSettlementNotification(
+                anyLong(), anyString(), anyString(), anyMap());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.smash.scheduler;
 
 import com.smash.api.fcm.FcmService;
+import com.smash.api.fcm.PushData;
 import com.smash.domain.activity.*;
 import com.smash.domain.group.Group;
 import com.smash.domain.group.GroupRepository;
@@ -42,8 +43,12 @@ public class ActivityScheduler {
     @Scheduled(cron = "0 0 * * * *")
     @Transactional(readOnly = true)
     public void sendActivityReminderNotification() {
-        LocalDate today = LocalDate.now();
-        LocalTime nowHour = LocalTime.now().withMinute(0).withSecond(0).withNano(0);
+        sendActivityReminderNotification(LocalDate.now(), LocalTime.now());
+    }
+
+    // 기준 날짜와 시각을 받는 버전: 테스트에서 "지금"을 고정하기 위해 분리
+    void sendActivityReminderNotification(LocalDate today, LocalTime now) {
+        LocalTime nowHour = now.withMinute(0).withSecond(0).withNano(0);
 
         // 1시간 후 시작하는 활동 조회
         LocalTime targetTime = nowHour.plusHours(1);
@@ -71,7 +76,8 @@ public class ActivityScheduler {
                     fcmService.sendActivityNotificationToUser(
                             user.getId(),
                             "오늘 활동 마감 임박 ⏰",
-                            activity.getGroup().getLabel() + " 활동 참여 여부를 선택해주세요."
+                            activity.getGroup().getLabel() + " 활동 참여 여부를 선택해주세요.",
+                            PushData.activity(activity.getId())
                     );
                 }
             }

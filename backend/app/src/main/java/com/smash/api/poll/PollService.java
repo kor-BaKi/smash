@@ -1,6 +1,7 @@
 package com.smash.api.poll;
 
 import com.smash.api.fcm.FcmService;
+import com.smash.api.fcm.PushData;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.poll.*;
 import com.smash.domain.user.User;
@@ -54,7 +55,8 @@ public class PollService {
         if (request.isSendNotification()) {
             fcmService.sendPollNotification(
                     "새 투표가 등록되었습니다!",
-                    request.getTitle()
+                    request.getTitle(),
+                    PushData.poll(poll.getId())
             );
         }
 

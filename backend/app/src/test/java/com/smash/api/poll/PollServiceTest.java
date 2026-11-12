@@ -1,6 +1,7 @@
 package com.smash.api.poll;
 
 import com.smash.api.fcm.FcmService;
+import com.smash.api.fcm.PushData;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.poll.Poll;
 import com.smash.domain.poll.PollOptionRepository;
@@ -26,7 +27,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -104,7 +107,7 @@ class PollServiceTest {
         PollRequest req = request(LocalDateTime.now().minusDays(1), true);
 
         assertBusiness(catchThrowable(() -> pollService.create(USER_ID, req)), "INVALID_CLOSE_TIME");
-        verify(fcmService, never()).sendPollNotification(anyString(), anyString());
+        verify(fcmService, never()).sendPollNotification(anyString(), anyString(), anyMap());
     }
 
     @Test
@@ -139,6 +142,8 @@ class PollServiceTest {
 
         pollService.create(USER_ID, req);
 
-        verify(fcmService).sendPollNotification(anyString(), anyString());
+        // 제목과 본문은 그대로, data에는 투표 id가 문자열로 담긴다
+        verify(fcmService).sendPollNotification(
+                eq("새 투표가 등록되었습니다!"), eq("MT 날짜 정하기"), eq(PushData.poll(POLL_ID)));
     }
 }

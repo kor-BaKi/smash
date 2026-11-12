@@ -1,6 +1,7 @@
 package com.smash.api.transport;
 
 import com.smash.api.fcm.FcmService;
+import com.smash.api.fcm.PushData;
 import com.smash.common.exception.BusinessException;
 import com.smash.domain.activity.Activity;
 import com.smash.domain.activity.ActivityRepository;
@@ -101,7 +102,8 @@ public class TaxiSettlementService {
                     fcmService.sendSettlementNotification(
                             member.getUser().getId(),
                             "택시비 정산 요청",
-                            settlementMessage(amountPerPerson, payer.getName())
+                            settlementMessage(amountPerPerson, payer.getName()),
+                            PushData.settlement(activityId, groupId)
                     );
                 }
             }
