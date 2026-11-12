@@ -135,7 +135,7 @@ class WithdrawalServiceTest {
     }
 
     @Test
-    @DisplayName("마지막 남은 임원은 탈퇴할 수 없다 (INVALID_REQUEST)")
+    @DisplayName("마지막 남은 임원은 탈퇴할 수 없다 (LAST_ADMIN)")
     void lastAdmin_rejected() {
         User admin = newUser(USER_ID, STUDENT_NO, Role.ADMIN);
         given(userRepository.findById(USER_ID)).willReturn(Optional.of(admin));
@@ -143,7 +143,9 @@ class WithdrawalServiceTest {
 
         Throwable thrown = catchThrowable(() -> withdrawalService.withdraw(USER_ID, request));
 
-        assertBusiness(thrown, "INVALID_REQUEST");
+        assertBusiness(thrown, "LAST_ADMIN");
+        // 코드만 바뀌었고 메시지는 그대로여야 한다 (코드를 보지 않는 기존 앱이 이 메시지를 표시)
+        assertThat(thrown).hasMessage("마지막 임원은 탈퇴할 수 없습니다. 다른 임원을 먼저 지정해 주세요.");
         verify(refreshTokenRepository, never()).deleteByUserId(anyLong());
         assertThat(admin.getDeletedAt()).isNull();
     }
@@ -230,7 +232,7 @@ class WithdrawalServiceTest {
 
         Throwable thrown = catchThrowable(() -> withdrawalService.eraseAccount(admin));
 
-        assertBusiness(thrown, "INVALID_REQUEST");
+        assertBusiness(thrown, "LAST_ADMIN");
         assertThat(admin.getDeletedAt()).isNull();
     }
 }

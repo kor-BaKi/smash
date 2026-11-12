@@ -184,7 +184,7 @@ public class AdminMemberService {
     public void deleteMember(Long userId, Long adminId) {
         if (userId.equals(adminId)) {
             throw new BusinessException(
-                    "INVALID_REQUEST", "본인 게정은 설정의 회원 탈퇴를 이용해 주세요."
+                    "INVALID_REQUEST", "본인 계정은 설정의 회원 탈퇴를 이용해 주세요."
             );
         }
         User user = userRepository.findById(userId)
@@ -193,7 +193,7 @@ public class AdminMemberService {
                 ));
         withdrawalService.eraseAccount(user);
     }
-
+// /Users/baki/Desktop/project/smash/backend/app/src/main/java/com/smash/api/admin/AdminMemberService.java
     // 부원 상세 조회
     @Transactional(readOnly = true)
     public MemberDetailResponse getMember(Long userId, Long adminId) {

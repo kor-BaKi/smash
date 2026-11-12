@@ -103,7 +103,8 @@ public class WithdrawalService {
         user.withdraw();
     }
 
-    // 마지막 임원은 삭제·탈퇴할 수 없다.
+    // 마지막 임원은 삭제·탈퇴할 수 없다. 앱이 전용 안내를 보여줄 수 있도록 LAST_ADMIN 코드를 쓴다.
+    // (HTTP 상태는 기본 400, 메시지는 이전과 같아서 코드를 보지 않는 기존 앱도 그대로 동작한다)
     private void assertNotLastAdmin(User user) {
         if (user.getRole() != Role.ADMIN) {
             return;
@@ -113,7 +114,7 @@ public class WithdrawalService {
                 .count();
         if (activeAdmins <= 1) {
             throw new BusinessException(
-                    "INVALID_REQUEST", "마지막 임원은 탈퇴할 수 없습니다. 다른 임원을 먼저 지정해 주세요.");
+                    "LAST_ADMIN", "마지막 임원은 탈퇴할 수 없습니다. 다른 임원을 먼저 지정해 주세요.");
         }
     }
 }
