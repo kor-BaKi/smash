@@ -33,4 +33,13 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
             @Param("groupId") Long groupId,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
+
+    // 취소된 활동까지 포함 (캘린더 표시용). 취소를 제외하는 위 조회는 이월 후보 계산에 쓰이므로 그대로 둔다.
+    @Query("SELECT a FROM Activity a WHERE a.group.id = :groupId " +
+            "AND a.activityDate BETWEEN :start AND :end " +
+            "ORDER BY a.activityDate ASC")
+    List<Activity> findAllActivitiesByGroupAndMonth(
+            @Param("groupId") Long groupId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end);
 }
