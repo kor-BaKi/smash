@@ -57,6 +57,14 @@ dependencies:
   firebase_messaging: ^16.6.0
   gal: ^2.3.3
 
+  # 날짜·시간 선택 (시간 휠). 1.0 이전 버전이라 정확히 고정
+  wheel_picker: 0.4.0
+
+  # 한국어 로케일, 날짜 포맷 (버전은 Flutter SDK가 정함)
+  intl: any
+  flutter_localizations:
+    sdk: flutter
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
