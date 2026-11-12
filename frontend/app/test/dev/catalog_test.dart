@@ -164,6 +164,38 @@ void main() {
     });
   });
 
+  // 실제로 등록된 컴포넌트마다 모든 상태가 글자 1.0, 1.3, 2.0배에서 오류 없이 그려지는지 확인한다.
+  // 새 컴포넌트를 등록하면 이 검사가 자동으로 따라붙는다.
+  group('등록된 실제 컴포넌트', () {
+    for (final entry in catalogEntries) {
+      testWidgets('${entry.name}: 모든 상태가 세 배율에서 오류 없이 그려진다', (tester) async {
+        await open(tester, entry, catalogEntries);
+
+        for (final scale in catalogTextScales) {
+          for (final state in entry.states) {
+            expect(
+              find.byKey(ValueKey('${entry.name}|$scale|${state.label}')),
+              findsOneWidget,
+              reason: '${state.label} @$scale',
+            );
+          }
+        }
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('${entry.name}: 첫 상태는 배율이 클수록 줄어들지 않는다', (tester) async {
+        await open(tester, entry, catalogEntries);
+
+        double heightAt(double scale) => tester
+            .getSize(find.byKey(ValueKey('${entry.name}|$scale|${entry.states.first.label}')))
+            .height;
+
+        expect(heightAt(1.3), greaterThanOrEqualTo(heightAt(1.0)));
+        expect(heightAt(2.0), greaterThanOrEqualTo(heightAt(1.3)));
+      });
+    }
+  });
+
   group('등록 목록 점검 (컴포넌트가 늘어나도 계속 지켜져야 하는 규칙)', () {
     test('컴포넌트 이름이 중복되지 않는다', () {
       final names = catalogEntries.map((e) => e.name).toList();
