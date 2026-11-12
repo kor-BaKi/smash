@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -100,7 +101,7 @@ public class TaxiSettlementService {
                     fcmService.sendSettlementNotification(
                             member.getUser().getId(),
                             "택시비 정산 요청",
-                            amountPerPerson + "원을" + payer.getName() + "님께 송금해주세요."
+                            settlementMessage(amountPerPerson, payer.getName())
                     );
                 }
             }
@@ -108,6 +109,12 @@ public class TaxiSettlementService {
 
 
         return TaxiSettlementResponse.of(settlement, payments);
+    }
+
+    // 정산 요청 알림 본문 예: "6,500원을 김결제님께 송금해 주세요."
+    // 서버 기본 로케일과 무관하게 천 단위 구분자가 ','가 되도록 로케일을 고정한다.
+    static String settlementMessage(int amountPerPerson, String payerName) {
+        return String.format(Locale.KOREA, "%,d원을 %s님께 송금해 주세요.", amountPerPerson, payerName);
     }
 
     // 정산 조회
