@@ -1,3 +1,4 @@
+import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/catalog/catalog_app.dart';
 import 'package:app/dev/catalog/catalog_entry.dart';
 import 'package:app/dev/catalog/catalog_page.dart';
@@ -194,6 +195,178 @@ void main() {
         expect(heightAt(2.0), greaterThanOrEqualTo(heightAt(1.3)));
       });
     }
+  });
+
+  // 값을 바꾸는 컴포넌트는 정적인 모양만으로는 동작을 알 수 없으므로, 눌러 보면 실제로 값이 바뀌는
+  // 상태(interactiveStateLabel)를 카탈로그에 함께 둔다.
+  group('직접 눌러 보기 상태 (값을 바꾸는 컴포넌트)', () {
+    const interactiveNames = ['SmashSegmentedControl', 'SmashSwitchRow', 'SmashCheckboxRow'];
+
+    CatalogEntry entryNamed(String name) =>
+        catalogEntries.firstWhere((e) => e.name == name);
+
+    Finder block(String entryName, double scale, String stateLabel) =>
+        find.byKey(ValueKey('$entryName|$scale|$stateLabel'));
+
+    Finder inBlock(String entryName, double scale, String stateLabel, Finder matching) =>
+        find.descendant(of: block(entryName, scale, stateLabel), matching: matching);
+
+    Finder checkIconIn(Finder container) =>
+        find.descendant(of: container, matching: find.byIcon(Icons.check));
+
+    test('값을 바꾸는 컴포넌트는 모두 직접 눌러 보기 상태를 가진다', () {
+      for (final name in interactiveNames) {
+        final labels = entryNamed(name).states.map((s) => s.label);
+
+        expect(labels, contains(interactiveStateLabel), reason: name);
+      }
+    });
+
+    test('기존 정적 상태들도 그대로 남아 있다', () {
+      expect(
+        entryNamed('SmashSegmentedControl').states.map((s) => s.label),
+        containsAll(['기본 (첫째 선택)', '둘째 선택', '일부 비활성', '전체 비활성', '조각 3개']),
+      );
+      expect(
+        entryNamed('SmashSwitchRow').states.map((s) => s.label),
+        containsAll(['꺼짐', '켜짐', '설명 포함', '비활성']),
+      );
+      expect(
+        entryNamed('SmashCheckboxRow').states.map((s) => s.label),
+        containsAll(['해제', '체크', '설명 포함', '비활성']),
+      );
+    });
+
+    testWidgets('세그먼트: 다른 조각을 누르면 값과 선택 표시(체크 아이콘)가 바뀌고, 다시 누르면 돌아온다',
+        (tester) async {
+      final entry = entryNamed('SmashSegmentedControl');
+      await open(tester, entry, catalogEntries);
+      Finder segment(String label) => find.ancestor(
+            of: inBlock(entry.name, 1.0, interactiveStateLabel, find.text(label)),
+            matching: find.byType(SmashPressable),
+          );
+      expect(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: 같이 가요')),
+          findsOneWidget);
+      expect(checkIconIn(segment('같이 가요')), findsOneWidget);
+
+      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('따로 가요')));
+      await tester.pump();
+
+      expect(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: 따로 가요')),
+          findsOneWidget);
+      expect(checkIconIn(segment('따로 가요')), findsOneWidget);
+      expect(checkIconIn(segment('같이 가요')), findsNothing);
+
+      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('같이 가요')));
+      await tester.pump();
+
+      expect(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: 같이 가요')),
+          findsOneWidget);
+    });
+
+    testWidgets('스위치: 글자를 눌러도 스위치를 눌러도 꺼짐/켜짐이 번갈아 바뀐다', (tester) async {
+      final entry = entryNamed('SmashSwitchRow');
+      await open(tester, entry, catalogEntries);
+      Finder value(String text) =>
+          inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: $text'));
+      expect(value('꺼짐'), findsOneWidget);
+
+      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('투표 알림')));
+      await tester.pump();
+      expect(value('켜짐'), findsOneWidget);
+      expect(
+        tester
+            .widget<Switch>(inBlock(entry.name, 1.0, interactiveStateLabel, find.byType(Switch)))
+            .value,
+        isTrue,
+      );
+
+      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, find.byType(Switch)));
+      await tester.pump();
+      expect(value('꺼짐'), findsOneWidget);
+    });
+
+    testWidgets('체크박스: 글자를 눌러도 체크박스를 눌러도 해제/체크가 번갈아 바뀐다', (tester) async {
+      final entry = entryNamed('SmashCheckboxRow');
+      await open(tester, entry, catalogEntries);
+      Finder value(String text) =>
+          inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: $text'));
+      expect(value('해제'), findsOneWidget);
+
+      await tester.tap(inBlock(
+          entry.name, 1.0, interactiveStateLabel, find.text('개인정보 처리방침에 동의해요')));
+      await tester.pump();
+      expect(value('체크'), findsOneWidget);
+      expect(
+        tester
+            .widget<Checkbox>(
+                inBlock(entry.name, 1.0, interactiveStateLabel, find.byType(Checkbox)))
+            .value,
+        isTrue,
+      );
+
+      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, find.byType(Checkbox)));
+      await tester.pump();
+      expect(value('해제'), findsOneWidget);
+    });
+
+    testWidgets('배율 블록마다 값이 독립이다 (1.0배에서 눌러도 1.3배, 2.0배는 그대로)', (tester) async {
+      final entry = entryNamed('SmashSwitchRow');
+      await open(tester, entry, catalogEntries);
+
+      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('투표 알림')));
+      await tester.pump();
+
+      expect(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: 켜짐')),
+          findsOneWidget);
+      expect(inBlock(entry.name, 1.3, interactiveStateLabel, find.text('현재 값: 꺼짐')),
+          findsOneWidget);
+      expect(inBlock(entry.name, 2.0, interactiveStateLabel, find.text('현재 값: 꺼짐')),
+          findsOneWidget);
+    });
+
+    testWidgets('정적 스위치 상태는 눌러도 값이 바뀌지 않는다 (모양 확인용이므로 그대로)', (tester) async {
+      final entry = entryNamed('SmashSwitchRow');
+      await open(tester, entry, catalogEntries);
+
+      await tester.tap(inBlock(entry.name, 1.0, '꺼짐', find.text('투표 알림')));
+      await tester.pump();
+
+      expect(
+        tester.widget<Switch>(inBlock(entry.name, 1.0, '꺼짐', find.byType(Switch))).value,
+        isFalse,
+      );
+    });
+
+    testWidgets('정적 세그먼트 상태는 눌러도 선택이 바뀌지 않는다', (tester) async {
+      final entry = entryNamed('SmashSegmentedControl');
+      await open(tester, entry, catalogEntries);
+
+      await tester.tap(inBlock(entry.name, 1.0, '기본 (첫째 선택)', find.text('따로 가요')));
+      await tester.pump();
+
+      expect(
+        checkIconIn(find.ancestor(
+          of: inBlock(entry.name, 1.0, '기본 (첫째 선택)', find.text('같이 가요')),
+          matching: find.byType(SmashPressable),
+        )),
+        findsOneWidget,
+        reason: '정적 상태의 선택은 그대로 첫째 조각',
+      );
+    });
+
+    testWidgets('정적 체크박스 상태는 눌러도 값이 바뀌지 않는다', (tester) async {
+      final entry = entryNamed('SmashCheckboxRow');
+      await open(tester, entry, catalogEntries);
+
+      await tester.tap(inBlock(entry.name, 1.0, '해제', find.text('개인정보 처리방침에 동의해요')));
+      await tester.pump();
+
+      expect(
+        tester.widget<Checkbox>(inBlock(entry.name, 1.0, '해제', find.byType(Checkbox))).value,
+        isFalse,
+      );
+    });
   });
 
   group('등록 목록 점검 (컴포넌트가 늘어나도 계속 지켜져야 하는 규칙)', () {

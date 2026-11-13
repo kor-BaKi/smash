@@ -9,4 +9,7 @@ final List<CatalogEntry> catalogEntries = [
   iconButtonEntry,
   textFieldEntry,
   passwordFieldEntry,
+  segmentedEntry,
+  switchRowEntry,
+  checkboxRowEntry,
 ];

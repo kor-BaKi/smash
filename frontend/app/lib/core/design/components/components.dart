@@ -1,6 +1,9 @@
 export 'smash_button.dart';
+export 'smash_checkbox_row.dart';
 export 'smash_force_pressed.dart';
 export 'smash_icon_button.dart';
 export 'smash_password_field.dart';
 export 'smash_pressable.dart';
+export 'smash_segmented_control.dart';
+export 'smash_switch_row.dart';
 export 'smash_text_field.dart';
