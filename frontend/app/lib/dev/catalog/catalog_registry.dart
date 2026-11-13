@@ -8,4 +8,5 @@ final List<CatalogEntry> catalogEntries = [
   buttonEntry,
   iconButtonEntry,
   textFieldEntry,
+  passwordFieldEntry,
 ];

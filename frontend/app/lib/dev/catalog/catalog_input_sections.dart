@@ -101,3 +101,39 @@ final textFieldEntry = CatalogEntry(
     ),
   ],
 );
+
+final passwordFieldEntry = CatalogEntry(
+  name: 'SmashPasswordField',
+  description: '기본은 가림. 눈 아이콘으로 보기/숨기기. 복사, 공유는 막고 붙여넣기는 허용.',
+  states: [
+    CatalogState(
+      '기본 (가림)',
+      (_) => _field((_, c) => SmashPasswordField(label: '비밀번호', controller: c)),
+    ),
+    CatalogState(
+      '입력됨 (가림)',
+      (_) => _field(
+        (_, c) => SmashPasswordField(label: '비밀번호', controller: c),
+        text: 'abc12345',
+      ),
+    ),
+    CatalogState(
+      '에러',
+      (_) => _field(
+        (_, c) => SmashPasswordField(
+          label: '비밀번호',
+          errorText: '비밀번호가 맞지 않아요',
+          controller: c,
+        ),
+        text: 'abc12345',
+      ),
+    ),
+    CatalogState(
+      '비활성',
+      (_) => _field(
+        (_, c) => SmashPasswordField(label: '비밀번호', enabled: false, controller: c),
+        text: 'abc12345',
+      ),
+    ),
+  ],
+);
