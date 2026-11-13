@@ -359,7 +359,9 @@ void main() {
       expect(controller.text, '한글', reason: '조합이 끝나면 제한(2글자)에 맞춰 자른다');
     });
 
-    testWidgets('붙여넣기를 막지 않는다 (비밀번호 관리자, 학번 복사)', (tester) async {
+    // 주의: 이 테스트는 입력기(IME)나 비밀번호 관리자가 값을 보내 주는 경우를 흉내 낸 것이다.
+    // 길게 눌러 나오는 "붙여넣기" 메뉴 자체는 아래 '길게 누르기 메뉴와 붙여넣기' 그룹이 확인한다.
+    testWidgets('입력기가 보내 주는 값(자동완성, 붙여넣기 포함)을 막지 않는다', (tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(smashHarness(
@@ -374,6 +376,148 @@ void main() {
       await tester.pump();
 
       expect(controller.text, '20250001');
+    });
+  });
+
+  group('길게 누르기 메뉴와 붙여넣기', () {
+    testWidgets('contextMenuBuilder를 생략하면 기본 메뉴가 연결된다 (null을 넘기면 메뉴가 사라진다)',
+        (tester) async {
+      await tester.pumpWidget(smashHarness(const SmashTextField(label: '학번')));
+
+      expect(textFieldOf(tester).contextMenuBuilder, isNotNull);
+    });
+
+    testWidgets('직접 넘긴 contextMenuBuilder가 쓰인다', (tester) async {
+      final controller = TextEditingController(text: '20250001');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(smashHarness(
+        SmashTextField(
+          label: '학번',
+          controller: controller,
+          contextMenuBuilder: (context, state) => const Text('내 메뉴'),
+        ),
+      ));
+
+      await longPressText(tester);
+
+      expect(find.text('내 메뉴'), findsOneWidget);
+      expect(menuLabels(tester), isEmpty, reason: '기본 메뉴는 뜨지 않는다');
+    });
+
+    testWidgets('클립보드의 글자를 길게 눌러 붙여넣을 수 있다 (선택한 글자가 바뀐다)', (tester) async {
+      mockClipboard(tester, pasteable: '붙여넣을 값');
+      final controller = TextEditingController(text: '20250001');
+      addTearDown(controller.dispose);
+      final changes = <String>[];
+      await tester.pumpWidget(smashHarness(
+        SmashTextField(label: '학번', controller: controller, onChanged: changes.add),
+      ));
+
+      await longPressText(tester);
+      expect(find.text('붙여넣기'), findsOneWidget);
+      await tester.tap(find.text('붙여넣기'));
+      await tester.pumpAndSettle();
+
+      expect(controller.text, '붙여넣을 값');
+      expect(changes.last, '붙여넣을 값');
+    });
+
+    testWidgets('빈 입력창을 길게 눌러도 붙여넣을 수 있다', (tester) async {
+      mockClipboard(tester, pasteable: '붙여넣을 값');
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(smashHarness(
+        SmashTextField(label: '학번', controller: controller),
+      ));
+
+      await tester.longPress(field);
+      await tester.pumpAndSettle();
+      expect(menuLabels(tester), ['붙여넣기']);
+      await tester.tap(find.text('붙여넣기'));
+      await tester.pumpAndSettle();
+
+      expect(controller.text, '붙여넣을 값');
+    });
+
+    testWidgets('클립보드가 비어 있으면 붙여넣기 항목이 없다', (tester) async {
+      mockClipboard(tester);
+      final controller = TextEditingController(text: '20250001');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(smashHarness(
+        SmashTextField(label: '학번', controller: controller),
+      ));
+
+      await longPressText(tester);
+
+      expect(menuLabels(tester), isNot(contains('붙여넣기')));
+      expect(menuLabels(tester), contains('복사'));
+    });
+
+    testWidgets('글자를 선택해 복사하면 클립보드로 들어간다', (tester) async {
+      final log = mockClipboard(tester, pasteable: '붙여넣을 값');
+      final controller = TextEditingController(text: '20250001');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(smashHarness(
+        SmashTextField(label: '학번', controller: controller),
+      ));
+
+      await longPressText(tester);
+      await tester.tap(find.text('복사'));
+      await tester.pumpAndSettle();
+
+      expect(log.copied, ['20250001']);
+    });
+
+    testWidgets('여러 단어 중 일부만 선택되면 전체 선택 항목이 나온다', (tester) async {
+      mockClipboard(tester, pasteable: '값');
+      final controller = TextEditingController(text: 'abc 12345');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(smashHarness(
+        SmashTextField(label: '메모', controller: controller),
+      ));
+
+      await longPressText(tester);
+      expect(menuLabels(tester), contains('전체 선택'));
+      await tester.tap(find.text('전체 선택'));
+      await tester.pumpAndSettle();
+
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 9));
+    });
+
+    testWidgets('읽기 전용이면 복사만 되고 붙여넣기, 잘라내기는 없다', (tester) async {
+      mockClipboard(tester, pasteable: '붙여넣을 값');
+      final controller = TextEditingController(text: '20250001');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(smashHarness(
+        SmashTextField(label: '학번', controller: controller, readOnly: true),
+      ));
+
+      await longPressText(tester);
+
+      expect(menuLabels(tester), contains('복사'));
+      expect(menuLabels(tester), isNot(contains('붙여넣기')));
+      expect(menuLabels(tester), isNot(contains('잘라내기')));
+    });
+
+    testWidgets('비활성이면 길게 눌러도 메뉴가 없다', (tester) async {
+      mockClipboard(tester, pasteable: '붙여넣을 값');
+      final controller = TextEditingController(text: '20250001');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(smashHarness(
+        SmashTextField(label: '학번', controller: controller, enabled: false),
+      ));
+
+      await tester.longPressAt(tester.getTopLeft(field) + const Offset(20, 30));
+      await tester.pumpAndSettle();
+
+      expect(menuLabels(tester), isEmpty);
+    });
+
+    testWidgets('자동완성 힌트를 생략하면 자동완성을 쓰지 않는다 (null, Flutter 기본값은 빈 목록)',
+        (tester) async {
+      await tester.pumpWidget(smashHarness(const SmashTextField(label: '메모')));
+
+      expect(textFieldOf(tester).autofillHints, isNull);
     });
   });
 

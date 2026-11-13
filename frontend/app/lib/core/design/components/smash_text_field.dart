@@ -66,7 +66,9 @@ class SmashTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
 
-  /// 자동완성 힌트 (학번은 username, 비밀번호는 password 등). 비밀번호 관리자 연동에 쓰인다
+  /// 자동완성 힌트 (학번은 username, 비밀번호는 password 등). 비밀번호 관리자 연동에 쓰인다.
+  /// 생략(null)하면 이 입력창은 자동완성을 쓰지 않는다 (Flutter 기본값은 빈 목록이지만
+  /// 이름, 메모, 가입코드처럼 자동완성이 필요 없는 곳이 대부분이라 끄는 쪽을 기본으로 했다)
   final Iterable<String>? autofillHints;
   final List<TextInputFormatter>? inputFormatters;
   final bool obscureText;
@@ -90,12 +92,26 @@ class SmashTextField extends StatelessWidget {
 
   /// 입력창 안쪽 오른쪽 위젯. 누르는 동안 입력창의 포커스를 유지한다
   final Widget? suffix;
+
+  /// 길게 눌렀을 때 나오는 메뉴(복사, 붙여넣기, 전체 선택 등).
+  /// null이면 Flutter 기본 메뉴를 쓴다. (TextField에 null을 그대로 넘기면 메뉴가 사라진다)
   final EditableTextContextMenuBuilder? contextMenuBuilder;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onTap;
 
   bool get _hasError => errorText != null && errorText!.isNotEmpty;
+
+  // Flutter TextField의 기본 메뉴와 같다. TextField는 인자를 생략하면 이 메뉴를 쓰지만
+  // null을 직접 넘기면 메뉴가 없어지므로, 우리가 기본값을 대신 채워 넘긴다.
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
 
   OutlineInputBorder _border(Color color, double width) => OutlineInputBorder(
         borderRadius: SmashRadius.circular(SmashRadius.md),
@@ -165,7 +181,7 @@ class SmashTextField extends StatelessWidget {
             enableSuggestions: enableSuggestions,
             enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
             autofocus: autofocus,
-            contextMenuBuilder: contextMenuBuilder,
+            contextMenuBuilder: contextMenuBuilder ?? _defaultContextMenuBuilder,
             onChanged: onChanged,
             onSubmitted: onSubmitted,
             onTap: onTap,

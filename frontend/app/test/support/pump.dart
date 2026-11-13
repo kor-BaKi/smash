@@ -51,3 +51,44 @@ List<String> captureHaptics(WidgetTester tester) {
       .setMockMethodCallHandler(SystemChannels.platform, null));
   return calls;
 }
+
+
+/// 클립보드로 나가는 복사 호출을 모으고, 붙여넣기용 값을 돌려준다.
+class ClipboardLog {
+  final List<String> copied = [];
+  String? pasteable;
+}
+
+ClipboardLog mockClipboard(WidgetTester tester, {String? pasteable}) {
+  final log = ClipboardLog()..pasteable = pasteable;
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    SystemChannels.platform,
+    (call) async {
+      switch (call.method) {
+        case 'Clipboard.setData':
+          log.copied.add((call.arguments as Map)['text'] as String);
+          return null;
+        case 'Clipboard.getData':
+          return log.pasteable == null ? null : <String, dynamic>{'text': log.pasteable};
+        case 'Clipboard.hasStrings':
+          return <String, dynamic>{'value': log.pasteable != null};
+      }
+      return null;
+    },
+  );
+  addTearDown(() => tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, null));
+  return log;
+}
+
+/// 글자가 있는 위치(입력창 왼쪽)를 길게 눌러 글자를 선택하고 메뉴를 띄운다.
+Future<void> longPressText(WidgetTester tester, {Offset offset = const Offset(10, 10)}) async {
+  await tester.longPressAt(tester.getTopLeft(find.byType(EditableText)) + offset);
+  await tester.pumpAndSettle();
+}
+
+/// 지금 화면에 떠 있는 길게 누르기 메뉴의 항목 이름들 (예: [잘라내기, 복사, 붙여넣기])
+List<String> menuLabels(WidgetTester tester) => tester
+    .widgetList<TextSelectionToolbarTextButton>(find.byType(TextSelectionToolbarTextButton))
+    .map((button) => (button.child as Text).data!)
+    .toList();
