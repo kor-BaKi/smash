@@ -1,3 +1,4 @@
+import 'catalog_display_sections.dart';
 import 'catalog_entry.dart';
 import 'catalog_input_sections.dart';
 import 'catalog_sections.dart';
@@ -12,4 +13,10 @@ final List<CatalogEntry> catalogEntries = [
   segmentedEntry,
   switchRowEntry,
   checkboxRowEntry,
+  chipEntry,
+  badgeEntry,
+  listRowEntry,
+  sectionHeaderEntry,
+  panelEntry,
+  avatarEntry,
 ];

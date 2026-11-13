@@ -88,6 +88,7 @@ void main() {
     });
 
     testWidgets('기본값(entries 생략)은 등록 목록(catalogEntries)을 보여준다', (tester) async {
+      await useTallScreen(tester); // 목록이 길어 기본 화면 밖의 항목은 그려지지 않는다
       await tester.pumpWidget(const CatalogApp());
 
       for (final entry in catalogEntries) {

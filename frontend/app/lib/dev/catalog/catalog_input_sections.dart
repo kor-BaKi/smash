@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/design/components/components.dart';
-import '../../core/design/spacing.dart';
-import '../../core/design/typography.dart';
 import 'catalog_entry.dart';
+import 'catalog_state_host.dart';
 
 /// 컨트롤러를 만들고 정리해 주는 카탈로그용 입력창 틀
 class _FieldHost extends StatefulWidget {
@@ -32,40 +31,6 @@ class _FieldHostState extends State<_FieldHost> {
 
 /// 값을 들고 있다가 컴포넌트가 바꾸면 그대로 반영하는 카탈로그용 틀.
 /// 현재 값을 글자로도 보여 주어, 모양 변화와 실제 값이 맞는지 눈으로 확인할 수 있다.
-class _StateHost<T> extends StatefulWidget {
-  const _StateHost({
-    required this.initial,
-    required this.builder,
-    required this.describe,
-  });
-
-  final T initial;
-  final Widget Function(BuildContext context, T value, ValueChanged<T> onChanged) builder;
-  final String Function(T value) describe;
-
-  @override
-  State<_StateHost<T>> createState() => _StateHostState<T>();
-}
-
-class _StateHostState<T> extends State<_StateHost<T>> {
-  late T _value = widget.initial;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        widget.builder(context, _value, (next) => setState(() => _value = next)),
-        Padding(
-          padding: const EdgeInsets.only(top: SmashSpacing.sm),
-          child: Text('현재 값: ${widget.describe(_value)}', style: SmashText.caption),
-        ),
-      ],
-    );
-  }
-}
-
 Widget _field(
   Widget Function(BuildContext, TextEditingController) builder, {
   String text = '',
@@ -204,7 +169,7 @@ final segmentedEntry = CatalogEntry(
     CatalogState('전체 비활성', (_) => _segmented(disabled: true)),
     CatalogState(
       interactiveStateLabel,
-      (_) => _StateHost<_Travel>(
+      (_) => CatalogStateHost<_Travel>(
         initial: _Travel.together,
         describe: (value) => value == _Travel.together ? '같이 가요' : '따로 가요',
         builder: (context, value, onChanged) => SmashSegmentedControl<_Travel>(
@@ -258,7 +223,7 @@ final switchRowEntry = CatalogEntry(
     ),
     CatalogState(
       interactiveStateLabel,
-      (_) => _StateHost<bool>(
+      (_) => CatalogStateHost<bool>(
         initial: false,
         describe: (value) => value ? '켜짐' : '꺼짐',
         builder: (context, value, onChanged) => SmashSwitchRow(
@@ -295,7 +260,7 @@ final checkboxRowEntry = CatalogEntry(
     const CatalogState('비활성', _checkDisabled),
     CatalogState(
       interactiveStateLabel,
-      (_) => _StateHost<bool>(
+      (_) => CatalogStateHost<bool>(
         initial: false,
         describe: (value) => value ? '체크' : '해제',
         builder: (context, value, onChanged) => SmashCheckboxRow(
