@@ -1,6 +1,7 @@
 import 'package:app/core/design/smash_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 컴포넌트 위젯 테스트용 공통 틀: SMASH 라이트 테마 + 글자 배율 + 모션 줄이기 설정
@@ -12,6 +13,14 @@ Widget smashHarness(
 }) {
   return MaterialApp(
     theme: SmashTheme.light(),
+    // 실제 앱과 같게 한국어 로케일을 쓴다 (기본 위젯의 문구: 복사, 붙여넣기, 뒤로 등)
+    locale: const Locale('ko', 'KR'),
+    supportedLocales: const [Locale('ko', 'KR')],
+    localizationsDelegates: const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
     builder: (context, app) => MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(textScale),

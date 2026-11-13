@@ -1,4 +1,5 @@
 import 'catalog_entry.dart';
+import 'catalog_input_sections.dart';
 import 'catalog_sections.dart';
 
 /// 카탈로그에 올라간 컴포넌트 목록.
@@ -6,4 +7,5 @@ import 'catalog_sections.dart';
 final List<CatalogEntry> catalogEntries = [
   buttonEntry,
   iconButtonEntry,
+  textFieldEntry,
 ];
