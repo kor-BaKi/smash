@@ -1,5 +1,6 @@
 import 'catalog_display_sections.dart';
 import 'catalog_entry.dart';
+import 'catalog_frame_sections.dart';
 import 'catalog_input_sections.dart';
 import 'catalog_sections.dart';
 
@@ -19,4 +20,10 @@ final List<CatalogEntry> catalogEntries = [
   sectionHeaderEntry,
   panelEntry,
   avatarEntry,
+  systemUiEntry,
+  appBarEntry,
+  bottomBarEntry,
+  bottomNavEntry,
+  scaffoldEntry,
+  tabShellEntry,
 ];
