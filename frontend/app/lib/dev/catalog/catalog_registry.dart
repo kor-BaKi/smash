@@ -4,6 +4,7 @@ import 'catalog_frame_sections.dart';
 import 'catalog_input_sections.dart';
 import 'catalog_overlay_sections.dart';
 import 'catalog_sections.dart';
+import 'catalog_state_sections.dart';
 
 /// 카탈로그에 올라간 컴포넌트 목록.
 /// 컴포넌트를 만들 때마다 해당 섹션(CatalogEntry)을 만들어 여기에 한 줄을 더한다.
@@ -31,4 +32,8 @@ final List<CatalogEntry> catalogEntries = [
   dialogEntry,
   snackBarEntry,
   inlineNoticeEntry,
+  skeletonEntry,
+  emptyEntry,
+  errorViewEntry,
+  asyncViewEntry,
 ];
