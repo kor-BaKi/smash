@@ -38,7 +38,7 @@ final _otherEntry = CatalogEntry(
 
 void main() {
   Future<void> useTallScreen(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(400, 12000);
+    tester.view.physicalSize = const Size(400, 40000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
   }

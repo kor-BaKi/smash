@@ -5,6 +5,7 @@ export 'smash_badge.dart';
 export 'smash_bottom_bar.dart';
 export 'smash_bottom_nav.dart';
 export 'smash_button.dart';
+export 'smash_calendar.dart';
 export 'smash_checkbox_row.dart';
 export 'smash_chip.dart';
 export 'smash_dialog.dart';
