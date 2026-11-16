@@ -32,6 +32,7 @@ class SmashButton extends StatelessWidget {
     this.isLoading = false,
     this.expanded = true,
     this.haptic,
+    this.autofocus = false,
   });
 
   final String label;
@@ -45,6 +46,9 @@ class SmashButton extends StatelessWidget {
   final bool expanded;
   final SmashHaptic? haptic;
 
+  /// true이면 화면이 열릴 때 이 버튼에 포커스가 간다 (위험한 확인 대화상자에서 취소 버튼에 쓴다)
+  final bool autofocus;
+
   double get _minHeight => size == SmashButtonSize.large ? 52 : 48;
 
   @override
@@ -55,6 +59,7 @@ class SmashButton extends StatelessWidget {
       borderRadius: SmashRadius.circular(SmashRadius.md),
       minSize: Size(SmashSpacing.minTouchTarget, _minHeight),
       semanticLabel: isLoading ? '$label, 처리 중' : null,
+      autofocus: autofocus,
       builder: _buildFace,
     );
     return expanded ? SizedBox(width: double.infinity, child: button) : button;

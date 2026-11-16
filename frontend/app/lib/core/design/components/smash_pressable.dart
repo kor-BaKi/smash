@@ -27,6 +27,7 @@ class SmashPressable extends StatefulWidget {
     this.haptic,
     this.borderRadius = BorderRadius.zero,
     this.minSize = const Size.square(SmashSpacing.minTouchTarget),
+    this.autofocus = false,
   });
 
   /// null이면 비활성
@@ -40,6 +41,9 @@ class SmashPressable extends StatefulWidget {
   final SmashHaptic? haptic;
   final BorderRadius borderRadius;
   final Size minSize;
+
+  /// true이면 화면(대화상자 등)이 열릴 때 이 버튼에 포커스가 간다. 키보드, 스위치 접근 사용자가 Enter를 누르면 이 버튼이 실행된다
+  final bool autofocus;
 
   @override
   State<SmashPressable> createState() => _SmashPressableState();
@@ -82,6 +86,7 @@ class _SmashPressableState extends State<SmashPressable> {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: _enabled ? _activate : null,
+            autofocus: widget.autofocus,
             borderRadius: widget.borderRadius,
             splashFactory: NoSplash.splashFactory,
             highlightColor: Colors.transparent,

@@ -2,6 +2,7 @@ import 'catalog_display_sections.dart';
 import 'catalog_entry.dart';
 import 'catalog_frame_sections.dart';
 import 'catalog_input_sections.dart';
+import 'catalog_overlay_sections.dart';
 import 'catalog_sections.dart';
 
 /// 카탈로그에 올라간 컴포넌트 목록.
@@ -26,4 +27,8 @@ final List<CatalogEntry> catalogEntries = [
   bottomNavEntry,
   scaffoldEntry,
   tabShellEntry,
+  sheetEntry,
+  dialogEntry,
+  snackBarEntry,
+  inlineNoticeEntry,
 ];
