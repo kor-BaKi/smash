@@ -6,7 +6,8 @@ import 'smash_system_ui.dart';
 /// 모든 화면의 바탕. 배경색, 상태 표시줄 모양, 안전 영역, 키보드 처리를 한 곳에서 정한다.
 ///
 /// - [appBar]가 있으면 위쪽 안전 영역은 앱바가 처리하고, 없으면 본문이 피한다
-/// - [bottom]에는 [SmashBottomBar]나 [SmashBottomNav]를 넣는다. 키보드가 올라오면 키보드 위로 올라간다
+/// - [bottom]에는 [SmashBottomBar]나 [SmashBottomNav]를 넣는다. 화면 폭 전체로 펼쳐지고,
+///   키보드가 올라오면 키보드 위로 올라가며, 스낵바는 이 막대 위에 뜬다
 ///   (탭 막대를 키보드 위에 두고 싶지 않으면 [SmashTabShell]을 쓴다)
 /// - 본문 아래 안전 영역은 [bottom]이 없을 때만 본문이 피한다
 class SmashScaffold extends StatelessWidget {
@@ -25,33 +26,34 @@ class SmashScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Scaffold 안쪽에서는 키보드 높이(viewInsets)가 이미 빠져 있고 아래 안전 영역만 남아 있어서
-    // bottom 안에서는 키보드가 올라온 줄 알 수 없다. 키보드 정보가 있는 이곳에서 판단한다
-    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    // Scaffold 안쪽에서는 키보드 높이(viewInsets)가 이미 빠져 있어서 안쪽 위젯은 키보드가 올라온 줄 모른다.
+    // 키보드 정보가 있는 이곳에서 판단한다
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final hasBottom = bottom != null;
+
     return SmashSystemUiRegion(
       child: Scaffold(
         backgroundColor: backgroundColor,
         appBar: appBar,
-        resizeToAvoidBottomInset: true,
-        // Scaffold.bottomNavigationBar는 키보드가 올라와도 올라오지 않고 키보드에 가려진다.
-        // 그래서 bottom을 본문 아래 Column에 두어, 키보드로 줄어든 본문 영역과 함께 올라가게 한다
-        body: Column(
-          children: [
-            Expanded(
-              child: SafeArea(
-                top: appBar == null,
-                bottom: bottom == null,
-                child: body,
-              ),
-            ),
-            if (bottom != null)
-              // 키보드가 올라와 있으면 홈 인디케이터 영역은 키보드가 덮고 있으므로 여백을 또 남기지 않는다
-              MediaQuery.removePadding(
-                context: context,
-                removeBottom: keyboardOpen,
-                child: bottom!,
-              ),
-          ],
+        // 막대 쪽에 키보드 높이를 padding으로 얹어서 막대와 본문이 함께 키보드 위로 올라가게 한다.
+        // (Scaffold.bottomNavigationBar 자리라서 스낵바도 막대 위에 뜬다. 본문은 Scaffold가
+        // max(키보드 높이, 막대 높이)만큼만 줄이므로, 막대가 키보드 높이를 가진 경우에도 이중으로 줄지 않는다)
+        bottomNavigationBar: hasBottom
+            ? Padding(
+                padding: EdgeInsets.only(bottom: keyboard),
+                child: MediaQuery.removePadding(
+                  context: context,
+                  // 키보드가 올라와 있으면 홈 인디케이터 영역은 키보드가 덮고 있으므로 여백을 또 남기지 않는다
+                  removeBottom: keyboard > 0,
+                  child: bottom!,
+                ),
+              )
+            : null,
+        body: MediaQuery.removeViewInsets(
+          context: context,
+          // 막대가 키보드 높이를 이미 반영했으므로 본문은 같은 높이를 또 빼지 않는다
+          removeBottom: hasBottom,
+          child: SafeArea(top: appBar == null, bottom: !hasBottom, child: body),
         ),
       ),
     );

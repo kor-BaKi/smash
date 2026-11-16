@@ -181,6 +181,45 @@ void main() {
       expect(bar.bottom, 500);
       expect(bar.bottom - tester.getRect(find.text('저장')).bottom, 16);
     });
+
+    testWidgets('키보드가 올라와도 본문은 막대 위 남은 높이를 한 번만 줄인다 (이중 차감 없음)', (tester) async {
+      sizeScreen(tester);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      await tester.pumpWidget(screen(const SmashScaffold(
+        body: SizedBox.expand(key: Key('body')),
+        bottom: SmashBottomBar(child: SizedBox(height: 52, child: Text('저장'))),
+      )));
+
+      // 화면 800 - 키보드 300 - 막대(52 + 위아래 16, 선 1)
+      final bar = tester.getRect(find.byType(SmashBottomBar));
+      expect(bar.bottom, 500);
+      expect(tester.getSize(find.byKey(const Key('body'))).height, closeTo(bar.top, 0.5));
+    });
+
+    testWidgets('막대가 키보드 높이를 이미 반영했으므로 본문은 키보드 높이(viewInsets)를 다시 받지 않는다', (tester) async {
+      sizeScreen(tester);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      double? seen;
+      await tester.pumpWidget(screen(SmashScaffold(
+        body: Builder(builder: (c) {
+          seen = MediaQuery.viewInsetsOf(c).bottom;
+          return const SizedBox.expand();
+        }),
+        bottom: const SmashBottomBar(child: SizedBox(height: 52)),
+      )));
+
+      expect(seen, 0);
+    });
+
+    testWidgets('막대가 화면 폭 전체로 펼쳐진다 (안쪽이 좁아도)', (tester) async {
+      sizeScreen(tester);
+      await tester.pumpWidget(screen(const SmashScaffold(
+        body: SizedBox(),
+        bottom: SmashBottomBar(child: SizedBox(height: 52, child: Text('저장'))),
+      )));
+
+      expect(tester.getSize(find.byType(SmashBottomBar)).width, 400);
+    });
   });
 
   group('SmashScaffold', () {
