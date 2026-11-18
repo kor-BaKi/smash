@@ -5,6 +5,7 @@ import 'package:app/dev/catalog/catalog_page.dart';
 import 'package:app/dev/catalog/catalog_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 // 등록된 컴포넌트가 아직 없어도 카탈로그의 목록, 상태 표, 글자 확대 동작을 확인할 수 있도록
 // 가짜 컴포넌트를 넘겨서 검사한다.
@@ -37,6 +38,9 @@ final _otherEntry = CatalogEntry(
 );
 
 void main() {
+  // 날짜 표기(KoDateFormat)는 로케일 데이터가 있어야 한다. 앱은 main(), 카탈로그는 catalog_main()에서 초기화한다
+  setUpAll(() async => initializeDateFormatting('ko_KR', null));
+
   Future<void> useTallScreen(WidgetTester tester) async {
     tester.view.physicalSize = const Size(400, 40000);
     tester.view.devicePixelRatio = 1.0;

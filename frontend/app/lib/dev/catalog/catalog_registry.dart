@@ -1,4 +1,5 @@
 import 'catalog_calendar_sections.dart';
+import 'catalog_date_sections.dart';
 import 'catalog_display_sections.dart';
 import 'catalog_entry.dart';
 import 'catalog_frame_sections.dart';
@@ -38,4 +39,7 @@ final List<CatalogEntry> catalogEntries = [
   errorViewEntry,
   asyncViewEntry,
   calendarEntry,
+  dayPickerEntry,
+  dateFieldEntry,
+  datePickerEntry,
 ];

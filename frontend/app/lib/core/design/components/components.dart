@@ -8,6 +8,8 @@ export 'smash_button.dart';
 export 'smash_calendar.dart';
 export 'smash_checkbox_row.dart';
 export 'smash_chip.dart';
+export 'smash_date_field.dart';
+export 'smash_date_picker.dart';
 export 'smash_dialog.dart';
 export 'smash_empty.dart';
 export 'smash_error_view.dart';
