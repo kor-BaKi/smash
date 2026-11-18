@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../support/pump.dart';
+import '../../../support/segment_label.dart';
 
 enum Travel { together, alone }
 
@@ -29,7 +30,7 @@ Widget control({
 }
 
 Finder segment(String label) => find.ancestor(
-      of: find.text(label),
+      of: segmentLabel(label),
       matching: find.byType(SmashPressable),
     );
 
@@ -44,8 +45,8 @@ void main() {
     testWidgets('조각 글자가 모두 보이고 선택된 조각에만 체크 아이콘이 있다', (tester) async {
       await tester.pumpWidget(smashHarness(control(onChanged: (_) {})));
 
-      expect(find.text('같이 가요'), findsOneWidget);
-      expect(find.text('따로 가요'), findsOneWidget);
+      expect(segmentLabel('같이 가요'), findsOneWidget);
+      expect(segmentLabel('따로 가요'), findsOneWidget);
       expect(find.byIcon(Icons.check), findsOneWidget);
       expect(
         find.descendant(of: segment('같이 가요'), matching: find.byIcon(Icons.check)),
@@ -57,17 +58,17 @@ void main() {
       await tester.pumpWidget(smashHarness(control(onChanged: (_) {})));
 
       expect(faceOf(tester, '같이 가요').color, SmashColors.brandTint);
-      expect(tester.widget<Text>(find.text('같이 가요')).style!.fontWeight, FontWeight.w600);
-      expect(tester.widget<Text>(find.text('같이 가요')).style!.color, SmashColors.brand);
+      expect(tester.widget<Text>(segmentLabel('같이 가요')).style!.fontWeight, FontWeight.w600);
+      expect(tester.widget<Text>(segmentLabel('같이 가요')).style!.color, SmashColors.brand);
       expect(faceOf(tester, '따로 가요').color, Colors.transparent);
-      expect(tester.widget<Text>(find.text('따로 가요')).style!.fontWeight, FontWeight.w400);
+      expect(tester.widget<Text>(segmentLabel('따로 가요')).style!.fontWeight, FontWeight.w400);
     });
 
     testWidgets('다른 조각을 누르면 onChanged가 그 값으로 불린다', (tester) async {
       final changes = <Travel>[];
       await tester.pumpWidget(smashHarness(control(onChanged: changes.add)));
 
-      await tester.tap(find.text('따로 가요'));
+      await tester.tap(segmentLabel('따로 가요'));
       await tester.pump();
 
       expect(changes, [Travel.alone]);
@@ -77,7 +78,7 @@ void main() {
       final changes = <Travel>[];
       await tester.pumpWidget(smashHarness(control(onChanged: changes.add)));
 
-      await tester.tap(find.text('같이 가요'));
+      await tester.tap(segmentLabel('같이 가요'));
       await tester.pump();
 
       expect(changes, isEmpty);
@@ -111,10 +112,10 @@ void main() {
     testWidgets('onChanged가 null이면 모든 조각이 비활성이다', (tester) async {
       await tester.pumpWidget(smashHarness(control(onChanged: null)));
 
-      await tester.tap(find.text('따로 가요'), warnIfMissed: false);
+      await tester.tap(segmentLabel('따로 가요'), warnIfMissed: false);
       await tester.pump();
 
-      expect(tester.widget<Text>(find.text('따로 가요')).style!.color, SmashColors.textDisabled);
+      expect(tester.widget<Text>(segmentLabel('따로 가요')).style!.color, SmashColors.textDisabled);
     });
 
     testWidgets('일부 조각만 비활성이면 그 조각만 눌리지 않는다', (tester) async {
@@ -127,12 +128,12 @@ void main() {
         ],
       )));
 
-      await tester.tap(find.text('따로 가요'), warnIfMissed: false);
+      await tester.tap(segmentLabel('따로 가요'), warnIfMissed: false);
       await tester.pump();
 
       expect(changes, isEmpty);
-      expect(tester.widget<Text>(find.text('따로 가요')).style!.color, SmashColors.textDisabled);
-      expect(tester.widget<Text>(find.text('같이 가요')).style!.color, isNot(SmashColors.textDisabled));
+      expect(tester.widget<Text>(segmentLabel('따로 가요')).style!.color, SmashColors.textDisabled);
+      expect(tester.widget<Text>(segmentLabel('같이 가요')).style!.color, isNot(SmashColors.textDisabled));
     });
   });
 
@@ -206,7 +207,7 @@ void main() {
       ));
 
       expect(tester.takeException(), isNull);
-      final text = tester.widget<Text>(find.text('다른 조 참여'));
+      final text = tester.widget<Text>(segmentLabel('다른 조 참여'));
       expect(text.overflow, isNot(TextOverflow.ellipsis));
     });
 

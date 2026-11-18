@@ -6,6 +6,7 @@ import 'package:app/dev/catalog/catalog_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import '../support/segment_label.dart';
 
 // 등록된 컴포넌트가 아직 없어도 카탈로그의 목록, 상태 표, 글자 확대 동작을 확인할 수 있도록
 // 가짜 컴포넌트를 넘겨서 검사한다.
@@ -247,14 +248,14 @@ void main() {
       final entry = entryNamed('SmashSegmentedControl');
       await open(tester, entry, catalogEntries);
       Finder segment(String label) => find.ancestor(
-            of: inBlock(entry.name, 1.0, interactiveStateLabel, find.text(label)),
+            of: inBlock(entry.name, 1.0, interactiveStateLabel, segmentLabel(label)),
             matching: find.byType(SmashPressable),
           );
       expect(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: 같이 가요')),
           findsOneWidget);
       expect(checkIconIn(segment('같이 가요')), findsOneWidget);
 
-      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('따로 가요')));
+      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, segmentLabel('따로 가요')));
       await tester.pump();
 
       expect(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: 따로 가요')),
@@ -262,7 +263,7 @@ void main() {
       expect(checkIconIn(segment('따로 가요')), findsOneWidget);
       expect(checkIconIn(segment('같이 가요')), findsNothing);
 
-      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('같이 가요')));
+      await tester.tap(inBlock(entry.name, 1.0, interactiveStateLabel, segmentLabel('같이 가요')));
       await tester.pump();
 
       expect(inBlock(entry.name, 1.0, interactiveStateLabel, find.text('현재 값: 같이 가요')),
@@ -347,12 +348,12 @@ void main() {
       final entry = entryNamed('SmashSegmentedControl');
       await open(tester, entry, catalogEntries);
 
-      await tester.tap(inBlock(entry.name, 1.0, '기본 (첫째 선택)', find.text('따로 가요')));
+      await tester.tap(inBlock(entry.name, 1.0, '기본 (첫째 선택)', segmentLabel('따로 가요')));
       await tester.pump();
 
       expect(
         checkIconIn(find.ancestor(
-          of: inBlock(entry.name, 1.0, '기본 (첫째 선택)', find.text('같이 가요')),
+          of: inBlock(entry.name, 1.0, '기본 (첫째 선택)', segmentLabel('같이 가요')),
           matching: find.byType(SmashPressable),
         )),
         findsOneWidget,

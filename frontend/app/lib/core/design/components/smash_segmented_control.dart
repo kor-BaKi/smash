@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../colors.dart';
+import '../no_char_break.dart';
 import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
@@ -17,7 +18,10 @@ class SmashSegment<T> {
 /// 둘 중 하나, 여럿 중 하나를 고르는 조각 선택 (이동 방식: 같이 가요 | 따로 가요).
 ///
 /// - 선택된 조각은 색뿐 아니라 체크 아이콘과 굵은 글자로도 구분한다
-/// - 조각은 같은 너비이고 터치 영역은 48dp 이상. 글자가 길거나 확대되면 줄바꿈으로 높이가 늘어난다
+/// - 조각은 같은 너비이고 터치 영역은 48dp 이상. 글자가 길거나 확대되면 공백에서 줄바꿈되어 높이가 늘어난다
+/// - 한글 라벨은 낱말 중간에서 줄바꿈되지 않는다 ([noCharBreak]: "같이/가요"). 다만 한 낱말이 조각 폭보다 길면 엔진이 글자 단위로 끊으므로,
+///   쓰는 쪽이 낱말이 들어갈 폭을 잡아야 한다 (선택된 조각은 체크 아이콘이 폭을 차지한다. 조각 수가 많거나 라벨이 길면 폭을 넉넉히)
+/// - 스크린리더는 라벨 원문을 읽는다
 /// - 선택된 조각을 다시 눌러도 [onChanged]는 불리지 않는다
 class SmashSegmentedControl<T> extends StatelessWidget {
   const SmashSegmentedControl({
@@ -112,7 +116,8 @@ class SmashSegmentedControl<T> extends StatelessWidget {
                 ],
                 Flexible(
                   child: Text(
-                    segment.label,
+                    noCharBreak(segment.label),
+                    semanticsLabel: segment.label,
                     textAlign: TextAlign.center,
                     style: (isSelected ? SmashText.bodyStrong : SmashText.body)
                         .copyWith(color: foreground),

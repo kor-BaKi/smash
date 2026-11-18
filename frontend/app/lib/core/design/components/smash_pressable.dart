@@ -28,6 +28,7 @@ class SmashPressable extends StatefulWidget {
     this.borderRadius = BorderRadius.zero,
     this.minSize = const Size.square(SmashSpacing.minTouchTarget),
     this.autofocus = false,
+    this.focusNode,
   });
 
   /// null이면 비활성
@@ -44,6 +45,9 @@ class SmashPressable extends StatefulWidget {
 
   /// true이면 화면(대화상자 등)이 열릴 때 이 버튼에 포커스가 간다. 키보드, 스위치 접근 사용자가 Enter를 누르면 이 버튼이 실행된다
   final bool autofocus;
+
+  /// 포커스를 밖에서 옮기거나 확인해야 할 때 넘긴다 (예: 팝업이 닫히면 그 팝업을 연 칸으로 포커스를 돌려준다)
+  final FocusNode? focusNode;
 
   @override
   State<SmashPressable> createState() => _SmashPressableState();
@@ -87,6 +91,7 @@ class _SmashPressableState extends State<SmashPressable> {
           child: InkWell(
             onTap: _enabled ? _activate : null,
             autofocus: widget.autofocus,
+            focusNode: widget.focusNode,
             borderRadius: widget.borderRadius,
             splashFactory: NoSplash.splashFactory,
             highlightColor: Colors.transparent,
