@@ -178,6 +178,8 @@ final asyncViewEntry = CatalogEntry(
                 isEmpty: (items) => items.isEmpty,
                 empty: const SmashEmpty(title: '아직 아무도 없어요', message: '회원이 들어오면 여기에 보여요.', scrollable: true),
                 data: (context, items) => ListView(
+                  // 안전 영역이 상자 안 목록의 위아래 여백으로 새지 않게 한다
+                  padding: EdgeInsets.zero,
                   children: [
                     for (final name in items)
                       SmashListRow(title: name, leading: SmashAvatar(name: name)),

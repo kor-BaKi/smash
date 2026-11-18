@@ -112,6 +112,8 @@ class SmashSkeletonList extends StatelessWidget {
       container: true,
       child: SmashSkeletonPulse(
         child: ListView.builder(
+          // padding을 안 주면 화면의 안전 영역(노치, 홈 인디케이터)이 위아래 여백으로 암묵적으로 더해져서, 상자 안에 둔 스켈레톤의 위에 큰 빈 공간이 생긴다
+          padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: itemCount,
           itemBuilder: (context, index) => Padding(
