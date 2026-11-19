@@ -31,14 +31,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  test('새 컴포넌트 세 개는 목록 맨 아래에 순서대로 붙어 있다', () {
-    expect(
-      catalogEntries
-          .map((e) => e.name)
-          .toList()
-          .sublist(catalogEntries.length - 3),
-      names,
-    );
+  test('새 컴포넌트 세 개는 목록 아래쪽에 순서대로 이어 붙어 있다 (그 뒤에는 이후 단계에서 붙은 항목만 있다)', () {
+    final all = catalogEntries.map((e) => e.name).toList();
+    final start = all.indexOf(names.first);
+    expect(start, greaterThanOrEqualTo(0));
+    expect(all.sublist(start, start + 3), names);
+    expect(all.sublist(start + 3), everyElement(isIn(const ['SmashLabel'])), reason: '이 세 개 뒤에는 SmashLabel만 있다 (새 컴포넌트는 맨 아래에 붙는다)');
   });
 
   test('세 컴포넌트 모두 직접 눌러 보기 상태를 가지고, 상태 이름이 중복되지 않는다', () {

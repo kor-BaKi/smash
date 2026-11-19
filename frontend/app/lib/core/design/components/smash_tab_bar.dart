@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../colors.dart';
+import '../no_char_break.dart';
 import '../spacing.dart';
 import '../typography.dart';
 
@@ -57,7 +58,11 @@ class SmashTabBar extends StatelessWidget {
       ? Duration.zero
       : kTabScrollDuration;
 
-  static const TextStyle _labelStyle = SmashText.bodyStrong;
+  /// 탭 글자. **자간을 0으로 명시한다**: 명시하지 않으면 Material의 기본 글자 스타일(자간 0.1)이 섞여 실제 폭이
+  /// [TextPainter]로 잰 폭보다 글자당 0.1px 커지고, 그러면 고정 모드에서 폭이 모자라 글자가 잘릴 수 있다
+  static final TextStyle _labelStyle = SmashText.bodyStrong.copyWith(
+    letterSpacing: 0,
+  );
 
   /// 개수 숫자: 굵기는 항상 w600(선택이 바뀌어도 폭이 변하지 않는다), 자릿수 폭이 같은 숫자.
   /// 색은 정하지 않는다 (탭 글자 색을 따라 선택은 브랜드 색, 나머지는 보조색이 된다)
@@ -67,6 +72,7 @@ class SmashTabBar extends StatelessWidget {
       fontSize: 13,
       height: 1.2,
       fontWeight: FontWeight.w600,
+      letterSpacing: 0,
     ),
   );
 
@@ -84,9 +90,10 @@ class SmashTabBar extends StatelessWidget {
   static double _badgeWidth(int count, TextScaler scaler) =>
       _measure('$count', _countStyle, scaler);
 
+  /// 실제로 그려지는 글자와 같은 기준으로 잰다: `SmashLabel`이 그리는 문자열([noCharBreak])을 같은 스타일로 한 줄에 놓았을 때의 폭
   static double _measure(String text, TextStyle style, TextScaler scaler) {
     final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
+      text: TextSpan(text: noCharBreak(text), style: style),
       textDirection: TextDirection.ltr,
       textScaler: scaler,
       maxLines: 1,

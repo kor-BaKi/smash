@@ -4,6 +4,7 @@ import 'catalog_display_sections.dart';
 import 'catalog_entry.dart';
 import 'catalog_frame_sections.dart';
 import 'catalog_input_sections.dart';
+import 'catalog_label_sections.dart';
 import 'catalog_nav_sections.dart';
 import 'catalog_overlay_sections.dart';
 import 'catalog_sections.dart';
@@ -50,4 +51,5 @@ final List<CatalogEntry> catalogEntries = [
   tabBarEntry,
   selectFieldEntry,
   actionSheetEntry,
+  labelEntry,
 ];

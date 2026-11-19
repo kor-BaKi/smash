@@ -19,6 +19,7 @@ export 'smash_error_view.dart';
 export 'smash_force_pressed.dart';
 export 'smash_icon_button.dart';
 export 'smash_inline_notice.dart';
+export 'smash_label.dart';
 export 'smash_list_row.dart';
 export 'smash_panel.dart';
 export 'smash_password_field.dart';
