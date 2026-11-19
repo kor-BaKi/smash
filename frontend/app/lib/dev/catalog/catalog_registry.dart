@@ -4,6 +4,7 @@ import 'catalog_display_sections.dart';
 import 'catalog_entry.dart';
 import 'catalog_frame_sections.dart';
 import 'catalog_input_sections.dart';
+import 'catalog_nav_sections.dart';
 import 'catalog_overlay_sections.dart';
 import 'catalog_sections.dart';
 import 'catalog_state_sections.dart';
@@ -46,4 +47,7 @@ final List<CatalogEntry> catalogEntries = [
   timeFieldPickerEntry,
   dateTimeFieldEntry,
   dateTimePickerEntry,
+  tabBarEntry,
+  selectFieldEntry,
+  actionSheetEntry,
 ];
