@@ -58,21 +58,20 @@ class SmashTabBar extends StatelessWidget {
       ? Duration.zero
       : kTabScrollDuration;
 
-  /// 탭 글자. **자간을 0으로 명시한다**: 명시하지 않으면 Material의 기본 글자 스타일(자간 0.1)이 섞여 실제 폭이
-  /// [TextPainter]로 잰 폭보다 글자당 0.1px 커지고, 그러면 고정 모드에서 폭이 모자라 글자가 잘릴 수 있다
-  static final TextStyle _labelStyle = SmashText.bodyStrong.copyWith(
-    letterSpacing: 0,
-  );
+  /// 탭 글자: 강조 본문 토큰 그대로다. 자간은 토큰이 0으로 명시하고 있어서 Material 기본 자간(0.1)이 섞이지 않고,
+  /// 그래서 [TextPainter]로 잰 폭이 실제 폭과 같다
+  static const TextStyle _labelStyle = SmashText.bodyStrong;
 
-  /// 개수 숫자: 굵기는 항상 w600(선택이 바뀌어도 폭이 변하지 않는다), 자릿수 폭이 같은 숫자.
-  /// 색은 정하지 않는다 (탭 글자 색을 따라 선택은 브랜드 색, 나머지는 보조색이 된다)
+  /// 개수 숫자: 캡션 토큰에서 크기, 글꼴, 자간을 물려받고 굵기는 항상 w600(선택이 바뀌어도 폭이 변하지 않는다),
+  /// 자릿수 폭이 같은 숫자다. **색은 정하지 않는다** (캡션 토큰의 색을 가져오면 선택된 탭에서도 보조색에 고정된다.
+  /// 탭 글자 색을 따라 선택은 브랜드 색, 나머지는 보조색이 되어야 한다)
   static final TextStyle _countStyle = SmashText.tabular(
-    const TextStyle(
-      fontFamily: SmashText.family,
-      fontSize: 13,
+    TextStyle(
+      fontFamily: SmashText.caption.fontFamily,
+      fontSize: SmashText.caption.fontSize,
+      letterSpacing: SmashText.caption.letterSpacing,
       height: 1.2,
       fontWeight: FontWeight.w600,
-      letterSpacing: 0,
     ),
   );
 

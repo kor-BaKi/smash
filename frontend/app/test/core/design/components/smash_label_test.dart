@@ -559,9 +559,8 @@ void main() {
       );
 
       testWidgets(
-        '글자 $scale배: 자간이 있으면 글자 폭에 더해서 WORD JOINER마다 자간만큼 더 넓어진다 (Material 기본 자간 0.25가 섞이는 경우)',
+        '글자 $scale배: 토큰의 자간은 0이라 WORD JOINER 폭이 없고, SmashLabel의 폭 = 일반 Text의 폭이다',
         (tester) async {
-          // 스타일에 자간을 명시하지 않으면 Scaffold 본문에서는 Material 기본 글자 스타일의 자간(0.25)이 섞인다
           for (final s in strings) {
             await tester.pumpWidget(
               host(
@@ -586,14 +585,41 @@ void main() {
 
             expect(
               plainStyle.letterSpacing,
-              0.25,
-              reason: 'SmashText.body는 자간을 명시하지 않아 Material 기본 자간이 섞인다',
+              0,
+              reason: 'SmashText.body는 자간 0을 명시한다 (Material 기본 자간이 섞이지 않는다)',
             );
-            expect(
-              label - plain,
-              closeTo(0.25 * wjCount(noCharBreak(s)), 0.01),
-              reason: '"$s"',
-            );
+            expect(label, closeTo(plain, 0.01), reason: '"$s" 배율 $scale');
+          }
+        },
+      );
+
+      testWidgets(
+        '글자 $scale배: 자간을 직접 준 스타일에서는 WORD JOINER마다 그 값만큼 더 넓어진다 (0.25, -0.2)',
+        (tester) async {
+          for (final spacing in [0.25, -0.2]) {
+            final style = SmashText.body.copyWith(letterSpacing: spacing);
+            for (final s in strings) {
+              await tester.pumpWidget(
+                host(
+                  Text(s, style: style, maxLines: 1, softWrap: false),
+                  scale: scale,
+                ),
+              );
+              final plain = tester.getSize(anyText()).width;
+              await tester.pumpWidget(
+                host(
+                  SmashLabel(s, style: style, maxLines: 1, softWrap: false),
+                  scale: scale,
+                ),
+              );
+              final label = tester.getSize(anyText()).width;
+
+              expect(
+                label - plain,
+                closeTo(spacing * wjCount(noCharBreak(s)), 0.01),
+                reason: '"$s" 자간 $spacing 배율 $scale',
+              );
+            }
           }
         },
       );
