@@ -4,6 +4,7 @@ import '../colors.dart';
 import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 /// 스낵바의 종류. 색뿐 아니라 아이콘과 스크린리더 문구로도 구분한다.
 /// - progress: 진행 중 (끝나면 [SmashSnackHandle.replace]로 결과로 바꾼다)
@@ -124,7 +125,7 @@ class _SnackContent extends StatelessWidget {
             Icon(icon, size: 20, color: color),
           const SizedBox(width: SmashSpacing.sm),
           Expanded(
-            child: Text(message, style: SmashText.body.copyWith(color: SmashColors.onBrand)),
+            child: SmashLabel(message, style: SmashText.body.copyWith(color: SmashColors.onBrand)),
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../colors.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 /// 목록 한 줄. 높이는 56dp 이상이고, [onTap]이 있으면 줄 어디를 눌러도 반응한다.
 ///
@@ -52,14 +53,14 @@ class SmashListRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  SmashLabel(
                     title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: SmashText.body,
                   ),
                   if (subtitle != null)
-                    Text(
+                    SmashLabel(
                       subtitle!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

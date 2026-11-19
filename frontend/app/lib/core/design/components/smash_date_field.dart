@@ -6,6 +6,7 @@ import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
 import 'smash_date_picker.dart';
+import 'smash_label.dart';
 import 'smash_pressable.dart';
 
 /// 날짜를 고르는 입력칸. 누르면 날짜 시트가 열리고, "선택"으로 확정하면 [onChanged]가 불린다.
@@ -85,7 +86,7 @@ class SmashDateField extends StatelessWidget {
       children: [
         // 라벨은 칸과 하나로 묶어 읽으므로 따로 읽지 않는다
         ExcludeSemantics(
-          child: Text(
+          child: SmashLabel(
             label,
             style: SmashText.caption.copyWith(
               color: SmashColors.text,
@@ -124,7 +125,7 @@ class SmashDateField extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(
+                      child: SmashLabel(
                         valueText ?? hint,
                         style: SmashText.body.copyWith(
                           color: !enabled
@@ -169,7 +170,7 @@ class SmashDateField extends StatelessWidget {
                   ),
                   const SizedBox(width: SmashSpacing.xs),
                   Expanded(
-                    child: Text(
+                    child: SmashLabel(
                       errorText!,
                       style: SmashText.caption.copyWith(
                         color: SmashColors.danger,
@@ -184,7 +185,7 @@ class SmashDateField extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: SmashSpacing.xs),
             child: ExcludeSemantics(
-              child: Text(helper!, style: SmashText.caption),
+              child: SmashLabel(helper!, style: SmashText.caption),
             ),
           ),
       ],

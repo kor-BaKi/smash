@@ -6,6 +6,7 @@ import '../motion.dart';
 import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 import 'smash_pressable.dart';
 
 /// 필터, 선택용 칩 (이번 주 | 이번 달, 정규 | 이월 등).
@@ -98,7 +99,7 @@ class SmashChip extends StatelessWidget {
               const SizedBox(width: SmashSpacing.xs),
             ],
             Flexible(
-              child: Text(
+              child: SmashLabel(
                 label,
                 textAlign: TextAlign.center,
                 style: (selected ? SmashText.bodyStrong : SmashText.body)

@@ -6,6 +6,7 @@ import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
 import 'smash_date_time_picker.dart';
+import 'smash_label.dart';
 import 'smash_pressable.dart';
 
 /// 날짜와 시간을 고르는 입력칸. 누르면 날짜+시간 시트가 열리고 확인하면 [onChanged]가 불린다.
@@ -83,7 +84,7 @@ class SmashDateTimeField extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ExcludeSemantics(
-          child: Text(
+          child: SmashLabel(
             label,
             style: SmashText.caption.copyWith(
               color: SmashColors.text,
@@ -122,7 +123,7 @@ class SmashDateTimeField extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(
+                      child: SmashLabel(
                         valueText ?? hint,
                         style: SmashText.body.copyWith(
                           color: !enabled
@@ -167,7 +168,7 @@ class SmashDateTimeField extends StatelessWidget {
                   ),
                   const SizedBox(width: SmashSpacing.xs),
                   Expanded(
-                    child: Text(
+                    child: SmashLabel(
                       errorText!,
                       style: SmashText.caption.copyWith(
                         color: SmashColors.danger,
@@ -182,7 +183,7 @@ class SmashDateTimeField extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: SmashSpacing.xs),
             child: ExcludeSemantics(
-              child: Text(helper!, style: SmashText.caption),
+              child: SmashLabel(helper!, style: SmashText.caption),
             ),
           ),
       ],

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../support/finders.dart';
 import '../../../support/semantics_tree.dart';
 import '../../../support/text_lines.dart';
 
@@ -26,8 +27,6 @@ Widget host(Widget child, {double scale = 1.0, double? width}) => MaterialApp(
     ),
   ),
 );
-
-Finder anyText() => find.byWidgetPredicate((w) => w is Text);
 
 RichText richOf(WidgetTester tester) => tester.widget<RichText>(
   find.descendant(of: anyText(), matching: find.byType(RichText)).first,

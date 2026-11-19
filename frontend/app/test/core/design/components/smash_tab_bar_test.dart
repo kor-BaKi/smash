@@ -11,6 +11,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../support/contrast.dart';
+import '../../../support/finders.dart';
 import '../../../support/pixels.dart';
 import '../../../support/semantics_tree.dart';
 import '../../../support/text_lines.dart';
@@ -237,16 +238,16 @@ void main() {
       expect(find.text('12'), findsOneWidget);
       expect(find.text('0'), findsOneWidget);
       expect(
-        find.descendant(of: tabAt(0), matching: find.byType(Text)),
+        find.descendant(of: tabAt(0), matching: anyText()),
         findsNWidgets(2),
         reason: '라벨 + 숫자',
       );
       expect(
-        find.descendant(of: tabAt(1), matching: find.byType(Text)),
+        find.descendant(of: tabAt(1), matching: anyText()),
         findsNWidgets(2),
       );
       expect(
-        find.descendant(of: tabAt(2), matching: find.byType(Text)),
+        find.descendant(of: tabAt(2), matching: anyText()),
         findsOneWidget,
         reason: '개수가 없으면 라벨뿐',
       );

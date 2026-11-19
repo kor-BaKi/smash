@@ -301,8 +301,9 @@ void main() {
       expect(find.bySemanticsLabel('따로 가요'), findsOneWidget);
       for (final label in ['같이 가요', '따로 가요']) {
         final text = tester.widget<Text>(segmentLabel(label));
-        expect(text.semanticsLabel, label);
-        expect(text.semanticsLabel!.contains('\u2060'), isFalse);
+        // SmashLabel은 data가 원문이고 (WORD JOINER는 그릴 때만 들어간다), 읽는 말도 원문이다
+        expect(text.data, label);
+        expect(text.data!.contains('\u2060'), isFalse);
         expect(
           tester.getSemantics(segmentLabel(label)).label.contains('\u2060'),
           isFalse,

@@ -6,6 +6,7 @@ import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
 import 'smash_icon_button.dart';
+import 'smash_label.dart';
 import 'smash_pressable.dart';
 
 /// 시작일과 끝일이 모두 있는 기간 (예: 투표가 열려 있는 기간). 양 끝 날짜를 포함한다.
@@ -524,7 +525,7 @@ class _SmashCalendarState extends State<SmashCalendar> {
                       alignment: Alignment.centerLeft,
                       child: MediaQuery.withClampedTextScaling(
                         maxScaleFactor: SmashCalendar.bandMaxTextScale,
-                        child: Text(
+                        child: SmashLabel(
                           title,
                           maxLines: 1,
                           softWrap: false,
@@ -565,7 +566,7 @@ class _SmashCalendarState extends State<SmashCalendar> {
               child: Semantics(
                 header: true,
                 liveRegion: true,
-                child: Text(
+                child: SmashLabel(
                   '${widget.month.year}년 ${widget.month.month}월',
                   textAlign: TextAlign.center,
                   style: SmashText.heading,
@@ -612,7 +613,7 @@ class _SmashCalendarState extends State<SmashCalendar> {
                             padding: const EdgeInsets.symmetric(
                               vertical: SmashSpacing.sm,
                             ),
-                            child: Text(
+                            child: SmashLabel(
                               name,
                               textAlign: TextAlign.center,
                               style: SmashText.caption.copyWith(
@@ -765,7 +766,7 @@ class _DayCell extends StatelessWidget {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(6),
-                          child: Text(
+                          child: SmashLabel(
                             '${day.day}',
                             style:
                                 (isSelected || isToday
@@ -806,7 +807,7 @@ class _DayCell extends StatelessWidget {
                                   MediaQuery.withClampedTextScaling(
                                     maxScaleFactor:
                                         SmashCalendar.bandMaxTextScale,
-                                    child: Text(
+                                    child: SmashLabel(
                                       '+$hiddenPeriodCount',
                                       key: ValueKey(
                                         'period-more|${keyOf(day)}',

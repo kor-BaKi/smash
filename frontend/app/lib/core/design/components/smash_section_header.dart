@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../colors.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 enum SmashSectionHeaderStyle {
   /// 화면의 큰 구역 제목 (오늘 활동, 진행 중인 투표)
@@ -53,7 +54,7 @@ class SmashSectionHeader extends StatelessWidget {
           Expanded(
             child: Semantics(
               header: true,
-              child: Text(title, style: textStyle),
+              child: SmashLabel(title, style: textStyle),
             ),
           ),
           if (trailing != null) ...[

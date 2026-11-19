@@ -5,6 +5,7 @@ import '../colors.dart';
 import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 /// 한글 입력기(IME)가 글자를 조합하는 중인지.
 ///
@@ -146,7 +147,7 @@ class SmashTextField extends StatelessWidget {
       children: [
         // 라벨은 입력창과 하나로 묶어 읽으므로 따로 읽지 않는다
         ExcludeSemantics(
-          child: Text(
+          child: SmashLabel(
             label,
             style: SmashText.caption.copyWith(
               color: SmashColors.text,
@@ -204,7 +205,7 @@ class SmashTextField extends StatelessWidget {
                   ),
                   const SizedBox(width: SmashSpacing.xs),
                   Expanded(
-                    child: Text(
+                    child: SmashLabel(
                       errorText!,
                       style: SmashText.caption.copyWith(color: SmashColors.danger),
                     ),
@@ -216,7 +217,7 @@ class SmashTextField extends StatelessWidget {
         else if (helper != null && helper!.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: SmashSpacing.xs),
-            child: ExcludeSemantics(child: Text(helper!, style: SmashText.caption)),
+            child: ExcludeSemantics(child: SmashLabel(helper!, style: SmashText.caption)),
           ),
       ],
     );

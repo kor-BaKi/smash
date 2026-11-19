@@ -4,6 +4,7 @@ import '../colors.dart';
 import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 /// 배지의 의미. 색과 함께 아이콘과 문구로 전달한다 (색만으로 구분하지 않는다).
 enum SmashBadgeTone { neutral, info, success, warning, danger }
@@ -65,7 +66,7 @@ class SmashBadge extends StatelessWidget {
               const SizedBox(width: SmashSpacing.xs),
             ],
             Flexible(
-              child: Text(
+              child: SmashLabel(
                 label,
                 style: SmashText.caption.copyWith(
                   color: foreground,

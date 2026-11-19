@@ -11,6 +11,7 @@ import 'smash_button.dart';
 import 'smash_calendar.dart';
 import 'smash_chip.dart';
 import 'smash_date_picker.dart';
+import 'smash_label.dart';
 import 'smash_sheet.dart';
 import 'smash_time_field_picker.dart';
 
@@ -252,7 +253,7 @@ class _DateTimeSheetBodyState extends State<_DateTimeSheetBody> {
                 ),
                 const SizedBox(width: SmashSpacing.xs),
                 Expanded(
-                  child: Text(
+                  child: SmashLabel(
                     _notice!,
                     style: SmashText.caption.copyWith(color: SmashColors.text),
                   ),
@@ -265,7 +266,7 @@ class _DateTimeSheetBodyState extends State<_DateTimeSheetBody> {
         Semantics(
           liveRegion: true,
           container: true,
-          child: Text(
+          child: SmashLabel(
             '선택한 시각: ${KoDateFormat.dateTime(_value, now: widget.today)}',
             textAlign: TextAlign.center,
             style: SmashText.bodyStrong,

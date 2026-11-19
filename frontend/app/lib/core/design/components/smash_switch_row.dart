@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../colors.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 /// 켜고 끄는 설정 한 줄 (알림 설정 등). 줄 어디를 눌러도 바뀌고, 높이는 56dp 이상이다.
 /// 스크린리더는 "라벨, 설명, 켜짐/꺼짐"을 한 번에 읽는다.
@@ -50,9 +51,9 @@ class SmashSwitchRow extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(label, style: SmashText.body.copyWith(color: textColor)),
+                          SmashLabel(label, style: SmashText.body.copyWith(color: textColor)),
                           if (description != null)
-                            Text(
+                            SmashLabel(
                               description!,
                               style: SmashText.caption.copyWith(
                                 color: _enabled

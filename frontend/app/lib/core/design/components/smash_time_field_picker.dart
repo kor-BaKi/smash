@@ -11,6 +11,7 @@ import '../radius.dart';
 import '../shadows.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 import 'smash_pressable.dart';
 import 'smash_segmented_control.dart';
 
@@ -320,7 +321,7 @@ class _SmashTimeFieldPickerState extends State<SmashTimeFieldPicker> {
                   const Padding(
                     padding: EdgeInsets.only(left: SmashSpacing.xs),
                     child: ExcludeSemantics(
-                      child: Text(':', style: SmashText.heading),
+                      child: SmashLabel(':', style: SmashText.heading),
                     ),
                   ),
                 ],
@@ -536,7 +537,7 @@ class _Cell extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(
+                      child: SmashLabel(
                         text,
                         textAlign: TextAlign.center,
                         style: SmashText.bodyStrong,
@@ -683,7 +684,7 @@ class _TimeListState extends State<_TimeList> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Text(
+                            child: SmashLabel(
                               widget.labelOf(index),
                               style:
                                   (selected

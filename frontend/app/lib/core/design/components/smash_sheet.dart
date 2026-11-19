@@ -6,6 +6,7 @@ import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
 import 'smash_icon_button.dart';
+import 'smash_label.dart';
 
 /// 아래에서 올라오는 시트를 연다. 닫으면 null, [Navigator.pop]에 값을 넘기면 그 값이 돌아온다.
 ///
@@ -125,7 +126,7 @@ class SmashSheetFrame extends StatelessWidget {
                                   ? const SizedBox.shrink()
                                   : Semantics(
                                       header: true,
-                                      child: Text(
+                                      child: SmashLabel(
                                         title!,
                                         style: SmashText.heading,
                                       ),

@@ -6,6 +6,7 @@ import '../motion.dart';
 import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 import 'smash_pressable.dart';
 
 enum SmashButtonVariant { primary, secondary, text, danger }
@@ -67,7 +68,7 @@ class SmashButton extends StatelessWidget {
 
   Widget _buildFace(BuildContext context, Set<WidgetState> states) {
     final colors = _colorsFor(states);
-    final text = Text(
+    final text = SmashLabel(
       label,
       textAlign: TextAlign.center,
       style: SmashText.bodyStrong.copyWith(color: colors.foreground),

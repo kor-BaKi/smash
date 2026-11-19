@@ -5,6 +5,7 @@ import '../spacing.dart';
 import '../typography.dart';
 import 'smash_badge.dart';
 import 'smash_button.dart';
+import 'smash_label.dart';
 
 enum SmashNoticeTone { info, success, warning, danger }
 
@@ -69,8 +70,8 @@ class SmashInlineNotice extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (title != null) Text(title!, style: SmashText.bodyStrong),
-                        Text(message, style: SmashText.body),
+                        if (title != null) SmashLabel(title!, style: SmashText.bodyStrong),
+                        SmashLabel(message, style: SmashText.body),
                       ],
                     ),
                   ),

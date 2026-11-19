@@ -4,6 +4,7 @@ import '../colors.dart';
 import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 import 'smash_list_row.dart';
 import 'smash_pressable.dart';
 import 'smash_sheet.dart';
@@ -233,7 +234,7 @@ class _SmashSelectFieldState<T> extends State<SmashSelectField<T>> {
 }
 
 /// 이 파일의 글자 위젯은 여기서만 만든다 (한 곳에서 글자 정책을 바꿀 수 있게)
-Widget _text(String data, {TextStyle? style}) => Text(data, style: style);
+Widget _text(String data, {TextStyle? style}) => SmashLabel(data, style: style);
 
 /// 시트 안의 선택지 목록. 시트가 이미 스크롤되므로 `ListView`가 아니라 `Column`이다
 /// (`ListView`는 padding을 안 주면 화면의 안전 영역이 위아래 여백으로 새어 들어온다)

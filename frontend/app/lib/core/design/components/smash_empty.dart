@@ -5,6 +5,7 @@ import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
 import 'smash_button.dart';
+import 'smash_label.dart';
 
 /// 화면 가운데에 놓이는 안내 틀 (비어 있음, 오류에 함께 쓴다).
 /// 빈 화면은 "무엇이 없는지"와 "무엇을 하면 되는지"를 알려준다.
@@ -52,10 +53,10 @@ class SmashStateMessage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: SmashSpacing.md),
-            Text(title, textAlign: TextAlign.center, style: SmashText.heading),
+            SmashLabel(title, textAlign: TextAlign.center, style: SmashText.heading),
             if (message != null) ...[
               const SizedBox(height: SmashSpacing.xs),
-              Text(
+              SmashLabel(
                 message!,
                 textAlign: TextAlign.center,
                 style: SmashText.body.copyWith(color: SmashColors.textSecondary),

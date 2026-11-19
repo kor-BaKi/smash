@@ -4,6 +4,7 @@ import '../colors.dart';
 import '../no_char_break.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 /// [SmashTabBar]의 탭 하나. 개수를 보이려면 [badgeCount]를 넘긴다 (0도 보인다, null이면 없음).
 /// 개수는 라벨 오른쪽에 **숫자만** 보인다 (배경 모양 없음). 라벨과 8의 간격을 두고, 굵기는 고정이며(선택이 바뀌어도 폭이 변하지 않는다)
@@ -199,7 +200,7 @@ class SmashTabBar extends StatelessWidget {
 }
 
 /// 탭 글자는 한 줄이다 (줄바꿈하지 않는다). 글자 위젯은 여기서만 만든다 (라벨과 개수 숫자 두 곳)
-Widget _text(String data, {TextStyle? style}) => Text(
+Widget _text(String data, {TextStyle? style}) => SmashLabel(
   data,
   maxLines: 1,
   softWrap: false,

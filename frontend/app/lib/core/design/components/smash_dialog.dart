@@ -6,6 +6,7 @@ import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
 import 'smash_button.dart';
+import 'smash_label.dart';
 
 /// 가운데 뜨는 대화상자를 연다. [builder]에는 보통 [SmashDialog]를 돌려준다.
 /// 닫으면 null, [Navigator.pop]에 값을 넘기면 그 값이 돌아온다.
@@ -142,7 +143,7 @@ class SmashDialog extends StatelessWidget {
               children: [
                 Semantics(
                   header: true,
-                  child: Text(title, style: SmashText.heading),
+                  child: SmashLabel(title, style: SmashText.heading),
                 ),
                 if (message != null || content != null)
                   Flexible(
@@ -152,7 +153,7 @@ class SmashDialog extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           if (message != null)
-                            Text(message!, style: SmashText.body),
+                            SmashLabel(message!, style: SmashText.body),
                           if (message != null && content != null)
                             const SizedBox(height: SmashSpacing.md),
                           ?content,

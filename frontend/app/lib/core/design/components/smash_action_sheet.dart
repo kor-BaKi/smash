@@ -4,6 +4,7 @@ import '../colors.dart';
 import '../spacing.dart';
 import '../typography.dart';
 import 'smash_button.dart';
+import 'smash_label.dart';
 import 'smash_pressable.dart';
 import 'smash_sheet.dart';
 
@@ -80,7 +81,7 @@ Future<T?> showSmashActionSheet<T extends Object>({
 }
 
 /// 이 파일의 글자 위젯은 여기서만 만든다 (한 곳에서 글자 정책을 바꿀 수 있게)
-Widget _text(String data, {TextStyle? style}) => Text(data, style: style);
+Widget _text(String data, {TextStyle? style}) => SmashLabel(data, style: style);
 
 class _ActionRow<T extends Object> extends StatelessWidget {
   const _ActionRow({

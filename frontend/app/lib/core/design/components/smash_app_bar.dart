@@ -4,6 +4,7 @@ import '../colors.dart';
 import '../spacing.dart';
 import '../typography.dart';
 import 'smash_icon_button.dart';
+import 'smash_label.dart';
 import 'smash_system_ui.dart';
 
 /// 화면 위쪽 막대. 높이 56 (상태 표시줄 영역은 따로 더해진다), 그림자 없이 아래 선 하나.
@@ -74,7 +75,7 @@ class SmashAppBar extends StatelessWidget implements PreferredSizeWidget {
                     padding: const EdgeInsets.symmetric(horizontal: SmashSpacing.sm),
                     child: Semantics(
                       header: true,
-                      child: Text(
+                      child: SmashLabel(
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

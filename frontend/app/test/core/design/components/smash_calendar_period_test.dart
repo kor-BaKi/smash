@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../support/contrast.dart';
+import '../../../support/finders.dart';
 
 SmashCalendarPeriod p(
   int sm,
@@ -371,7 +372,7 @@ void main() {
     });
 
     group('띠 안의 제목', () {
-      Finder titleIn(Finder band) => find.descendant(of: band, matching: find.byType(Text));
+      Finder titleIn(Finder band) => find.descendant(of: band, matching: anyText());
 
       testWidgets('제목은 띠 안에 한 줄로 보이고 넘치면 말줄임이다 (글자 11, 흰색)', (tester) async {
         await tester.pumpWidget(host(calendar(periods: [p(11, 16, 11, 18, title: '뒤풀이 장소')])));
@@ -489,7 +490,7 @@ void main() {
           final bandFinder = band(1 + i * 4, 0);
           final color = decorationOf(tester, bandFinder).color!;
           colors.add(color);
-          final text = tester.widget<Text>(find.descendant(of: bandFinder, matching: find.byType(Text)));
+          final text = tester.widget<Text>(find.descendant(of: bandFinder, matching: anyText()));
           expect(contrastRatio(text.style!.color!, color), greaterThanOrEqualTo(4.5), reason: '$i번 색 위 흰 글자');
           expect(contrastRatio(color, SmashColors.surface), greaterThanOrEqualTo(3.0));
           expect(contrastRatio(color, SmashColors.brandTintSoft), greaterThanOrEqualTo(3.0));
@@ -729,7 +730,9 @@ void main() {
               expect(size.height, greaterThanOrEqualTo(48), reason: '$d일 높이');
               expect(size.width, greaterThanOrEqualTo(44), reason: '$d일 너비');
               // 날짜 숫자는 접히지 않고 한 줄이다
-              final paragraph = tester.renderObject<RenderParagraph>(find.text('$d'));
+              final paragraph = tester.renderObject<RenderParagraph>(
+                find.descendant(of: find.text('$d'), matching: find.byType(RichText)),
+              );
               expect(paragraph.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: '$d'.length)), hasLength(1), reason: '$d일 숫자가 두 줄로 접히지 않는다 (접히면 줄마다 상자가 생긴다)');
               expect(tester.getRect(find.text('$d')).right, lessThanOrEqualTo(tester.getRect(cell).right + 0.01), reason: '$d일 숫자가 칸 밖으로 나가지 않는다');
             }
@@ -741,9 +744,9 @@ void main() {
               expect(rect.right, lessThanOrEqualTo(calendarRect.right + 0.01));
               expect(rect.height, SmashCalendar.bandHeight);
               final color = (tester.widget<DecoratedBox>(finder).decoration as BoxDecoration).color!;
-              for (final text in tester.widgetList<Text>(find.descendant(of: finder, matching: find.byType(Text)))) {
+              for (final text in tester.widgetList<Text>(find.descendant(of: finder, matching: anyText()))) {
                 expect(contrastRatio(text.style!.color!, color), greaterThanOrEqualTo(4.5));
-                expect(tester.getSize(find.descendant(of: finder, matching: find.byType(Text))).height, lessThanOrEqualTo(SmashCalendar.bandHeight));
+                expect(tester.getSize(find.descendant(of: finder, matching: anyText())).height, lessThanOrEqualTo(SmashCalendar.bandHeight));
               }
             }
           });

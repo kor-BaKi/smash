@@ -6,6 +6,7 @@ import '../motion.dart';
 import '../radius.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 import 'smash_pressable.dart';
 
 /// 하단 탭 한 칸의 내용. 라벨은 항상 보인다 (아이콘만 두지 않는다).
@@ -152,7 +153,7 @@ class _NavItem extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: SmashSpacing.xs),
-                  Text(
+                  SmashLabel(
                     destination.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -189,7 +190,7 @@ class _Badge extends StatelessWidget {
             widthFactor: 1,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: Text(
+              child: SmashLabel(
                 text,
                 style: SmashText.caption.copyWith(
                   fontSize: 11,

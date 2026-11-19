@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../colors.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 /// 이름의 첫 글자를 보여주는 동그란 표시. 이름은 옆에 글자로 따로 있으므로 스크린리더는 읽지 않는다.
 ///
@@ -34,7 +35,7 @@ class SmashAvatar extends StatelessWidget {
             child: MediaQuery.withNoTextScaling(
               child: initial == null
                   ? Icon(Icons.person_outline, size: size * 0.55, color: SmashColors.brand)
-                  : Text(
+                  : SmashLabel(
                       initial,
                       style: SmashText.bodyStrong.copyWith(
                         fontSize: size * 0.4,

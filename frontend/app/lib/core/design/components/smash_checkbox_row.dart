@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../colors.dart';
 import '../spacing.dart';
 import '../typography.dart';
+import 'smash_label.dart';
 
 /// 체크박스 한 줄 (동의 항목 등). 줄 어디를 눌러도 바뀌고, 높이는 48dp 이상이다.
 /// 스크린리더는 "라벨, 선택됨/선택 안 됨"을 한 번에 읽는다.
@@ -73,9 +74,9 @@ class SmashCheckboxRow extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(label, style: SmashText.body.copyWith(color: textColor)),
+                          SmashLabel(label, style: SmashText.body.copyWith(color: textColor)),
                           if (description != null)
-                            Text(
+                            SmashLabel(
                               description!,
                               style: SmashText.caption.copyWith(
                                 color: _enabled

@@ -6,6 +6,7 @@ import '../spacing.dart';
 import '../typography.dart';
 import 'smash_button.dart';
 import 'smash_calendar.dart';
+import 'smash_label.dart';
 import 'smash_sheet.dart';
 
 /// 날짜 하나를 고르는 달력 본체 (시트 껍데기 없음). [showSmashDatePicker]가 시트 안에 넣어 쓰고,
@@ -184,7 +185,7 @@ class _DatePickerSheetBodyState extends State<_DatePickerSheetBody> {
         Semantics(
           liveRegion: true,
           container: true,
-          child: Text(
+          child: SmashLabel(
             selected == null
                 ? '날짜를 선택해 주세요'
                 : '선택한 날짜: ${KoDateFormat.date(selected, now: widget.today)}',
