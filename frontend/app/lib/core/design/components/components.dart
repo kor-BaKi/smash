@@ -23,6 +23,7 @@ export 'smash_inline_notice.dart';
 export 'smash_label.dart';
 export 'smash_list_row.dart';
 export 'smash_panel.dart';
+export 'smash_participation_buttons.dart';
 export 'smash_password_field.dart';
 export 'smash_pressable.dart';
 export 'smash_scaffold.dart';

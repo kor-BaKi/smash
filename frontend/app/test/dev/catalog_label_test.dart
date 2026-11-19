@@ -27,9 +27,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  test('SmashLabel은 목록 맨 아래에 붙어 있고 직접 눌러 보기 상태가 있으며 상태 이름이 중복되지 않는다', () {
-    expect(catalogEntries.last.name, 'SmashLabel');
-    final labels = catalogEntries.last.states.map((s) => s.label).toList();
+  test('SmashLabel은 목록에 있고 직접 눌러 보기 상태가 있으며 상태 이름이 중복되지 않는다 (이후 단계의 항목은 그 뒤에 붙는다)', () {
+    final entry = catalogEntries.firstWhere((e) => e.name == 'SmashLabel');
+    final labels = entry.states.map((s) => s.label).toList();
     expect(labels, contains(interactiveStateLabel));
     expect(labels.toSet().length, labels.length);
   });

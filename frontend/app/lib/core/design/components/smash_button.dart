@@ -22,6 +22,8 @@ void _doNothing() {}
 /// - 로딩: [isLoading]이 true이면 글자 대신 진행 표시를 보이고 누름을 무시한다.
 ///   크기는 그대로라서 화면이 흔들리지 않는다. (요청이 시작되기 전에는 비활성으로 만들지 않는다)
 /// - 글자 크기를 키우면 높이가 늘어난다 (줄어들지 않는다)
+/// - [semanticLabel]을 주면 스크린리더가 글자 대신 그 말을 읽는다 (로딩 중에는 뒤에 ", 처리 중"이 붙는다)
+/// - [horizontalPadding]은 글자 좌우 여백이다 (기본 24). 한 줄에 여러 개를 놓는 좁은 자리에서만 줄인다
 class SmashButton extends StatelessWidget {
   const SmashButton({
     super.key,
@@ -34,7 +36,9 @@ class SmashButton extends StatelessWidget {
     this.expanded = true,
     this.haptic,
     this.autofocus = false,
-  });
+    this.semanticLabel,
+    this.horizontalPadding = SmashSpacing.lg,
+  }) : assert(horizontalPadding >= 0);
 
   final String label;
   final VoidCallback? onPressed;
@@ -50,6 +54,12 @@ class SmashButton extends StatelessWidget {
   /// true이면 화면이 열릴 때 이 버튼에 포커스가 간다 (위험한 확인 대화상자에서 취소 버튼에 쓴다)
   final bool autofocus;
 
+  /// 스크린리더가 읽는 말 (null이면 [label])
+  final String? semanticLabel;
+
+  /// 글자 좌우 여백
+  final double horizontalPadding;
+
   double get _minHeight => size == SmashButtonSize.large ? 52 : 48;
 
   @override
@@ -59,7 +69,7 @@ class SmashButton extends StatelessWidget {
       haptic: isLoading ? null : haptic, // 로딩 중 누름은 무시하므로 햅틱도 없다
       borderRadius: SmashRadius.circular(SmashRadius.md),
       minSize: Size(SmashSpacing.minTouchTarget, _minHeight),
-      semanticLabel: isLoading ? '$label, 처리 중' : null,
+      semanticLabel: isLoading ? '${semanticLabel ?? label}, 처리 중' : semanticLabel,
       autofocus: autofocus,
       builder: _buildFace,
     );
@@ -90,8 +100,8 @@ class SmashButton extends StatelessWidget {
       curve: SmashMotion.easeOut,
       constraints: BoxConstraints(minHeight: _minHeight),
       // 세로 여백은 8: 글자 24 + 여백 16 + 테두리 2 = 42라서 최소 높이(48, 52)가 높이를 정한다
-      padding: const EdgeInsets.symmetric(
-        horizontal: SmashSpacing.lg,
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
         vertical: SmashSpacing.sm,
       ),
       decoration: BoxDecoration(

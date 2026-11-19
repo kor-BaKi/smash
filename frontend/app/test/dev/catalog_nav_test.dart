@@ -36,7 +36,7 @@ void main() {
     final start = all.indexOf(names.first);
     expect(start, greaterThanOrEqualTo(0));
     expect(all.sublist(start, start + 3), names);
-    expect(all.sublist(start + 3), everyElement(isIn(const ['SmashLabel'])), reason: '이 세 개 뒤에는 SmashLabel만 있다 (새 컴포넌트는 맨 아래에 붙는다)');
+    expect(all.sublist(start + 3), everyElement(isIn(const ['SmashLabel', 'SmashParticipationButtons'])), reason: '이 세 개 뒤에는 이후 단계에서 붙은 항목만 있다 (새 컴포넌트는 맨 아래에 붙는다)');
   });
 
   test('세 컴포넌트 모두 직접 눌러 보기 상태를 가지고, 상태 이름이 중복되지 않는다', () {
