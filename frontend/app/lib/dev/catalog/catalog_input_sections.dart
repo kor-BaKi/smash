@@ -196,8 +196,76 @@ final segmentedEntry = CatalogEntry(
         onChanged: (_) {},
       ),
     ),
+    CatalogState(
+      '2×2 전환 (조각 4개, 폭 320, 글자 2.0배)',
+      (_) => _fixedWidth(_attendanceFour(), width: 320, textScale: 2.0),
+    ),
+    CatalogState(
+      '세로 전환 (조각 4개, 긴 낱말, 폭 320, 글자 2.0배)',
+      (_) => _fixedWidth(_attendanceFour(labels: _longWords), width: 320, textScale: 2.0),
+    ),
+    CatalogState(
+      '폭 슬라이더로 줄여 보기 (직접 눌러 보기)',
+      (_) => CatalogStateHost<({double width, int selected})>(
+        initial: (width: 360, selected: 1),
+        describe: (value) => '폭 ${value.width.round()}, 선택 ${_longWords[value.selected]}',
+        builder: (context, value, onChanged) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Slider(
+              min: 160,
+              max: 360,
+              divisions: 20,
+              value: value.width,
+              label: '${value.width.round()}',
+              onChanged: (width) => onChanged((width: width, selected: value.selected)),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                width: value.width,
+                child: _attendanceFour(
+                  labels: _longWords,
+                  selected: value.selected,
+                  onChanged: (selected) => onChanged((width: value.width, selected: selected)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
   ],
 );
+
+const _normalWords = ['정규 참여', '이월 참여', '다른 조 참여', '불참 신청'];
+const _longWords = ['정규참여', '이월참여신청', '다른조참여', '불참신청'];
+
+Widget _attendanceFour({
+  List<String> labels = _normalWords,
+  int selected = 0,
+  ValueChanged<int>? onChanged,
+}) {
+  return SmashSegmentedControl<int>(
+    semanticLabel: '참석 구분',
+    segments: [for (var i = 0; i < labels.length; i++) SmashSegment(value: i, label: labels[i])],
+    selected: selected,
+    onChanged: onChanged ?? (_) {},
+  );
+}
+
+/// 폭과 글자 배율을 정해서 보여준다 (블록의 글자 배율과 상관없이 같은 모습)
+Widget _fixedWidth(Widget child, {required double width, required double textScale}) {
+  return Builder(
+    builder: (context) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(width: width, child: child),
+      ),
+    ),
+  );
+}
 
 void _noop(bool _) {}
 
