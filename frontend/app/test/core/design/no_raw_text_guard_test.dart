@@ -57,6 +57,17 @@ void main() {
       },
     );
 
+    test('옛 테마 사용을 찾는다 (AppColors, core/theme import)', () {
+      expect(oldThemeUses("final c = AppColors.bg;"), isNotEmpty);
+      expect(oldThemeUses("color: AppColors.white,"), isNotEmpty);
+      expect(oldThemeUses("import '../../../core/theme/app_theme.dart';"), isNotEmpty);
+      expect(oldThemeUses("import 'package:app/core/theme/app_colors.dart';"), isNotEmpty);
+      expect(oldThemeUses('final c = SmashColors.brand;'), isEmpty);
+      expect(oldThemeUses('final MyAppColors = 1;'), isEmpty, reason: '다른 이름의 일부는 찾지 않는다');
+      expect(oldThemeUses('// AppColors는 쓰지 않는다'), isEmpty, reason: '주석은 제외');
+      expect(oldThemeUses("final s = 'AppColors.bg';"), isEmpty, reason: '문자열 안은 제외');
+    });
+
     test('주석, 문서 주석, 블록 주석, 문자열 안은 제외한다', () {
       expect(count("// Text('가')"), 0);
       expect(count("/// `Text(...)`를 쓰지 않는다"), 0);
@@ -132,7 +143,55 @@ void main() {
       },
     );
   });
+
+  /// 새 디자인(SmashTheme, 컴포넌트)으로 옮긴 화면 파일. 화면을 옮길 때마다(S단계) 여기에 더한다.
+  /// 이 화면들은 날 `Text(`/`RichText(`와 옛 색(`AppColors`), 옛 테마(`core/theme`)를 쓰지 않는다.
+  const migratedScreens = <String>[
+    'lib/features/auth/page/login_page.dart', // S1a
+  ];
+
+  group('교체한 화면 소스 전수 조사', () {
+    test('목록의 파일이 실제로 있다 (이름이 바뀌어 검사가 비게 되는 것을 막는다)', () {
+      for (final path in migratedScreens) {
+        expect(File(path).existsSync(), isTrue, reason: path);
+      }
+    });
+
+    test('날 Text(, Text.rich(, Text.new, RichText(을 쓰지 않는다 (글자는 SmashLabel로)', () {
+      final offenders = <String>[
+        for (final path in migratedScreens)
+          if (rawTextCalls(File(path).readAsStringSync()).isNotEmpty) path,
+      ];
+      expect(offenders, isEmpty, reason: offenders.join('\n'));
+    });
+
+    test('옛 AppColors와 core/theme를 쓰지 않는다 (색은 SmashColors 토큰으로)', () {
+      final offenders = <String>[
+        for (final path in migratedScreens)
+          for (final m in oldThemeUses(File(path).readAsStringSync()))
+            '$path: ${m.group(0)}',
+      ];
+      expect(offenders, isEmpty, reason: offenders.join('\n'));
+    });
+  });
 }
+
+/// 소스에서 옛 테마 사용(`AppColors` 이름, `core/theme/` import)을 찾는다. 주석과 문자열 안은 제외하지만
+/// import 경로는 문자열이라서 따로 본다
+List<RegExpMatch> oldThemeUses(String source) {
+  final code = stripCommentsAndStrings(source);
+  final names = RegExp(r'(?<![A-Za-z0-9_$])AppColors\b').allMatches(code);
+  final imports = RegExp(
+    r'''^\s*(?:import|export)\s+['"][^'"]*core/theme/[^'"]*['"]''',
+    multiLine: true,
+  ).allMatches(_withoutComments(source));
+  return [...names, ...imports];
+}
+
+/// 주석만 지운다 (문자열은 남긴다)
+String _withoutComments(String source) => source
+    .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '')
+    .replaceAll(RegExp(r'^\s*//.*$', multiLine: true), '');
 
 /// 소스에서 주석과 문자열 리터럴을 지운다 (줄 수는 유지한다)
 String stripCommentsAndStrings(String source) {

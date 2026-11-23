@@ -1,0 +1,192 @@
+import 'dart:io';
+
+import 'package:app/core/design/components/components.dart';
+import 'package:app/dev/screens/login_screen_states.dart';
+import 'package:app/dev/screens/screen_conditions.dart';
+import 'package:app/dev/screens/screen_gallery_app.dart';
+import 'package:app/dev/screens/screen_registry.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+import '../support/screen_pump.dart';
+
+/// 화면 상태 갤러리: 등록 규칙, 화면 열기, 조건 바꾸기, 가짜 서버로 직접 눌러 보기
+void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('ko_KR', null);
+    await loadPretendard();
+  });
+
+  group('등록 목록 점검 (화면이 늘어나도 계속 지켜져야 하는 규칙)', () {
+    test('화면 이름이 중복되지 않고 경로는 /로 시작한다', () {
+      final names = screenGalleryEntries.map((e) => e.name).toList();
+      expect(names, isNotEmpty);
+      expect(names.toSet().length, names.length);
+      for (final e in screenGalleryEntries) {
+        expect(e.path, startsWith('/'), reason: e.name);
+        expect(e.states, isNotEmpty, reason: e.name);
+        expect(
+          e.states.map((s) => s.label).toSet().length,
+          e.states.length,
+          reason: '${e.name}: 상태 이름 중복',
+        );
+      }
+    });
+
+    test('로그인 화면은 계획한 5가지 상태와 직접 눌러 보기를 가진다', () {
+      final labels = loginScreenEntry.states.map((s) => s.label).toList();
+      expect(labels.take(5), [
+        '초기',
+        '입력 오류',
+        '제출 중',
+        '서버·네트워크 오류',
+        '제한·불가 (시도 횟수 초과)',
+      ]);
+      expect(labels.last, startsWith('직접 눌러 보기'));
+      expect(loginScreenEntry.stubPaths, containsAll(['/signup', '/home']));
+    });
+
+    test('갤러리의 로그인 실패 문구는 AuthNotifier가 실제로 쓰는 문구와 같다', () {
+      final source = File(
+        'lib/features/home/provider/auth_provider.dart',
+      ).readAsStringSync();
+      for (final message in [
+        loginNetworkErrorMessage,
+        loginTooManyMessage,
+        loginFailedMessage,
+      ]) {
+        expect(source, contains("'$message'"), reason: message);
+      }
+    });
+  });
+
+  group('ScreenHost: 조건이 화면에 실제로 전달된다', () {
+    testWidgets('폭 320, 글자 2.0배, 키보드 300: 글자 배율, 키보드 높이, 안전 영역, 본문 높이', (
+      tester,
+    ) async {
+      const c = ScreenConditions(
+        width: 320,
+        textScale: 2.0,
+        keyboardHeight: 300,
+      );
+      await pumpScreen(
+        tester,
+        loginScreenEntry,
+        loginScreenEntry.states.first,
+        conditions: c,
+      );
+
+      final media = MediaQuery.of(
+        tester.element(find.byType(SingleChildScrollView)),
+      );
+      expect(media.textScaler.scale(10), 20);
+      // 본문 쪽 MediaQuery는 Scaffold가 키보드 높이를 이미 뺀 값이다: 본문 높이로 확인한다
+      final body = tester.getSize(find.byType(SingleChildScrollView));
+      expect(body.width, 320);
+      expect(
+        body.height,
+        c.height - 300 - ScreenConditions.safeTop,
+        reason: '키보드 위, 상태 표시줄 아래',
+      );
+      expect(
+        tester.getTopLeft(find.byType(SingleChildScrollView)).dy,
+        ScreenConditions.safeTop,
+      );
+    });
+
+    testWidgets('키보드가 없으면 아래 안전 영역(34)만큼 비운다', (tester) async {
+      const c = ScreenConditions(width: 360);
+      await pumpScreen(
+        tester,
+        loginScreenEntry,
+        loginScreenEntry.states.first,
+        conditions: c,
+      );
+      final body = tester.getSize(find.byType(SingleChildScrollView));
+      expect(
+        body.height,
+        c.height - ScreenConditions.safeTop - ScreenConditions.safeBottom,
+      );
+    });
+
+    test('기기 높이는 폭에 맞춰 568, 640, 844다', () {
+      expect(const ScreenConditions(width: 320).height, 568);
+      expect(const ScreenConditions(width: 360).height, 640);
+      expect(const ScreenConditions(width: 390).height, 844);
+    });
+  });
+
+  group('갤러리 앱', () {
+    Future<void> open(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(420, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(const ScreenGalleryApp());
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('화면 목록 → 상태 목록 → 상태 화면으로 들어가 조건을 바꿔도 오류가 없다', (tester) async {
+      await open(tester);
+      await tester.tap(find.text('로그인 (S1a)'));
+      await tester.pumpAndSettle();
+      for (final label in loginScreenEntry.states.map((s) => s.label)) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+
+      await tester.tap(find.text('서버·네트워크 오류'));
+      await tester.pumpAndSettle();
+      expect(find.text(loginNetworkErrorMessage), findsOneWidget);
+
+      for (final label in [
+        '폭 320',
+        '폭 390',
+        '글자 2.0배',
+        '글자 1.3배',
+        '키보드 올라온 모양',
+        '키보드 올라온 모양',
+      ]) {
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+      }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('입력 오류 상태: 안내가 있고, 빈 칸으로 로그인을 누르면 안내가 뜬다', (tester) async {
+      await open(tester);
+      await tester.tap(find.text('로그인 (S1a)'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('두 칸을 비운 채'),
+        findsOneWidget,
+        reason: '목록에 해야 할 일이 적혀 있다',
+      );
+      await tester.tap(find.text('입력 오류'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(SmashButton, '로그인'));
+      await tester.pumpAndSettle();
+      expect(find.text('학번을 입력해주세요.'), findsOneWidget);
+    });
+
+    testWidgets('직접 눌러 보기: 가짜 서버가 2초 뒤에 학번에 따라 결과를 돌려준다', (tester) async {
+      await open(tester);
+      await tester.tap(find.text('로그인 (S1a)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('직접 눌러 보기').first);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).at(0), '2');
+      await tester.enterText(find.byType(TextField).at(1), 'pw');
+      await tester.tap(find.widgetWithText(SmashButton, '로그인'));
+      await tester.pump();
+      expect(
+        find.text(loginTooManyMessage),
+        findsNothing,
+        reason: '아직 응답 전(제출 중)',
+      );
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump();
+      expect(find.text(loginTooManyMessage), findsOneWidget);
+    });
+  });
+}
