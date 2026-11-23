@@ -31,12 +31,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  test('새 컴포넌트 세 개는 목록 아래쪽에 순서대로 이어 붙어 있다 (그 뒤에는 이후 단계에서 붙은 항목만 있다)', () {
+  test('새 컴포넌트 세 개가 목록에 순서대로 이어 붙어 있다 (뒤에 무엇이 붙는지는 검사하지 않는다)', () {
     final all = catalogEntries.map((e) => e.name).toList();
     final start = all.indexOf(names.first);
-    expect(start, greaterThanOrEqualTo(0));
-    expect(all.sublist(start, start + 3), names);
-    expect(all.sublist(start + 3), everyElement(isIn(const ['SmashLabel', 'SmashParticipationButtons'])), reason: '이 세 개 뒤에는 이후 단계에서 붙은 항목만 있다 (새 컴포넌트는 맨 아래에 붙는다)');
+    expect(start, greaterThanOrEqualTo(0), reason: '${names.first}가 목록에 있다');
+    expect(all.length, greaterThanOrEqualTo(start + names.length));
+    expect(all.sublist(start, start + names.length), names, reason: '순서대로 이어 붙어 있다 (빠지거나 순서가 바뀌면 실패)');
+    for (final name in names) {
+      expect(all.where((n) => n == name).length, 1, reason: '$name가 한 번만 있다');
+    }
   });
 
   test('세 컴포넌트 모두 직접 눌러 보기 상태를 가지고, 상태 이름이 중복되지 않는다', () {

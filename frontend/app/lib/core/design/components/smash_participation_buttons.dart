@@ -13,7 +13,7 @@ import 'smash_button.dart';
 enum SmashParticipationAction {
   attend('참여', '참여, 이 활동에 참여'),
   absent('불참', '불참, 이 활동에 불참'),
-  carryover('이월', '이월, 이월할 날짜를 고르기'),
+  carryover('이월', '이월, 이월할 날짜 고르기'),
   otherGroup('타조참', '타조참, 다른 조 활동에 참여');
 
   const SmashParticipationAction(this.label, this.readAs);
@@ -35,6 +35,9 @@ enum SmashParticipationAction {
 /// - **처리 중**: [onAction]이 `Future`를 돌려주면 끝날 때까지 그 버튼은 진행 표시를 보이고 모든 버튼의 누름이 무시된다
 ///   (더블 탭, 다른 버튼 연타로 응답이 두 번 가지 않는다). 화면이 요청을 직접 관리한다면 [loadingAction]으로 같은 상태를 보인다
 /// - **비활성**: [onAction]이 null이거나 [enabled]가 false이면 모든 버튼이 비활성이다
+///
+/// - **이월처럼 시트를 여는 동작은 `Future`를 돌려주지 말고 동기로 열거나, [loadingAction]을 서버 호출 구간에만 쓴다.**
+///   시트가 닫힐 때까지 `Future`를 기다리면 그동안 버튼이 처리 중으로 잠긴다
 ///
 /// 행 수가 적은 고정 영역에만 쓴다 ([SmashAdaptiveRow]의 제한과 같다).
 class SmashParticipationButtons extends StatefulWidget {

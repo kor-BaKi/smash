@@ -600,7 +600,7 @@ void main() {
       }
       expect(SmashParticipationAction.attend.readAs, '참여, 이 활동에 참여');
       expect(SmashParticipationAction.absent.readAs, '불참, 이 활동에 불참');
-      expect(SmashParticipationAction.carryover.readAs, '이월, 이월할 날짜를 고르기');
+      expect(SmashParticipationAction.carryover.readAs, '이월, 이월할 날짜 고르기');
       expect(SmashParticipationAction.otherGroup.readAs, '타조참, 다른 조 활동에 참여');
       expect([for (final a in all4) a.label], ['참여', '불참', '이월', '타조참']);
       handle.dispose();
