@@ -35,6 +35,7 @@ export 'smash_select_field.dart';
 export 'smash_sheet.dart';
 export 'smash_skeleton.dart';
 export 'smash_snack_bar.dart';
+export 'smash_step_indicator.dart';
 export 'smash_switch_row.dart';
 export 'smash_system_ui.dart';
 export 'smash_tab_bar.dart';

@@ -12,6 +12,7 @@ import 'catalog_photo_sections.dart';
 import 'catalog_poll_option_sections.dart';
 import 'catalog_sections.dart';
 import 'catalog_state_sections.dart';
+import 'catalog_step_sections.dart';
 import 'catalog_time_sections.dart';
 
 /// 카탈로그에 올라간 컴포넌트 목록.
@@ -58,4 +59,5 @@ final List<CatalogEntry> catalogEntries = [
   participationButtonsEntry,
   pollOptionRowEntry,
   photoTileEntry,
+  stepIndicatorEntry,
 ];
