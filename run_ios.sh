@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ~/Desktop/project/smash/frontend/app
+cd "$(dirname "$0")/frontend/app"
 
 flutter pub get
 
