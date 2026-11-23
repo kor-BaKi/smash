@@ -10,7 +10,10 @@ import 'features/auth/page/signup_page.dart';
 import 'features/home/provider/auth_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  // 로그인 여부만 구독한다. authProvider 전체를 구독하면 요청 중(isLoading)이나 오류 문구가 바뀔 때마다
+  // 라우터가 새로 만들어져 시작 경로(/login)로 돌아가고, 지금 화면이 다시 만들어져 입력이 사라진다.
+  // (redirect가 읽는 값은 로그인 여부뿐이다)
+  final isLoggedIn = ref.watch(authProvider.select((state) => state.isLoggedIn));
   // ref : riberpod의 모든 Provider에게 접근할 수 있는 통로
   // ref.watch(provider) : 상태를 구독. 그 상태가 바뀌면 이 위젯이 자동으로 다시 빌드
   // ref.read(provider.notifier) : 상태를 구독하지 않고 메서드만 호출. 버튼 클릭 같은 이벤트 핸들러 안에서 사용
@@ -18,7 +21,6 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/login', // 앱 처음 실행 시 보여줄 경로
     redirect: (context, state) {
-      final isLoggedIn = authState.isLoggedIn;
       final isLoginPage = state.matchedLocation == '/login';
       final isSignupPage = state.matchedLocation == '/signup';
 
