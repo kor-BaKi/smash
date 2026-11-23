@@ -8,6 +8,7 @@ import 'catalog_label_sections.dart';
 import 'catalog_nav_sections.dart';
 import 'catalog_overlay_sections.dart';
 import 'catalog_participation_sections.dart';
+import 'catalog_photo_sections.dart';
 import 'catalog_poll_option_sections.dart';
 import 'catalog_sections.dart';
 import 'catalog_state_sections.dart';
@@ -56,4 +57,5 @@ final List<CatalogEntry> catalogEntries = [
   labelEntry,
   participationButtonsEntry,
   pollOptionRowEntry,
+  photoTileEntry,
 ];
