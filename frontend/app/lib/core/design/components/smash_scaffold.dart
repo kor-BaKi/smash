@@ -5,7 +5,7 @@ import 'smash_system_ui.dart';
 
 /// 모든 화면의 바탕. 배경색, 상태 표시줄 모양, 안전 영역, 키보드 처리를 한 곳에서 정한다.
 ///
-/// - [appBar]가 있으면 위쪽 안전 영역은 앱바가 처리하고, 없으면 본문이 피한다
+/// - [appBar]가 있으면 위쪽 안전 영역은 앱바가 처리하고(본문 안쪽의 `MediaQuery.padding` 위쪽은 0), 없으면 본문이 피한다
 /// - [bottom]에는 [SmashBottomBar]나 [SmashBottomNav]를 넣는다. 화면 폭 전체로 펼쳐지고,
 ///   키보드가 올라오면 키보드 위로 올라가며, 스낵바는 이 막대 위에 뜬다
 ///   (탭 막대를 키보드 위에 두고 싶지 않으면 [SmashTabShell]을 쓴다)
@@ -57,14 +57,15 @@ class SmashScaffold extends StatelessWidget {
           child: SafeArea(
             top: appBar == null,
             bottom: !hasBottom,
-            // 막대가 아래 안전 영역(홈 인디케이터)을 이미 맡고 있으므로 본문은 그 값을 받지 않는다.
-            // (위의 removeViewInsets가 바깥 MediaQuery로 다시 만들기 때문에, Scaffold가 지워 둔 아래 값이 되살아나 있다.)
-            // 받으면 본문 안의 SafeArea나 ListView의 기본 여백이 같은 영역을 또 비운다. 위쪽은 건드리지 않는다
-            child: hasBottom
+            // 위쪽은 앱바가, 아래쪽은 막대가 안전 영역을 이미 맡고 있으므로 본문은 그 값을 받지 않는다.
+            // (위의 removeViewInsets가 바깥 MediaQuery로 다시 만들기 때문에, Scaffold가 지워 둔 값이 되살아나 있다.)
+            // 받으면 본문 안의 SafeArea나 ListView의 기본 여백이 같은 영역을 또 비운다
+            child: (appBar != null || hasBottom)
                 ? Builder(
                     builder: (inner) => MediaQuery.removePadding(
                       context: inner,
-                      removeBottom: true,
+                      removeTop: appBar != null,
+                      removeBottom: hasBottom,
                       child: body,
                     ),
                   )

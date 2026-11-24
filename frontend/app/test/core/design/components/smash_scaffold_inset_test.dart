@@ -74,15 +74,22 @@ void main() {
       },
     );
 
-    testWidgets('하단 막대 + 앱바: 아래는 0이고 위쪽은 그대로다 (바뀌지 않는다)', (tester) async {
-      final seen = _Seen();
-      await _pump(
-        tester,
-        SmashScaffold(appBar: _appBar, body: _probe(seen), bottom: _bar),
-      );
-      expect(seen.padding!.bottom, 0);
-      expect(seen.padding!.top, _top, reason: '위쪽 안전 영역 처리는 이번에 바꾸지 않았다');
-    });
+    testWidgets(
+      '하단 막대 + 앱바: 위쪽도 아래쪽도 0이다 (앱바가 상태 표시줄 영역을, 막대가 홈 인디케이터 영역을 맡는다)',
+      (tester) async {
+        final seen = _Seen();
+        await _pump(
+          tester,
+          SmashScaffold(appBar: _appBar, body: _probe(seen), bottom: _bar),
+        );
+        expect(seen.padding!.bottom, 0);
+        expect(
+          seen.padding!.top,
+          0,
+          reason: '앱바가 이미 비운 위쪽 안전 영역을 본문이 또 받지 않는다',
+        );
+      },
+    );
 
     testWidgets('하단 막대가 없으면(앱바 없음): 기존과 같다 (본문이 안전 영역을 피하고 안쪽은 0)', (
       tester,
@@ -92,12 +99,12 @@ void main() {
       expect(seen.padding, EdgeInsets.zero);
     });
 
-    testWidgets('하단 막대가 없으면(앱바 있음): 기존과 같다 (위는 그대로, 아래는 본문이 피해서 0)', (
+    testWidgets('하단 막대가 없으면(앱바 있음): 위쪽은 앱바가 맡아 0이고 아래쪽은 본문이 피해서 0이다', (
       tester,
     ) async {
       final seen = _Seen();
       await _pump(tester, SmashScaffold(appBar: _appBar, body: _probe(seen)));
-      expect(seen.padding!.top, _top);
+      expect(seen.padding!.top, 0);
       expect(seen.padding!.bottom, 0);
     });
 
@@ -208,6 +215,150 @@ void main() {
       await tester.pumpAndSettle();
       final last = tester.getRect(find.byKey(const ValueKey('item29')));
       expect(last.bottom, _size.height - _bottom);
+    });
+  });
+
+  group('앱바가 있을 때 본문 안의 SafeArea와 ListView는 위를 또 비우지 않는다', () {
+    testWidgets(
+      '본문 안의 SafeArea: 본문은 앱바 바로 아래에서 시작한다 (상태 표시줄 높이가 두 번 비워지지 않는다)',
+      (tester) async {
+        await _pump(
+          tester,
+          const SmashScaffold(
+            appBar: _appBar,
+            body: SafeArea(child: SizedBox.expand(key: ValueKey('inner'))),
+          ),
+        );
+        final inner = tester.getRect(find.byKey(const ValueKey('inner')));
+        final appBar = tester.getRect(find.byType(SmashAppBar));
+        expect(inner.top, appBar.bottom);
+      },
+    );
+
+    testWidgets('기본 여백의 ListView: 첫 항목이 앱바 바로 아래에 있다 (막대 없음)', (tester) async {
+      await _pump(
+        tester,
+        SmashScaffold(
+          appBar: _appBar,
+          body: ListView(
+            children: [
+              for (var i = 0; i < 5; i++)
+                SizedBox(key: ValueKey('item$i'), height: 80),
+            ],
+          ),
+        ),
+      );
+      final first = tester.getRect(find.byKey(const ValueKey('item0')));
+      expect(first.top, tester.getRect(find.byType(SmashAppBar)).bottom);
+    });
+
+    testWidgets(
+      '기본 여백의 ListView: 앱바와 막대가 둘 다 있어도 첫 항목은 앱바 바로 아래, 끝 항목은 막대 바로 위다',
+      (tester) async {
+        await _pump(
+          tester,
+          SmashScaffold(
+            appBar: _appBar,
+            bottom: _bar,
+            body: ListView(
+              children: [
+                for (var i = 0; i < 30; i++)
+                  SizedBox(key: ValueKey('item$i'), height: 80),
+              ],
+            ),
+          ),
+        );
+        final appBar = tester.getRect(find.byType(SmashAppBar));
+        expect(
+          tester.getRect(find.byKey(const ValueKey('item0'))).top,
+          appBar.bottom,
+        );
+        await tester.drag(find.byType(ListView), const Offset(0, -5000));
+        await tester.pumpAndSettle();
+        expect(
+          tester.getRect(find.byKey(const ValueKey('item29'))).bottom,
+          tester.getRect(find.byKey(const ValueKey('bar'))).top,
+        );
+      },
+    );
+
+    testWidgets(
+      '앱바가 없으면 기존과 같다: 본문 안의 SafeArea는 위를 비우지 않고(본문이 이미 피했다) 시작 위치는 안전 영역 아래다',
+      (tester) async {
+        await _pump(
+          tester,
+          const SmashScaffold(
+            body: SafeArea(child: SizedBox.expand(key: ValueKey('inner'))),
+          ),
+        );
+        expect(tester.getRect(find.byKey(const ValueKey('inner'))).top, _top);
+      },
+    );
+  });
+
+  group('앱바가 있을 때 위치와 키보드는 바뀌지 않는다', () {
+    testWidgets('본문은 앱바 바로 아래에서 시작하고 막대 없음이면 아래 안전 영역 위에서 끝난다', (tester) async {
+      await _pump(
+        tester,
+        SmashScaffold(appBar: _appBar, body: _probe(_Seen())),
+      );
+      final body = tester.getRect(find.byKey(const ValueKey('body')));
+      expect(body.top, tester.getRect(find.byType(SmashAppBar)).bottom);
+      expect(body.bottom, _size.height - _bottom);
+    });
+
+    testWidgets('앱바 + 막대: 본문은 앱바 아래에서 막대 위까지다', (tester) async {
+      await _pump(
+        tester,
+        SmashScaffold(appBar: _appBar, body: _probe(_Seen()), bottom: _bar),
+      );
+      final body = tester.getRect(find.byKey(const ValueKey('body')));
+      expect(body.top, tester.getRect(find.byType(SmashAppBar)).bottom);
+      expect(
+        body.bottom,
+        tester.getRect(find.byKey(const ValueKey('bar'))).top,
+      );
+    });
+
+    testWidgets('키보드가 올라와도 본문이 받는 키보드 높이는 기존과 같다 (막대 없음은 그대로 전달, 막대 있음은 0)', (
+      tester,
+    ) async {
+      final withoutBar = _Seen();
+      await _pump(
+        tester,
+        SmashScaffold(appBar: _appBar, body: _probe(withoutBar)),
+        keyboard: 300,
+      );
+      expect(withoutBar.viewInsets!.bottom, 300);
+
+      final withBar = _Seen();
+      await _pump(
+        tester,
+        SmashScaffold(appBar: _appBar, body: _probe(withBar), bottom: _bar),
+        keyboard: 300,
+      );
+      expect(withBar.viewInsets!.bottom, 0);
+    });
+  });
+
+  group('SmashTabShell 앱바', () {
+    testWidgets('앱바를 넘기면 본문 안쪽의 위쪽 안전 영역도 0이다', (tester) async {
+      final seen = _Seen();
+      await _pump(
+        tester,
+        SmashTabShell(
+          destinations: const [
+            SmashNavDestination(label: '하나', icon: Icons.home_outlined),
+            SmashNavDestination(label: '둘', icon: Icons.circle_outlined),
+          ],
+          selectedIndex: 0,
+          onSelected: (_) {},
+          appBar: _appBar,
+          body: _probe(seen),
+        ),
+      );
+      expect(seen.padding!.top, 0);
+      expect(seen.padding!.bottom, 0);
     });
   });
 
