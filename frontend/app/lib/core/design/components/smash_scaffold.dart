@@ -9,7 +9,8 @@ import 'smash_system_ui.dart';
 /// - [bottom]에는 [SmashBottomBar]나 [SmashBottomNav]를 넣는다. 화면 폭 전체로 펼쳐지고,
 ///   키보드가 올라오면 키보드 위로 올라가며, 스낵바는 이 막대 위에 뜬다
 ///   (탭 막대를 키보드 위에 두고 싶지 않으면 [SmashTabShell]을 쓴다)
-/// - 본문 아래 안전 영역은 [bottom]이 없을 때만 본문이 피한다
+/// - 본문 아래 안전 영역은 [bottom]이 없을 때만 본문이 피한다. [bottom]이 있으면 막대가 맡으므로 본문 안쪽의 `MediaQuery.padding` 아래쪽도 0이다
+///   (본문 안의 `SafeArea`나 기본 여백의 `ListView`가 같은 영역을 또 비우지 않는다)
 class SmashScaffold extends StatelessWidget {
   const SmashScaffold({
     super.key,
@@ -53,7 +54,22 @@ class SmashScaffold extends StatelessWidget {
           context: context,
           // 막대가 키보드 높이를 이미 반영했으므로 본문은 같은 높이를 또 빼지 않는다
           removeBottom: hasBottom,
-          child: SafeArea(top: appBar == null, bottom: !hasBottom, child: body),
+          child: SafeArea(
+            top: appBar == null,
+            bottom: !hasBottom,
+            // 막대가 아래 안전 영역(홈 인디케이터)을 이미 맡고 있으므로 본문은 그 값을 받지 않는다.
+            // (위의 removeViewInsets가 바깥 MediaQuery로 다시 만들기 때문에, Scaffold가 지워 둔 아래 값이 되살아나 있다.)
+            // 받으면 본문 안의 SafeArea나 ListView의 기본 여백이 같은 영역을 또 비운다. 위쪽은 건드리지 않는다
+            child: hasBottom
+                ? Builder(
+                    builder: (inner) => MediaQuery.removePadding(
+                      context: inner,
+                      removeBottom: true,
+                      child: body,
+                    ),
+                  )
+                : body,
+          ),
         ),
       ),
     );
