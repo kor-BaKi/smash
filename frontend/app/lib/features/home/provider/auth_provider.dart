@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app/core/api/api_client.dart';
 import 'package:app/core/api/auth_api.dart';
 import 'package:app/core/storage/token_storage.dart';
 import 'package:app/features/auth/model/auth_model.dart';
@@ -40,7 +41,22 @@ class AuthState {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(const AuthState());
+  AuthNotifier({AuthState initial = const AuthState()}) : super(initial) {
+    // 토큰 갱신을 서버가 거부하면 ApiClient가 알려 준다 (ApiClient가 이 파일을 알지 않도록 여기서 연결한다)
+    ApiClient.onSessionExpired = expireSession;
+  }
+
+  static const sessionExpiredMessage = '로그인 정보가 만료되었어요. 다시 로그인해 주세요.';
+
+  /// 서버가 토큰 갱신을 거부해서 세션이 끝났다. 로그인 상태를 풀면 라우터가 로그인 화면으로 보낸다.
+  /// (저장된 토큰은 ApiClient가 이미 지웠다. 동시에 여러 요청이 실패해도 처음 한 번만 처리한다)
+  void expireSession() {
+    if (!state.isLoggedIn) return;
+    final sub = _tokenRefreshSub;
+    _tokenRefreshSub = null;
+    sub?.cancel();
+    state = const AuthState(errorMessage: sessionExpiredMessage);
+  }
 
   // FCM 토큰 갱신 감시 구독 (로그인 상태에서 한 번만 등록)
   StreamSubscription<String>? _tokenRefreshSub;
@@ -232,6 +248,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   @override
   void dispose() {
     _tokenRefreshSub?.cancel();
+    if (ApiClient.onSessionExpired == expireSession) {
+      ApiClient.onSessionExpired = null;
+    }
     super.dispose();
   }
 }
