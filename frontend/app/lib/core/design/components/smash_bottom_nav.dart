@@ -31,7 +31,7 @@ class SmashNavDestination {
 /// 하단 탭 막대 (탭 2~5개).
 ///
 /// - 선택은 색뿐 아니라 아이콘 뒤의 알약, 굵은 글자, 스크린리더의 "선택됨"으로 구분한다
-/// - 라벨은 글자 확대를 1.3배까지만 따라간다 (탭 5개가 한 줄에 들어가야 하므로). 시스템 설정은 바꾸지 않는다
+/// - 라벨은 13sp(caption 토큰과 같은 크기)이고 글자 확대를 1.3배까지만 따라간다 (탭 5개가 한 줄에 들어가야 하므로). 시스템 설정은 바꾸지 않는다
 /// - 이미 선택된 탭을 다시 눌러도 [onSelected]가 불린다 (맨 위로 돌아가기 등은 화면이 정한다)
 class SmashBottomNav extends StatelessWidget {
   const SmashBottomNav({
@@ -159,7 +159,7 @@ class _NavItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     style: (selected ? SmashText.bodyStrong : SmashText.body)
-                        .copyWith(fontSize: 12, height: 1.2, color: color),
+                        .copyWith(fontSize: 13, height: 1.2, color: color),
                   ),
                 ],
               ),

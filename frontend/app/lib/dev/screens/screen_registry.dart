@@ -1,3 +1,4 @@
+import 'home_shell_states.dart';
 import 'login_screen_states.dart';
 import 'screen_entry.dart';
 import 'signup_screen_states.dart';
@@ -7,4 +8,5 @@ import 'signup_screen_states.dart';
 final List<ScreenEntry> screenGalleryEntries = [
   loginScreenEntry,
   signupScreenEntry,
+  homeShellScreenEntry,
 ];

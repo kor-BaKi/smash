@@ -4,6 +4,7 @@ import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/screens/login_screen_states.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
 import 'package:app/dev/screens/screen_gallery_app.dart';
+import 'package:app/dev/screens/home_shell_states.dart';
 import 'package:app/dev/screens/screen_registry.dart';
 import 'package:app/dev/screens/signup_screen_states.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +69,19 @@ void main() {
         '/signup/id',
         '/signup/password',
       ]);
+    });
+
+    test('홈 셸은 계획한 상태와 직접 눌러 보기를 가지고 운영 메뉴 항목은 실제와 같다', () {
+      final labels = homeShellScreenEntry.states.map((s) => s.label).toList();
+      expect(labels.take(5), [
+        '회원 홈 탭 (4탭, 조 미배정 안내)',
+        '회원 투표 탭 (옛 화면 흉내: 자기 AppBar)',
+        '운영진 홈 탭 (5탭)',
+        '운영진 운영 탭 (10개 항목)',
+        '운영진 설정 탭 (옛 화면 흉내: 자기 Scaffold와 AppBar)',
+      ]);
+      expect(labels.last, startsWith('직접 눌러 보기'));
+      expect(screenGalleryEntries, contains(homeShellScreenEntry));
     });
 
     test('갤러리의 가입 실패 문구는 AuthNotifier가 실제로 쓰는 문구와 같다', () {

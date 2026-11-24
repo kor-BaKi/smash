@@ -149,6 +149,8 @@ void main() {
   const migratedScreens = <String>[
     'lib/features/auth/page/login_page.dart', // S1a
     'lib/features/auth/page/signup_page.dart', // S1b
+    'lib/features/home/page/home_page.dart', // S2b 홈 셸 (탭 안쪽 옛 화면은 LegacyTabFrame으로 감싼다)
+    'lib/features/home/page/admin_menu_page.dart', // S2b 운영 탭
   ];
 
   group('교체한 화면 소스 전수 조사', () {

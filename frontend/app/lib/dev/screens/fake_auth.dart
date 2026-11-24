@@ -51,11 +51,22 @@ class FakeAuthNotifier extends AuthNotifier {
     await onSignup?.call(this, code, studentNo, password);
   }
 
+  /// 로그인한 사용자를 바꾼다 (역할이 바뀌는 경우를 보여 줄 때)
+  void setUser(UserInfo user) => state = AuthState(user: user);
+
   /// 로그인 실패: 요청이 끝나고 [message]가 남는다
   void fail(String message) => state = AuthState(errorMessage: message);
 
   /// 로그인 성공
   void succeed() => state = AuthState(user: fakeUser);
+
+  /// 운영진(ADMIN) 계정
+  static final fakeAdmin = UserInfo(
+    id: 2,
+    name: '임원',
+    role: 'ADMIN',
+    studentNo: '1',
+  );
 
   static final fakeUser = UserInfo(
     id: 1,
