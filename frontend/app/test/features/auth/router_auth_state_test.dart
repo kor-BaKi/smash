@@ -64,7 +64,7 @@ void main() {
     ref.read(routerProvider).push('/signup');
     await tester.pumpAndSettle();
     expect(onSignup(), isTrue);
-    await tester.enterText(find.byType(TextFormField).first, 'CODE');
+    await tester.enterText(find.byType(TextField).last, 'CODE');
 
     fake.state = const AuthState(isLoading: true);
     await settle(tester);
@@ -76,7 +76,7 @@ void main() {
     expect(onSignup(), isTrue, reason: '실패해도 가입 화면에 머문다 (로그인 화면으로 가지 않는다)');
     expect(
       tester
-          .widget<TextFormField>(find.byType(TextFormField).first)
+          .widget<TextField>(find.byType(TextField).last)
           .controller!
           .text,
       'CODE',

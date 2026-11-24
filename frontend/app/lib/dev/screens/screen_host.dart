@@ -36,10 +36,13 @@ class _ScreenHostState extends State<ScreenHost> {
   late final GoRouter _router = GoRouter(
     initialLocation: widget.entry.path,
     routes: [
-      GoRoute(
-        path: widget.entry.path,
-        builder: (context, _) => widget.entry.builder(context),
-      ),
+      if (widget.entry.routes != null)
+        ...widget.entry.routes!()
+      else
+        GoRoute(
+          path: widget.entry.path,
+          builder: (context, _) => widget.entry.builder(context),
+        ),
       for (final path in widget.entry.stubPaths)
         GoRoute(
           path: path,
@@ -52,6 +55,16 @@ class _ScreenHostState extends State<ScreenHost> {
   void initState() {
     super.initState();
     widget.onRouter?.call(_router);
+    // 뒷 단계 상태: 첫 화면이 뜬 뒤 앱처럼 차례로 쌓는다
+    if (widget.state.pushes.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        for (final path in widget.state.pushes) {
+          if (!mounted) return;
+          _router.push(path);
+          await Future<void>.delayed(Duration.zero);
+        }
+      });
+    }
   }
 
   @override

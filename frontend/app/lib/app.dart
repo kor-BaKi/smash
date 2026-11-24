@@ -22,7 +22,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/login', // 앱 처음 실행 시 보여줄 경로
     redirect: (context, state) {
       final isLoginPage = state.matchedLocation == '/login';
-      final isSignupPage = state.matchedLocation == '/signup';
+      // 가입은 3단계 경로(/signup, /signup/id, /signup/password)다
+      final location = state.matchedLocation;
+      final isSignupPage =
+          location == signupCodePath || location.startsWith('$signupCodePath/');
 
       if (!isLoggedIn && !isLoginPage && !isSignupPage) return '/login';
       if (isLoggedIn && isLoginPage) return '/home';
@@ -37,10 +40,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/home',
         builder: (context, state) => const HomePage(),
       ),
-      GoRoute(
-        path: '/signup',
-        builder: (context, state) => const SignupPage(),
-      ),
+      ...signupRoutes(),
     ],
   );
 });

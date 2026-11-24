@@ -148,6 +148,7 @@ void main() {
   /// 이 화면들은 날 `Text(`/`RichText(`와 옛 색(`AppColors`), 옛 테마(`core/theme`)를 쓰지 않는다.
   const migratedScreens = <String>[
     'lib/features/auth/page/login_page.dart', // S1a
+    'lib/features/auth/page/signup_page.dart', // S1b
   ];
 
   group('교체한 화면 소스 전수 조사', () {

@@ -54,7 +54,10 @@ Future<GoRouter> pumpScreen(
   if (settle) {
     await tester.pumpAndSettle();
   } else {
-    await tester.pump(const Duration(milliseconds: 100));
+    // 첫 화면 뒤에 쌓는 화면(pushes)까지 그려지도록 몇 번 짧게 기다린다
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
   }
   return router;
 }

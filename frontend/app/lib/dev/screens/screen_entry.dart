@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// 화면 상태 갤러리에 올라가는 화면 한 개.
 ///
@@ -13,6 +14,7 @@ class ScreenEntry {
     required this.builder,
     required this.states,
     this.stubPaths = const [],
+    this.routes,
   });
 
   final String name;
@@ -25,11 +27,20 @@ class ScreenEntry {
 
   /// 화면이 이동하는 다른 경로들 (예: `/signup`, `/home`). 갤러리에서는 자리 표시 화면으로 대신한다
   final List<String> stubPaths;
+
+  /// 화면이 여러 경로로 이루어진 흐름이면(예: 가입 3단계) 앱이 쓰는 경로들을 그대로 넘긴다.
+  /// 없으면 [path] 하나에 [builder]를 연결한다
+  final List<GoRoute> Function()? routes;
 }
 
 /// 한 화면의 한 상태.
 class ScreenState {
-  const ScreenState(this.label, {required this.overrides, this.hint});
+  const ScreenState(
+    this.label, {
+    required this.overrides,
+    this.hint,
+    this.pushes = const [],
+  });
 
   final String label;
 
@@ -38,4 +49,7 @@ class ScreenState {
 
   /// 화면 안에서 직접 해야 만들어지는 상태일 때, 기기에서 무엇을 해 보면 되는지 (예: "빈 칸으로 로그인을 눌러 보세요")
   final String? hint;
+
+  /// 화면이 뜬 뒤 차례로 push할 경로들 (여러 단계 흐름의 뒷 단계 상태를 보여 줄 때: 앱처럼 앞 단계가 아래에 쌓인다)
+  final List<String> pushes;
 }

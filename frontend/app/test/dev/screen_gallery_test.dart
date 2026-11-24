@@ -5,6 +5,7 @@ import 'package:app/dev/screens/login_screen_states.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
 import 'package:app/dev/screens/screen_gallery_app.dart';
 import 'package:app/dev/screens/screen_registry.dart';
+import 'package:app/dev/screens/signup_screen_states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -45,6 +46,35 @@ void main() {
       ]);
       expect(labels.last, startsWith('직접 눌러 보기'));
       expect(loginScreenEntry.stubPaths, containsAll(['/signup', '/home']));
+    });
+
+    test('가입 화면은 계획한 상태와 직접 눌러 보기를 가지고 앱과 같은 경로를 쓴다', () {
+      final labels = signupScreenEntry.states.map((s) => s.label).toList();
+      expect(labels.take(5), [
+        '1단계 초기',
+        '입력 오류 (1단계)',
+        '2단계 학번',
+        '제출 중 (3단계)',
+        '가입 실패 (3단계)',
+      ]);
+      expect(labels.last, startsWith('직접 눌러 보기'));
+      expect(
+        signupScreenEntry.routes,
+        isNotNull,
+        reason: '앱의 가입 경로(signupRoutes)를 그대로 쓴다',
+      );
+      expect(signupScreenEntry.routes!().map((r) => r.path), [
+        '/signup',
+        '/signup/id',
+        '/signup/password',
+      ]);
+    });
+
+    test('갤러리의 가입 실패 문구는 AuthNotifier가 실제로 쓰는 문구와 같다', () {
+      final source = File(
+        'lib/features/home/provider/auth_provider.dart',
+      ).readAsStringSync();
+      expect(source, contains("'$signupFailedMessage'"));
     });
 
     test('갤러리의 로그인 실패 문구는 AuthNotifier가 실제로 쓰는 문구와 같다', () {
@@ -166,6 +196,41 @@ void main() {
       await tester.tap(find.widgetWithText(SmashButton, '로그인'));
       await tester.pumpAndSettle();
       expect(find.text('학번을 입력해주세요.'), findsOneWidget);
+    });
+
+    testWidgets('가입 화면: 뒷 단계 상태(가입 실패)는 앞 단계가 쌓인 채로 열린다', (tester) async {
+      await open(tester);
+      await tester.tap(find.text('가입 3단계 (S1b)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('가입 실패 (3단계)'));
+      await tester.pumpAndSettle();
+      expect(find.text(signupFailedMessage), findsOneWidget);
+      expect(find.text('1단계로 가기'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('가입 화면 직접 눌러 보기: 3단계 제출까지 가고 2초 뒤 가짜 서버가 결과를 돌려준다', (
+      tester,
+    ) async {
+      await open(tester);
+      await tester.tap(find.text('가입 3단계 (S1b)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('직접 눌러 보기').first);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, 'X');
+      await tester.tap(find.widgetWithText(SmashButton, '다음').last);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, '2025');
+      await tester.tap(find.widgetWithText(SmashButton, '다음').last);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, 'pw12');
+      await tester.tap(find.widgetWithText(SmashButton, '가입하기'));
+      await tester.pump();
+      expect(find.text(signupFailedMessage), findsNothing, reason: '응답 전');
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text(signupFailedMessage), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('직접 눌러 보기: 가짜 서버가 2초 뒤에 학번에 따라 결과를 돌려준다', (tester) async {
