@@ -1,3 +1,4 @@
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/screens/login_screen_states.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
@@ -54,8 +55,8 @@ void main() {
               await tester.ensureVisible(loginButton);
               await tester.tap(loginButton);
               await tester.pump(const Duration(milliseconds: 300));
-              expect(find.text('학번을 입력해주세요.'), findsOneWidget);
-              expect(find.text('비밀번호를 입력해주세요.'), findsOneWidget);
+              expect(find.text(AuthMessages.studentNoRequired), findsOneWidget);
+              expect(find.text(AuthMessages.passwordRequired), findsOneWidget);
             }
 
             final viewTop = ScreenConditions.safeTop;

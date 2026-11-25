@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/core/design/colors.dart';
 import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/screens/fake_auth.dart';
@@ -50,6 +51,24 @@ void main() {
     );
     return (fake, router);
   }
+
+  testWidgets('가입 안내 문구는 "아직 계정이 없나요?"이고 가입하기 버튼이 그 뒤(오른쪽 또는 아래)에 이어진다', (
+    tester,
+  ) async {
+    await open(tester);
+    final notice = find.text('아직 계정이 없나요?');
+    expect(notice, findsOneWidget);
+    expect(signupButton, findsOneWidget);
+    final noticeRect = tester.getRect(notice);
+    final buttonRect = tester.getRect(signupButton);
+    expect(
+      buttonRect.left >= noticeRect.right - 1 ||
+          buttonRect.top >= noticeRect.bottom - 1,
+      isTrue,
+      reason: '안내 문구 다음에 읽힌다',
+    );
+    expect(find.textContaining('회원'), findsNothing);
+  });
 
   /// 지금 화면이 어느 경로인지: 갤러리의 자리 표시 화면이 떠 있으면 그 경로, 아니면 로그인
   String location(WidgetTester tester) {
@@ -169,8 +188,8 @@ void main() {
       await tapLogin(tester);
 
       expect(fake.loginCalls, isEmpty);
-      expect(find.text('학번을 입력해주세요.'), findsOneWidget);
-      expect(find.text('비밀번호를 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.studentNoRequired), findsOneWidget);
+      expect(find.text(AuthMessages.passwordRequired), findsOneWidget);
       expect(
         tester.widget<TextField>(textField(0)).focusNode!.hasFocus,
         isTrue,
@@ -183,8 +202,8 @@ void main() {
       await tapLogin(tester);
 
       expect(fake.loginCalls, isEmpty);
-      expect(find.text('학번을 입력해주세요.'), findsNothing);
-      expect(find.text('비밀번호를 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.studentNoRequired), findsNothing);
+      expect(find.text(AuthMessages.passwordRequired), findsOneWidget);
       expect(
         tester.widget<TextField>(textField(1)).focusNode!.hasFocus,
         isTrue,
@@ -198,18 +217,18 @@ void main() {
       await tapLogin(tester);
 
       expect(fake.loginCalls, isEmpty);
-      expect(find.text('학번을 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.studentNoRequired), findsOneWidget);
     });
 
     testWidgets('입력을 시작하면 그 칸의 안내가 사라진다', (tester) async {
       await open(tester);
       await tapLogin(tester);
-      expect(find.text('학번을 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.studentNoRequired), findsOneWidget);
 
       await tester.enterText(textField(0), '2');
       await tester.pump();
-      expect(find.text('학번을 입력해주세요.'), findsNothing);
-      expect(find.text('비밀번호를 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.studentNoRequired), findsNothing);
+      expect(find.text(AuthMessages.passwordRequired), findsOneWidget);
     });
   });
 
@@ -312,7 +331,7 @@ void main() {
     testWidgets('실패하면 저장하지 않는다', (tester) async {
       await open(
         tester,
-        onLogin: (self, s, p) async => self.fail(loginFailedMessage),
+        onLogin: (self, s, p) async => self.fail(AuthMessages.loginRejected),
       );
       await tester.enterText(textField(0), '3');
       await tester.enterText(textField(1), 'pw');
@@ -435,9 +454,9 @@ void main() {
     ) async {
       final handle = tester.ensureSemantics();
       for (final message in [
-        loginNetworkErrorMessage,
-        loginTooManyMessage,
-        loginFailedMessage,
+        AuthMessages.loginOffline,
+        AuthMessages.loginTooMany,
+        AuthMessages.loginRejected,
       ]) {
         await open(tester, initial: AuthState(errorMessage: message));
         await tester.ensureVisible(find.text(message));
@@ -467,7 +486,7 @@ void main() {
         onLogin: (self, s, p) async {
           final hold = holds[attempt++];
           await hold.future;
-          self.fail(loginNetworkErrorMessage);
+          self.fail(AuthMessages.loginOffline);
         },
       );
       await tester.enterText(textField(0), '1');
@@ -478,17 +497,17 @@ void main() {
       holds[0].complete();
       await tester.pumpAndSettle();
       expect(tester.widget<SmashButton>(loginButton).isLoading, isFalse);
-      expect(find.text(loginNetworkErrorMessage), findsOneWidget);
+      expect(find.text(AuthMessages.loginOffline), findsOneWidget);
 
       await tapLogin(tester);
       expect(
-        find.text(loginNetworkErrorMessage),
+        find.text(AuthMessages.loginOffline),
         findsNothing,
         reason: '요청 중에는 이전 문구를 숨긴다',
       );
       holds[1].complete();
       await tester.pumpAndSettle();
-      expect(find.text(loginNetworkErrorMessage), findsOneWidget);
+      expect(find.text(AuthMessages.loginOffline), findsOneWidget);
       expect(fake.loginCalls.length, 2);
     });
   });

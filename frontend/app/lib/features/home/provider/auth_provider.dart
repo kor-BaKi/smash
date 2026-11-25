@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:app/core/api/api_client.dart';
 import 'package:app/core/api/auth_api.dart';
+import 'package:app/core/error/error_messages.dart';
 import 'package:app/core/storage/token_storage.dart';
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/features/auth/model/auth_model.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -26,11 +28,7 @@ class AuthState {
 
   bool get isLoggedIn => user != null;
 
-  AuthState copyWith({
-    UserInfo? user,
-    bool? isLoading,
-    String? errorMessage,
-  }) {
+  AuthState copyWith({UserInfo? user, bool? isLoading, String? errorMessage}) {
     return AuthState(
       // ?? :  null 이면 오른쪽 값 사용
       user: user ?? this.user,
@@ -46,7 +44,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     ApiClient.onSessionExpired = expireSession;
   }
 
-  static const sessionExpiredMessage = '로그인 정보가 만료되었어요. 다시 로그인해 주세요.';
+  static const sessionExpiredMessage = AuthMessages.sessionExpired;
 
   /// 서버가 토큰 갱신을 거부해서 세션이 끝났다. 로그인 상태를 풀면 라우터가 로그인 화면으로 보낸다.
   /// (저장된 토큰은 ApiClient가 이미 지웠다. 동시에 여러 요청이 실패해도 처음 한 번만 처리한다)
@@ -135,11 +133,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   // 회원가입
-  Future<void> signup(
-    String code,
-    String studentNo,
-    String password,
-  ) async {
+  Future<void> signup(String code, String studentNo, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
@@ -156,12 +150,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = state.copyWith(user: auth.user, isLoading: false);
       await _registerFcmToken();
+    } on DioException catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _signupErrorMessage(e),
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: '회원가입에 실패했습니다. 가입코드와 학번을 확인해주세요.',
+        errorMessage: AuthMessages.signupRejected,
       );
     }
+  }
+
+  // 가입 실패 문구. 서버가 준 문구는 쓰지 않고 연결 상태와 상태 코드만 본다
+  static String _signupErrorMessage(DioException e) {
+    final response = e.response;
+    if (response == null) {
+      return switch (ErrorMessages.of(e)) {
+        ErrorMessages.offline => AuthMessages.signupOffline,
+        ErrorMessages.timeout => AuthMessages.signupTimeout,
+        _ => AuthMessages.signupRejected,
+      };
+    }
+    final status = response.statusCode ?? 0;
+    if (status == 429) return AuthMessages.signupTooMany;
+    if (status >= 500) return AuthMessages.signupServer;
+    return AuthMessages.signupRejected;
   }
 
   // 로그인
@@ -182,21 +197,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(user: auth.user, isLoading: false);
       await _registerFcmToken(); // 실패해도 내부에서 처리되어 로그인은 유지됨
     } on DioException catch (e) {
-      final String message;
-      if (e.response == null) {
-        message = '네트워크 연결을 확인해 주세요.';
-      } else if (e.response!.statusCode == 429) {
-        message = '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
-      } else {
-        message = '로그인에 실패했습니다.';
-      }
-      state = state.copyWith(isLoading: false, errorMessage: message);
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _loginErrorMessage(e),
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: '로그인에 실패했습니다.',
+        errorMessage: AuthMessages.loginUnknown,
       );
     }
+  }
+
+  // 로그인 실패 문구. 서버가 준 문구는 쓰지 않고 연결 상태와 상태 코드만 본다.
+  // 400, 401, 403 등 서버가 거절한 경우는 모두 같은 문구라서 계정이 있는지, 어떤 상태인지를 드러내지 않는다
+  static String _loginErrorMessage(DioException e) {
+    final response = e.response;
+    if (response == null) {
+      return switch (ErrorMessages.of(e)) {
+        ErrorMessages.offline => AuthMessages.loginOffline,
+        ErrorMessages.timeout => AuthMessages.loginTimeout,
+        _ => AuthMessages.loginUnknown,
+      };
+    }
+    final status = response.statusCode ?? 0;
+    if (status == 429) return AuthMessages.loginTooMany;
+    if (status >= 500) return AuthMessages.loginServer;
+    return AuthMessages.loginRejected;
   }
 
   // 로그아웃

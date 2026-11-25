@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/app.dart';
 import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/screens/fake_auth.dart';
@@ -140,10 +141,10 @@ void main() {
       expect(on(SignupPasswordPage), isTrue, reason: '요청 중에도 3단계');
       expect(on(LoginPage), isFalse);
 
-      fake.fail('회원가입에 실패했습니다. 가입코드와 학번을 확인해주세요.');
+      fake.fail(AuthMessages.signupRejected);
       await tester.pumpAndSettle();
       expect(on(SignupPasswordPage), isTrue, reason: '실패해도 3단계');
-      expect(find.text('회원가입에 실패했습니다. 가입코드와 학번을 확인해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.signupRejected), findsOneWidget);
       expect(fake.signupCalls, [('CODE', '2025', 'pw12')]);
 
       await tester.tap(find.text('1단계로 가기'));

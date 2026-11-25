@@ -1,3 +1,4 @@
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
 import 'package:app/dev/screens/signup_screen_states.dart';
@@ -64,7 +65,7 @@ void main() {
               await tester.ensureVisible(button);
               await tester.tap(button);
               await tester.pump(const Duration(milliseconds: 300));
-              expect(find.text('가입코드를 입력해주세요.'), findsOneWidget);
+              expect(find.text(AuthMessages.codeRequired), findsOneWidget);
             }
 
             final viewTop = tester

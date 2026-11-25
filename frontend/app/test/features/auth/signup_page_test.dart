@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/core/design/colors.dart';
 import 'package:app/core/design/components/components.dart';
-import 'package:app/dev/screens/signup_screen_states.dart';
 import 'package:app/features/auth/page/signup_page.dart';
 import 'package:app/features/auth/provider/signup_draft_provider.dart';
 import 'package:app/features/home/provider/auth_provider.dart';
@@ -58,6 +58,21 @@ void main() {
   }
 
   group('단계와 화면 구성', () {
+    testWidgets('앱바 제목은 "가입"이고 1단계 제목은 "가입코드를 입력해 주세요"다 (회원가입이라는 말을 쓰지 않는다)', (
+      tester,
+    ) async {
+      await openSignupFlow(tester, steps: const [signupCodePath]);
+      expect(
+        find.descendant(
+          of: find.byType(SmashAppBar),
+          matching: find.text('가입'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('가입코드를 입력해 주세요'), findsOneWidget);
+      expect(find.textContaining('회원'), findsNothing);
+    });
+
     testWidgets('단계 이름은 가입코드, 학번, 비밀번호이고 각 화면이 자기 단계를 가리킨다', (tester) async {
       await openSignupFlow(
         tester,
@@ -178,17 +193,21 @@ void main() {
     testWidgets('1단계: 비었거나 공백뿐이면 안내하고 넘어가지 않는다', (tester) async {
       final flow = await openSignupFlow(tester);
       await tapButton(tester, next);
-      expect(find.text('가입코드를 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.codeRequired), findsOneWidget);
       expect(onCode(), isTrue);
 
       await tester.enterText(field(), '   ');
       await tapButton(tester, next);
-      expect(find.text('가입코드를 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.codeRequired), findsOneWidget);
       expect(onCode(), isTrue);
 
       await tester.enterText(field(), 'A');
       await tester.pump();
-      expect(find.text('가입코드를 입력해주세요.'), findsNothing, reason: '입력하면 안내가 사라진다');
+      expect(
+        find.text(AuthMessages.codeRequired),
+        findsNothing,
+        reason: '입력하면 안내가 사라진다',
+      );
       expect(flow.fake.signupCalls, isEmpty);
     });
 
@@ -199,7 +218,7 @@ void main() {
         draft: const SignupDraft(code: 'C'),
       );
       await tapButton(tester, next);
-      expect(find.text('학번을 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.studentNoRequired), findsOneWidget);
       expect(onId(), isTrue);
     });
 
@@ -209,16 +228,16 @@ void main() {
         steps: const [signupCodePath, signupIdPath, signupPasswordPath],
       );
       await tapButton(tester, submit);
-      expect(find.text('비밀번호를 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.passwordRequired), findsOneWidget);
 
       await tester.enterText(field(), 'abc');
       await tapButton(tester, submit);
-      expect(find.text('비밀번호는 4자 이상이어야 합니다.'), findsOneWidget);
+      expect(find.text(AuthMessages.passwordTooShort), findsOneWidget);
       expect(flow.fake.signupCalls, isEmpty);
 
       await tester.enterText(field(), 'abcd');
       await tester.pump();
-      expect(find.text('비밀번호는 4자 이상이어야 합니다.'), findsNothing);
+      expect(find.text(AuthMessages.passwordTooShort), findsNothing);
     });
 
     testWidgets('키보드의 다음/완료 키로도 단계가 넘어간다', (tester) async {
@@ -237,7 +256,8 @@ void main() {
     ) async {
       final flow = await openSignupFlow(
         tester,
-        onSignup: (self, c, s, p) async => self.fail(signupFailedMessage),
+        onSignup: (self, c, s, p) async =>
+            self.fail(AuthMessages.signupRejected),
       );
       await tester.enterText(field(), '  CODE ');
       await tapButton(tester, next);
@@ -365,9 +385,9 @@ void main() {
         tester,
         steps: steps,
         draft: draft,
-        initial: const AuthState(errorMessage: signupFailedMessage),
+        initial: const AuthState(errorMessage: AuthMessages.signupRejected),
       );
-      expect(find.text(signupFailedMessage), findsOneWidget);
+      expect(find.text(AuthMessages.signupRejected), findsOneWidget);
       final notice = tester.widget<SmashInlineNotice>(
         find.byType(SmashInlineNotice),
       );
@@ -380,7 +400,7 @@ void main() {
         tester,
         steps: steps,
         draft: draft,
-        initial: const AuthState(errorMessage: signupFailedMessage),
+        initial: const AuthState(errorMessage: AuthMessages.signupRejected),
       );
       await tester.tap(find.text('1단계로 가기'));
       await tester.pumpAndSettle();
@@ -405,7 +425,7 @@ void main() {
       await openSignupFlow(
         tester,
         steps: steps,
-        initial: const AuthState(errorMessage: '로그인에 실패했습니다.'),
+        initial: const AuthState(errorMessage: AuthMessages.loginRejected),
       );
       expect(find.byType(SmashInlineNotice), findsNothing);
     });
@@ -417,7 +437,7 @@ void main() {
         tester,
         onSignup: (self, c, s, p) async {
           await holds[n++].future;
-          self.fail(signupFailedMessage);
+          self.fail(AuthMessages.signupRejected);
         },
       );
       await fillAll(tester);
@@ -427,19 +447,19 @@ void main() {
       expect(tester.widget<SmashButton>(submit).isLoading, isTrue);
       holds[0].complete();
       await tester.pumpAndSettle();
-      expect(find.text(signupFailedMessage), findsOneWidget);
+      expect(find.text(AuthMessages.signupRejected), findsOneWidget);
 
       await tester.ensureVisible(submit);
       await tester.tap(submit);
       await tester.pump();
       expect(
-        find.text(signupFailedMessage),
+        find.text(AuthMessages.signupRejected),
         findsNothing,
         reason: '요청 중에는 이전 문구를 숨긴다',
       );
       holds[1].complete();
       await tester.pumpAndSettle();
-      expect(find.text(signupFailedMessage), findsOneWidget);
+      expect(find.text(AuthMessages.signupRejected), findsOneWidget);
       expect(flow.fake.signupCalls.length, 2);
     });
   });
@@ -486,7 +506,8 @@ void main() {
     testWidgets('실패하면 저장하지 않고, 화면이 그냥 사라지면 취소한다', (tester) async {
       await openSignupFlow(
         tester,
-        onSignup: (self, c, s, p) async => self.fail(signupFailedMessage),
+        onSignup: (self, c, s, p) async =>
+            self.fail(AuthMessages.signupRejected),
       );
       await fillAll(tester);
       tester.testTextInput.log.clear();
@@ -513,7 +534,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(field()).controller!.text, isEmpty);
       await tapButton(tester, next);
-      expect(find.text('가입코드를 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.codeRequired), findsOneWidget);
     });
 
     SignupDraft draftOf(WidgetTester tester) => ProviderScope.containerOf(
@@ -542,7 +563,8 @@ void main() {
     ) async {
       await openSignupFlow(
         tester,
-        onSignup: (self, c, s, p) async => self.fail(signupFailedMessage),
+        onSignup: (self, c, s, p) async =>
+            self.fail(AuthMessages.signupRejected),
       );
       await tester.enterText(field(), 'CODE');
       await tapButton(tester, next);
@@ -552,7 +574,7 @@ void main() {
       // 입력 이벤트(onChanged) 없이 컨트롤러 값만 바꾼다 (붙여넣기나 자동완성이 이벤트 없이 값을 채우는 경우를 흉내)
       tester.widget<TextField>(field()).controller!.text = 'pw12';
       await tapButton(tester, submit);
-      expect(find.text(signupFailedMessage), findsOneWidget);
+      expect(find.text(AuthMessages.signupRejected), findsOneWidget);
 
       await tester.tap(find.text('1단계로 가기'));
       await tester.pumpAndSettle();
@@ -586,7 +608,7 @@ void main() {
       await openSignupFlow(
         tester,
         steps: const [signupCodePath, signupIdPath, signupPasswordPath],
-        initial: const AuthState(errorMessage: signupFailedMessage),
+        initial: const AuthState(errorMessage: AuthMessages.signupRejected),
         draft: const SignupDraft(attempted: true),
       );
       for (final element in anyText().evaluate()) {

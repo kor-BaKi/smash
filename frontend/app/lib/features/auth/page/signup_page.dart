@@ -7,6 +7,7 @@ import '../../../core/design/components/components.dart';
 import '../../../core/design/smash_theme.dart';
 import '../../../core/design/tokens.dart';
 import '../../home/provider/auth_provider.dart';
+import '../auth_messages.dart';
 import '../provider/signup_draft_provider.dart';
 
 /// 가입 3단계의 경로. 1단계가 `/signup`이고 2, 3단계는 그 아래 경로다.
@@ -32,7 +33,7 @@ List<GoRoute> signupRoutes() => [
   ),
 ];
 
-const _stepNames = ['가입코드', '학번', '비밀번호'];
+const _stepNames = AuthMessages.signupSteps;
 
 /// 가입 단계 화면의 공통 틀: 밝은 테마, 앱바(뒤로), 진행 표시, 제목
 class _SignupFrame extends StatelessWidget {
@@ -55,7 +56,10 @@ class _SignupFrame extends StatelessWidget {
     return Theme(
       data: SmashTheme.light(),
       child: SmashScaffold(
-        appBar: SmashAppBar(title: '회원가입', onBack: onBack),
+        appBar: SmashAppBar(
+          title: AuthMessages.signupAppBarTitle,
+          onBack: onBack,
+        ),
         body: SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(SmashSpacing.lg),
@@ -123,7 +127,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
   void _next() {
     if (_controller.text.trim().isEmpty) {
-      setState(() => _error = '가입코드를 입력해주세요.');
+      setState(() => _error = AuthMessages.codeRequired);
       return;
     }
     ref.read(signupDraftProvider.notifier).setCode(_controller.text);
@@ -137,12 +141,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
     return _SignupFrame(
       step: 0,
-      title: '회원가입',
-      subtitle: '동아리에서 받은 가입코드가 필요해요',
+      title: AuthMessages.codeTitle,
+      subtitle: AuthMessages.codeSubtitle,
       onBack: () => _goBack(context),
       children: [
         SmashTextField(
-          label: '가입코드',
+          label: AuthMessages.codeLabel,
           controller: _controller,
           errorText: _error,
           textInputAction: TextInputAction.next,
@@ -154,7 +158,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           onSubmitted: (_) => _next(),
         ),
         const SizedBox(height: SmashSpacing.lg),
-        SmashButton(label: '다음', onPressed: _next),
+        SmashButton(label: AuthMessages.next, onPressed: _next),
       ],
     );
   }
@@ -188,7 +192,7 @@ class _SignupIdPageState extends ConsumerState<SignupIdPage> {
 
   void _next() {
     if (_controller.text.trim().isEmpty) {
-      setState(() => _error = '학번을 입력해주세요.');
+      setState(() => _error = AuthMessages.studentNoRequired);
       return;
     }
     ref.read(signupDraftProvider.notifier).setStudentNo(_controller.text);
@@ -201,12 +205,12 @@ class _SignupIdPageState extends ConsumerState<SignupIdPage> {
 
     return _SignupFrame(
       step: 1,
-      title: '학번을 입력해 주세요',
-      subtitle: '로그인할 때 학번을 사용해요',
+      title: AuthMessages.studentNoTitle,
+      subtitle: AuthMessages.studentNoSubtitle,
       onBack: () => _goBack(context),
       children: [
         SmashTextField(
-          label: '학번',
+          label: AuthMessages.studentNoLabel,
           controller: _controller,
           errorText: _error,
           keyboardType: TextInputType.number,
@@ -219,7 +223,7 @@ class _SignupIdPageState extends ConsumerState<SignupIdPage> {
           onSubmitted: (_) => _next(),
         ),
         const SizedBox(height: SmashSpacing.lg),
-        SmashButton(label: '다음', onPressed: _next),
+        SmashButton(label: AuthMessages.next, onPressed: _next),
       ],
     );
   }
@@ -260,9 +264,9 @@ class _SignupPasswordPageState extends ConsumerState<SignupPasswordPage> {
 
     final password = _controller.text;
     final error = password.isEmpty
-        ? '비밀번호를 입력해주세요.'
+        ? AuthMessages.passwordRequired
         : password.length < 4
-        ? '비밀번호는 4자 이상이어야 합니다.'
+        ? AuthMessages.passwordTooShort
         : null;
     setState(() => _error = error);
     if (error != null) return;
@@ -308,14 +312,14 @@ class _SignupPasswordPageState extends ConsumerState<SignupPasswordPage> {
       canPop: !authState.isLoading,
       child: _SignupFrame(
         step: 2,
-        title: '비밀번호를 정해 주세요',
-        subtitle: '4자 이상으로 입력해 주세요',
+        title: AuthMessages.passwordTitle,
+        subtitle: AuthMessages.passwordSubtitle,
         onBack: authState.isLoading ? null : () => _goBack(context),
         children: [
           AutofillGroup(
             onDisposeAction: AutofillContextAction.cancel,
             child: SmashPasswordField(
-              label: '비밀번호',
+              label: AuthMessages.passwordLabel,
               controller: _controller,
               errorText: _error,
               autofillHints: const [AutofillHints.newPassword],
@@ -333,13 +337,13 @@ class _SignupPasswordPageState extends ConsumerState<SignupPasswordPage> {
             SmashInlineNotice(
               message: errorMessage,
               tone: SmashNoticeTone.danger,
-              actionLabel: '1단계로 가기',
+              actionLabel: AuthMessages.backToFirst,
               onAction: _backToFirst,
             ),
           ],
           const SizedBox(height: SmashSpacing.lg),
           SmashButton(
-            label: '가입하기',
+            label: AuthMessages.signupSubmit,
             isLoading: authState.isLoading,
             onPressed: _submit,
           ),

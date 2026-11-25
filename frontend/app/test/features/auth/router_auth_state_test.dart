@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/app.dart';
 import 'package:app/dev/screens/fake_auth.dart';
 import 'package:app/features/auth/page/login_page.dart';
@@ -71,14 +72,11 @@ void main() {
     expect(onSignup(), isTrue, reason: '요청 중에도 가입 화면에 머문다');
     expect(onLogin(), isFalse);
 
-    fake.state = const AuthState(errorMessage: '회원가입에 실패했습니다.');
+    fake.state = const AuthState(errorMessage: AuthMessages.signupRejected);
     await settle(tester);
     expect(onSignup(), isTrue, reason: '실패해도 가입 화면에 머문다 (로그인 화면으로 가지 않는다)');
     expect(
-      tester
-          .widget<TextField>(find.byType(TextField).last)
-          .controller!
-          .text,
+      tester.widget<TextField>(find.byType(TextField).last).controller!.text,
       'CODE',
     );
   });
@@ -89,7 +87,7 @@ void main() {
 
     fake.state = const AuthState(isLoading: true);
     await settle(tester);
-    fake.state = const AuthState(errorMessage: '로그인에 실패했습니다.');
+    fake.state = const AuthState(errorMessage: AuthMessages.loginRejected);
     await settle(tester);
 
     expect(onLogin(), isTrue);
@@ -97,7 +95,7 @@ void main() {
       tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text,
       '20250001',
     );
-    expect(find.text('로그인에 실패했습니다.'), findsOneWidget);
+    expect(find.text(AuthMessages.loginRejected), findsOneWidget);
   });
 
   testWidgets('로그인에 성공하면 /home으로 간다', (tester) async {

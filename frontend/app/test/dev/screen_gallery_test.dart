@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/screens/login_screen_states.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
@@ -84,23 +85,30 @@ void main() {
       expect(screenGalleryEntries, contains(homeShellScreenEntry));
     });
 
-    test('갤러리의 가입 실패 문구는 AuthNotifier가 실제로 쓰는 문구와 같다', () {
-      final source = File(
+    test('갤러리는 로그인, 가입 오류 문구를 베껴 적지 않고 AuthMessages를 쓴다 (문구가 어긋나지 않는다)', () {
+      final messages = <String>{
+        AuthMessages.loginOffline,
+        AuthMessages.loginTimeout,
+        AuthMessages.loginTooMany,
+        AuthMessages.loginRejected,
+        AuthMessages.loginServer,
+        AuthMessages.loginUnknown,
+        AuthMessages.signupRejected,
+        AuthMessages.sessionExpired,
+      };
+      for (final path in [
+        'lib/dev/screens/login_screen_states.dart',
+        'lib/dev/screens/signup_screen_states.dart',
         'lib/features/home/provider/auth_provider.dart',
-      ).readAsStringSync();
-      expect(source, contains("'$signupFailedMessage'"));
-    });
-
-    test('갤러리의 로그인 실패 문구는 AuthNotifier가 실제로 쓰는 문구와 같다', () {
-      final source = File(
-        'lib/features/home/provider/auth_provider.dart',
-      ).readAsStringSync();
-      for (final message in [
-        loginNetworkErrorMessage,
-        loginTooManyMessage,
-        loginFailedMessage,
       ]) {
-        expect(source, contains("'$message'"), reason: message);
+        final source = File(path).readAsStringSync();
+        for (final message in messages) {
+          expect(
+            source.contains(message),
+            isFalse,
+            reason: '$path에 문구를 직접 적었다: $message',
+          );
+        }
       }
     });
   });
@@ -180,7 +188,7 @@ void main() {
 
       await tester.tap(find.text('서버·네트워크 오류'));
       await tester.pumpAndSettle();
-      expect(find.text(loginNetworkErrorMessage), findsOneWidget);
+      expect(find.text(AuthMessages.loginOffline), findsOneWidget);
 
       for (final label in [
         '폭 320',
@@ -209,7 +217,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(SmashButton, '로그인'));
       await tester.pumpAndSettle();
-      expect(find.text('학번을 입력해주세요.'), findsOneWidget);
+      expect(find.text(AuthMessages.studentNoRequired), findsOneWidget);
     });
 
     testWidgets('가입 화면: 뒷 단계 상태(가입 실패)는 앞 단계가 쌓인 채로 열린다', (tester) async {
@@ -218,7 +226,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('가입 실패 (3단계)'));
       await tester.pumpAndSettle();
-      expect(find.text(signupFailedMessage), findsOneWidget);
+      expect(find.text(AuthMessages.signupRejected), findsOneWidget);
       expect(find.text('1단계로 가기'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -240,10 +248,14 @@ void main() {
       await tester.enterText(find.byType(TextField).last, 'pw12');
       await tester.tap(find.widgetWithText(SmashButton, '가입하기'));
       await tester.pump();
-      expect(find.text(signupFailedMessage), findsNothing, reason: '응답 전');
+      expect(
+        find.text(AuthMessages.signupRejected),
+        findsNothing,
+        reason: '응답 전',
+      );
       await tester.pump(const Duration(seconds: 2));
       await tester.pump(const Duration(milliseconds: 400));
-      expect(find.text(signupFailedMessage), findsOneWidget);
+      expect(find.text(AuthMessages.signupRejected), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -259,13 +271,13 @@ void main() {
       await tester.tap(find.widgetWithText(SmashButton, '로그인'));
       await tester.pump();
       expect(
-        find.text(loginTooManyMessage),
+        find.text(AuthMessages.loginTooMany),
         findsNothing,
         reason: '아직 응답 전(제출 중)',
       );
       await tester.pump(const Duration(seconds: 2));
       await tester.pump();
-      expect(find.text(loginTooManyMessage), findsOneWidget);
+      expect(find.text(AuthMessages.loginTooMany), findsOneWidget);
     });
   });
 }

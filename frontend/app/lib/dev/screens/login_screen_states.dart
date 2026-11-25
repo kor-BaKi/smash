@@ -1,14 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/auth_messages.dart';
 import '../../features/auth/page/login_page.dart';
 import '../../features/home/provider/auth_provider.dart';
 import 'fake_auth.dart';
 import 'screen_entry.dart';
-
-/// `AuthNotifier`가 로그인 실패 때 주는 문구 (auth_provider.dart와 같은 글자: 테스트가 대조한다)
-const loginNetworkErrorMessage = '네트워크 연결을 확인해 주세요.';
-const loginTooManyMessage = '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
-const loginFailedMessage = '로그인에 실패했습니다.';
 
 List<Override> _auth(AuthState initial, {OnLogin? onLogin}) => [
   authProvider.overrideWith(
@@ -32,13 +28,13 @@ Future<void> _slowServer(
   await Future<void>.delayed(const Duration(seconds: 2));
   switch (studentNo) {
     case '1':
-      self.fail(loginNetworkErrorMessage);
+      self.fail(AuthMessages.loginOffline);
     case '2':
-      self.fail(loginTooManyMessage);
+      self.fail(AuthMessages.loginTooMany);
     case '3':
       self.succeed();
     default:
-      self.fail(loginFailedMessage);
+      self.fail(AuthMessages.loginRejected);
   }
 }
 
@@ -58,11 +54,15 @@ final loginScreenEntry = ScreenEntry(
     ScreenState('제출 중', overrides: _auth(const AuthState(isLoading: true))),
     ScreenState(
       '서버·네트워크 오류',
-      overrides: _auth(const AuthState(errorMessage: loginNetworkErrorMessage)),
+      overrides: _auth(
+        const AuthState(errorMessage: AuthMessages.loginOffline),
+      ),
     ),
     ScreenState(
       '제한·불가 (시도 횟수 초과)',
-      overrides: _auth(const AuthState(errorMessage: loginTooManyMessage)),
+      overrides: _auth(
+        const AuthState(errorMessage: AuthMessages.loginTooMany),
+      ),
     ),
     ScreenState(
       '직접 눌러 보기 (가짜 서버, 2초 뒤 결과)',

@@ -7,6 +7,7 @@ import '../../../core/design/components/components.dart';
 import '../../../core/design/smash_theme.dart';
 import '../../../core/design/tokens.dart';
 import '../../home/provider/auth_provider.dart';
+import '../auth_messages.dart';
 
 /// 로그인 화면 (SMASH 라이트 디자인).
 ///
@@ -53,8 +54,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     final studentNo = _studentNoController.text.trim();
     final password = _passwordController.text;
-    final studentNoError = studentNo.isEmpty ? '학번을 입력해주세요.' : null;
-    final passwordError = password.isEmpty ? '비밀번호를 입력해주세요.' : null;
+    final studentNoError = studentNo.isEmpty
+        ? AuthMessages.studentNoRequired
+        : null;
+    final passwordError = password.isEmpty
+        ? AuthMessages.passwordRequired
+        : null;
     setState(() {
       _studentNoError = studentNoError;
       _passwordError = passwordError;
@@ -122,20 +127,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Semantics(
                       header: true,
                       child: const SmashLabel(
-                        '다시 만나 반가워요',
+                        AuthMessages.loginTitle,
                         style: SmashText.title,
                       ),
                     ),
                     const SizedBox(height: SmashSpacing.xs),
                     SmashLabel(
-                      'SMASH 계정으로 로그인하세요',
+                      AuthMessages.loginSubtitle,
                       style: SmashText.body.copyWith(
                         color: SmashColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: SmashSpacing.xl),
                     SmashTextField(
-                      label: '학번',
+                      label: AuthMessages.studentNoLabel,
                       controller: _studentNoController,
                       focusNode: _studentNoFocus,
                       errorText: _studentNoError,
@@ -152,7 +157,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     const SizedBox(height: SmashSpacing.md),
                     SmashPasswordField(
-                      label: '비밀번호',
+                      label: AuthMessages.passwordLabel,
                       controller: _passwordController,
                       focusNode: _passwordFocus,
                       errorText: _passwordError,
@@ -173,7 +178,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ],
                     const SizedBox(height: SmashSpacing.lg),
                     SmashButton(
-                      label: '로그인',
+                      label: AuthMessages.loginButton,
                       isLoading: authState.isLoading,
                       onPressed: _login,
                     ),
@@ -183,13 +188,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         SmashLabel(
-                          '아직 회원이 아니신가요?',
+                          AuthMessages.noAccount,
                           style: SmashText.body.copyWith(
                             color: SmashColors.textSecondary,
                           ),
                         ),
                         SmashButton(
-                          label: '가입하기',
+                          label: AuthMessages.signupButton,
                           variant: SmashButtonVariant.text,
                           size: SmashButtonSize.medium,
                           expanded: false,

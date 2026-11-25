@@ -1,3 +1,4 @@
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/app.dart';
 import 'package:app/dev/screens/fake_auth.dart';
 import 'package:app/features/auth/page/login_page.dart';
@@ -54,7 +55,7 @@ void main() {
 
       fake.state = const AuthState(isLoading: true);
       await tester.pump();
-      fake.state = const AuthState(errorMessage: '로그인에 실패했습니다.');
+      fake.state = const AuthState(errorMessage: AuthMessages.loginRejected);
       await tester.pump();
       expect(
         identical(ref.read(routerProvider), first),

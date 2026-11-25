@@ -1,3 +1,4 @@
+import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/core/api/api_client.dart';
 import 'package:app/dev/screens/fake_auth.dart';
 import 'package:app/features/home/provider/auth_provider.dart';
@@ -17,7 +18,7 @@ void main() {
 
     expect(auth.state.isLoggedIn, isFalse);
     expect(auth.state.isLoading, isFalse);
-    expect(auth.state.errorMessage, '로그인 정보가 만료되었어요. 다시 로그인해 주세요.');
+    expect(auth.state.errorMessage, AuthMessages.sessionExpired);
   });
 
   test('로그인 중이 아니면 아무것도 바꾸지 않는다 (로그인 화면에 만료 문구가 뜨지 않는다)', () {

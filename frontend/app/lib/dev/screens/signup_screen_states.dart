@@ -1,13 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/auth_messages.dart';
 import '../../features/auth/page/signup_page.dart';
 import '../../features/auth/provider/signup_draft_provider.dart';
 import '../../features/home/provider/auth_provider.dart';
 import 'fake_auth.dart';
 import 'screen_entry.dart';
-
-/// `AuthNotifier.signup`이 실패 때 주는 문구 (auth_provider.dart와 같은 글자: 테스트가 대조한다)
-const signupFailedMessage = '회원가입에 실패했습니다. 가입코드와 학번을 확인해주세요.';
 
 /// 앞 단계를 이미 채운 입력 (뒷 단계 상태를 보여 줄 때)
 const _filled = SignupDraft(
@@ -46,7 +44,7 @@ Future<void> _slowServer(
   if (code == 'OK') {
     self.succeed();
   } else {
-    self.fail(signupFailedMessage);
+    self.fail(AuthMessages.signupRejected);
   }
 }
 
@@ -82,7 +80,7 @@ final signupScreenEntry = ScreenEntry(
     ScreenState(
       '가입 실패 (3단계)',
       overrides: _overrides(
-        const AuthState(errorMessage: signupFailedMessage),
+        const AuthState(errorMessage: AuthMessages.signupRejected),
         draft: _filled.copyWith(password: 'pass1234', attempted: true),
       ),
       pushes: _toPassword,
