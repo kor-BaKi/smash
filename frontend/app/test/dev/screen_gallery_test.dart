@@ -206,13 +206,18 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('하단 막대 비교: 목록에 상태 8개가 있고 상태를 열어 막대를 눌러 볼 수 있다', (tester) async {
+    testWidgets('하단 막대 비교: 목록에 상태 26개가 있고 상태를 열어 막대를 눌러 볼 수 있다', (
+      tester,
+    ) async {
       await open(tester);
+      // 상태 목록이 길어서 한 화면에 다 안 들어간다. 모두 만들어지도록 화면을 길게 쓴다
+      tester.view.physicalSize = const Size(420, 6000);
+      await tester.pumpAndSettle();
       await tester.tap(find.text('하단 막대 비교 (S3a 후속)'));
       await tester.pumpAndSettle();
-      for (final label in bottomBarCompareScreenEntry.states.map(
-        (s) => s.label,
-      )) {
+      final labels = bottomBarCompareScreenEntry.states.map((s) => s.label);
+      expect(labels.length, 26);
+      for (final label in labels) {
         expect(find.text(label), findsOneWidget, reason: label);
       }
       await tester.tap(find.text('안 3 떠 있는 막대 · 임원 3탭'));
@@ -221,6 +226,28 @@ void main() {
       await tester.tap(find.bySemanticsLabel(RegExp('^운영, ')));
       await tester.pumpAndSettle();
       expect(tester.widget<SmashAppBar>(find.byType(SmashAppBar)).title, '운영');
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets("하단 막대 비교: 구성 A'(5탭) 상태도 열리고 칸을 눌러 선택 표시가 움직인다", (
+      tester,
+    ) async {
+      await open(tester);
+      tester.view.physicalSize = const Size(420, 6000);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('하단 막대 비교 (S3a 후속)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("구성 A' · 안 3 떠 있는 막대 · 임원 5탭"));
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel(RegExp('^내 기록, ')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('^내 정보, ')), findsOneWidget);
+      final before = tester.getRect(find.byKey(barHighlightKey)).left;
+      await tester.tap(find.bySemanticsLabel(RegExp('^내 기록, ')));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getRect(find.byKey(barHighlightKey)).left,
+        greaterThan(before),
+      );
       expect(tester.takeException(), isNull);
     });
 

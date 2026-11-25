@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' show Tristate;
 
 import 'package:app/core/design/components/components.dart';
+import 'package:app/core/design/typography.dart';
 import 'package:app/dev/screens/bottom_bar_compare_states.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
 import 'package:app/dev/screens/screen_entry.dart';
@@ -21,19 +22,35 @@ void main() {
 
   const variantOf = <String, BarVariant>{
     '현재': BarVariant.current,
+    '현재 막대': BarVariant.currentLook,
     '안 1 중앙 묶음': BarVariant.centered,
     '안 2 큰 칸': BarVariant.bigCell,
     '안 3 떠 있는 막대': BarVariant.floating,
   };
 
-  (BarVariant, bool) parse(ScreenState state) {
+  const setOf = <String, TabSet>{
+    '구성 C': TabSet.c,
+    "구성 A'": TabSet.aRecord,
+    "구성 A' (내 활동)": TabSet.aActivity,
+  };
+
+  /// 상태 이름 → (변종, 구성, 임원 여부). 구성 이름이 없는 기존 8개는 현재 구성이다
+  (BarVariant, TabSet, bool) parse(ScreenState state) {
     final parts = state.label.split(' · ');
-    return (variantOf[parts[0]]!, parts[1].startsWith('임원'));
+    final set = parts.length == 3 ? setOf[parts[0]]! : TabSet.base;
+    final rest = parts.length == 3 ? parts.sublist(1) : parts;
+    return (variantOf[rest[0]]!, set, rest[1].startsWith('임원'));
   }
 
   group('등록과 상태 목록', () {
-    test('상태 8개: {현재, 안 1, 안 2, 안 3} × {부원 2탭, 임원 3탭}', () {
-      expect(states.map((s) => s.label), [
+    test('상태 26개: 기존 8개(현재 구성) + 구성 C, A\', A\'(내 활동) 각 6개', () {
+      expect(states.length, 26);
+      expect(
+        states.map((s) => s.label).toSet().length,
+        26,
+        reason: '이름이 겹치지 않는다',
+      );
+      expect(states.take(8).map((s) => s.label), [
         '현재 · 부원 2탭',
         '현재 · 임원 3탭',
         '안 1 중앙 묶음 · 부원 2탭',
@@ -43,7 +60,38 @@ void main() {
         '안 3 떠 있는 막대 · 부원 2탭',
         '안 3 떠 있는 막대 · 임원 3탭',
       ]);
+      expect(states.skip(8).map((s) => s.label), [
+        for (final set in ['구성 C', "구성 A'", "구성 A' (내 활동)"])
+          for (final bar in ['현재 막대', '안 2 큰 칸', '안 3 떠 있는 막대'])
+            for (final role in [
+              set == '구성 C' ? '부원 3탭' : '부원 4탭',
+              set == '구성 C' ? '임원 4탭' : '임원 5탭',
+            ])
+              '$set · $bar · $role',
+      ]);
       expect(screenGalleryEntries, contains(bottomBarCompareScreenEntry));
+    });
+
+    test('구성별 탭 이름과 순서 (안 1은 칸이 늘어난 구성에 없다)', () {
+      List<String> names(TabSet set, bool admin) =>
+          set.destinations(admin: admin).map((d) => d.label).toList();
+      expect(names(TabSet.base, false), ['홈', '일정']);
+      expect(names(TabSet.base, true), ['홈', '일정', '운영']);
+      expect(names(TabSet.c, false), ['홈', '일정', '내 정보']);
+      expect(names(TabSet.c, true), ['홈', '일정', '운영', '내 정보']);
+      expect(names(TabSet.aRecord, false), ['홈', '일정', '내 기록', '내 정보']);
+      expect(names(TabSet.aRecord, true), ['홈', '일정', '내 기록', '운영', '내 정보']);
+      expect(names(TabSet.aActivity, false), ['홈', '일정', '내 활동', '내 정보']);
+      expect(names(TabSet.aActivity, true), ['홈', '일정', '내 활동', '운영', '내 정보']);
+      for (final s in states.skip(8)) {
+        expect(parse(s).$1, isNot(BarVariant.centered), reason: s.label);
+      }
+      // 아이콘 규칙: 탭마다 선택 아이콘이 따로 있다
+      for (final set in TabSet.values) {
+        for (final d in set.destinations(admin: true)) {
+          expect(d.selectedIcon, isNot(d.icon), reason: d.label);
+        }
+      }
     });
 
     test('실제 컴포넌트 SmashBottomNav는 비교 화면을 모르고(건드리지 않았고), 변종은 lib/dev에만 있다', () {
@@ -77,7 +125,7 @@ void main() {
               keyboardHeight: keyboard,
             );
             testWidgets('${state.label} | $c', (tester) async {
-              final (variant, admin) = parse(state);
+              final (variant, set, admin) = parse(state);
               final handle = tester.ensureSemantics();
               await pumpScreen(
                 tester,
@@ -86,7 +134,10 @@ void main() {
                 conditions: c,
               );
               final height = c.height;
-              final tabs = admin ? ['홈', '일정', '운영'] : ['홈', '일정'];
+              final tabs = set
+                  .destinations(admin: admin)
+                  .map((d) => d.label)
+                  .toList();
               final body = find.byType(ListView);
 
               if (keyboard > 0) {
@@ -163,6 +214,11 @@ void main() {
                   lessThan(variant.labelSize * 1.2 * applied * 1.5),
                   reason: '${tabs[i]} 한 줄',
                 );
+                expect(
+                  paragraph.didExceedMaxLines,
+                  isFalse,
+                  reason: '${tabs[i]} 라벨이 잘리지 않는다 (…로 줄지 않는다)',
+                );
                 final left = paragraph.localToGlobal(Offset.zero).dx;
                 expect(left, greaterThanOrEqualTo(-0.5));
                 expect(
@@ -176,6 +232,16 @@ void main() {
               switch (variant) {
                 case BarVariant.current:
                   expect(visible.width, closeTo(width, 0.5));
+                case BarVariant.currentLook:
+                  expect(visible.width, closeTo(width, 0.5));
+                  expect(
+                    tester.getRect(cells.first).width,
+                    closeTo(width / n, 0.5),
+                    reason: '칸이 전체 폭을 균등하게 나눈다',
+                  );
+                  final look = tester.getRect(find.byKey(barHighlightKey));
+                  expect(look.width, closeTo(56, 0.5));
+                  expect(look.height, closeTo(32, 0.5));
                 case BarVariant.centered:
                   expect(
                     visible.width,
@@ -223,32 +289,65 @@ void main() {
                     closeTo(tester.getRect(cells.first).width, 0.5),
                     reason: '선택 표시가 칸 전체다',
                   );
-                  // 아이콘과 라벨이 가로로 나란히 놓인다 (모든 조건에서 칸 안에 들어간다)
-                  final icon = tester.getRect(
-                    find
-                        .descendant(
-                          of: cells.first,
-                          matching: find.byType(Icon),
-                        )
-                        .first,
-                  );
-                  final text = find
-                      .descendant(
-                        of: cells.first,
-                        matching: find.byType(RichText),
-                      )
-                      .evaluate()
-                      .map((e) => e.renderObject)
-                      .whereType<RenderParagraph>()
-                      .firstWhere(
-                        (p) =>
-                            p.text.toPlainText().replaceAll('\u2060', '') ==
-                            tabs.first,
-                      );
+                  // 아이콘과 라벨이 가로로 나란히 놓인다(모든 라벨이 칸에 들어갈 때). 하나라도 안 들어가면 막대 전체가 세로다.
+                  // 한 막대 안에 가로 칸과 세로 칸이 섞이지 않는다
+                  final horizontals = <bool>[
+                    for (var i = 0; i < n; i++)
+                      () {
+                        final icon = tester.getRect(
+                          find
+                              .descendant(
+                                of: cells.at(i),
+                                matching: find.byType(Icon),
+                              )
+                              .first,
+                        );
+                        final text = find
+                            .descendant(
+                              of: cells.at(i),
+                              matching: find.byType(RichText),
+                            )
+                            .evaluate()
+                            .map((e) => e.renderObject)
+                            .whereType<RenderParagraph>()
+                            .firstWhere(
+                              (p) =>
+                                  p.text.toPlainText().replaceAll(
+                                    '\u2060',
+                                    '',
+                                  ) ==
+                                  tabs[i],
+                            );
+                        return text.localToGlobal(Offset.zero).dx >=
+                            icon.right - 0.5;
+                      }(),
+                  ];
                   expect(
-                    text.localToGlobal(Offset.zero).dx,
-                    greaterThanOrEqualTo(icon.right - 0.5),
-                    reason: '라벨이 아이콘 오른쪽에 있다',
+                    horizontals.toSet().length,
+                    1,
+                    reason: '한 막대 안의 칸은 모두 같은 배치다: $horizontals',
+                  );
+                  // 규칙을 따로 다시 계산해 본다: 모든 라벨(굵은 14sp, 글자 확대 1.3배 상한)이 아이콘 28 + 간격 8 + 양옆 여백 16과 함께 칸에 들어가면 가로
+                  final cellWidth = tester.getRect(cells.first).width;
+                  final fitsAll = tabs.every((label) {
+                    final painter = TextPainter(
+                      text: TextSpan(
+                        text: label,
+                        style: SmashText.bodyStrong.copyWith(
+                          fontSize: 14,
+                          height: 1.2,
+                        ),
+                      ),
+                      textDirection: TextDirection.ltr,
+                      textScaler: TextScaler.linear(applied),
+                      maxLines: 1,
+                    )..layout();
+                    return 28 + 8 + painter.width + 16 <= cellWidth;
+                  });
+                  expect(
+                    horizontals.first,
+                    fitsAll,
+                    reason: '가로 규칙: 모든 라벨이 들어가면 가로, 아니면 전부 세로 (칸 폭 $cellWidth)',
                   );
                 case BarVariant.floating:
                   expect(
