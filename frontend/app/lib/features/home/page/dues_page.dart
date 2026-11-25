@@ -14,24 +14,14 @@ class DuesPage extends ConsumerStatefulWidget {
   ConsumerState<DuesPage> createState() => _DuesPageState();
 }
 
-class _DuesPageState extends ConsumerState<DuesPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _DuesPageState extends ConsumerState<DuesPage> {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 1, vsync: this);
     Future.microtask(() {
       ref.read(duesProvider.notifier).load();
       ref.read(groupManagementProvider.notifier).loadAll();
     });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   Future<void> _confirmReset() async {
@@ -85,136 +75,131 @@ class _DuesPageState extends ConsumerState<DuesPage>
     final groupState = ref.watch(groupManagementProvider);
     final groups = groupState.groups;
 
-    if (_tabController.length != groups.length + 1) {
-      _tabController.dispose();
-      _tabController = TabController(
-        length: groups.length + 1 > 1 ? groups.length + 1 : 1,
-        vsync: this,
-      );
-    }
-
     final unassigned = duesState.members
         .where((m) => m.groupId == null)
         .toList();
     final paidCount = duesState.members.where((m) => m.isPaid).length;
     final totalCount = duesState.members.length;
 
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        title: const Text('회비 관리'),
-        actions: [
-          TextButton(
-            onPressed: _confirmReset,
-            child: const Text(
-              '초기화',
-              style: TextStyle(
-                color: AppColors.coral,
-                fontWeight: FontWeight.w700,
+    // 탭 컨트롤러는 DefaultTabController가 맡는다 (조 목록 길이가 바뀌면 안에서 안전하게 바꾸고,
+    // 줄어서 선택한 탭이 범위를 벗어나면 새 마지막 탭으로 맞춘다). 조가 없으면 길이 1이고 TabBar는 보이지 않는다
+    return DefaultTabController(
+      length: groups.length + 1,
+      child: Scaffold(
+        backgroundColor: AppColors.bg,
+        appBar: AppBar(
+          title: const Text('회비 관리'),
+          actions: [
+            TextButton(
+              onPressed: _confirmReset,
+              child: const Text(
+                '초기화',
+                style: TextStyle(
+                  color: AppColors.coral,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-          ),
-        ],
-        bottom: groups.isEmpty
-            ? null
-            : TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                labelColor: AppColors.lime,
-                unselectedLabelColor: AppColors.darkGray,
-                indicatorColor: AppColors.lime,
-                labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
-                tabs: [
-                  ...groups.map((g) => Tab(text: g.label)),
-                  const Tab(text: '미배정'),
-                ],
-              ),
-      ),
-      body: duesState.isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.lime),
-            )
-          : Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
+          ],
+          bottom: groups.isEmpty
+              ? null
+              : TabBar(
+                  isScrollable: true,
+                  labelColor: AppColors.lime,
+                  unselectedLabelColor: AppColors.darkGray,
+                  indicatorColor: AppColors.lime,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
                   ),
-                  color: AppColors.card,
-                  child: Row(
-                    children: [
-                      const Text(
-                        '납부 완료',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.gray,
+                  tabs: [
+                    ...groups.map((g) => Tab(text: g.label)),
+                    const Tab(text: '미배정'),
+                  ],
+                ),
+        ),
+        body: duesState.isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.lime),
+              )
+            : Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    color: AppColors.card,
+                    child: Row(
+                      children: [
+                        const Text(
+                          '납부 완료',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.gray,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '$paidCount / $totalCount명',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.lime,
+                        const SizedBox(width: 8),
+                        Text(
+                          '$paidCount / $totalCount명',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.lime,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Container(
-                        height: 6,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          color: AppColors.card2,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
-                          widthFactor: totalCount == 0
-                              ? 0
-                              : paidCount / totalCount,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.green,
-                              borderRadius: BorderRadius.circular(999),
+                        const Spacer(),
+                        Container(
+                          height: 6,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: AppColors.card2,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: totalCount == 0
+                                ? 0
+                                : paidCount / totalCount,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.green,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Container(height: 0.5, color: AppColors.border),
-                Expanded(
-                  child: groups.isEmpty
-                      ? _DuesTabView(
-                          members: duesState.members,
-                          groups: groups,
-                        )
-                      : TabBarView(
-                          controller: _tabController,
-                          children: [
-                            ...groups.map(
-                              (group) => _DuesTabView(
-                                members: duesState.members
-                                    .where((m) => m.groupId == group.id)
-                                    .toList(),
+                  Container(height: 0.5, color: AppColors.border),
+                  Expanded(
+                    child: groups.isEmpty
+                        ? _DuesTabView(
+                            members: duesState.members,
+                            groups: groups,
+                          )
+                        : TabBarView(
+                            children: [
+                              ...groups.map(
+                                (group) => _DuesTabView(
+                                  members: duesState.members
+                                      .where((m) => m.groupId == group.id)
+                                      .toList(),
+                                  groups: groups,
+                                ),
+                              ),
+                              _DuesTabView(
+                                members: unassigned,
                                 groups: groups,
                               ),
-                            ),
-                            _DuesTabView(
-                              members: unassigned,
-                              groups: groups,
-                            ),
-                          ],
-                        ),
-                ),
-              ],
-            ),
+                            ],
+                          ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }
