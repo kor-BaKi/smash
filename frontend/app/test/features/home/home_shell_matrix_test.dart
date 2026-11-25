@@ -2,16 +2,20 @@ import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/screens/home_shell_states.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
 import 'package:app/features/home/page/admin_menu_page.dart';
+import 'package:app/features/home/page/home_profile_button.dart';
+import 'package:app/features/home/page/profile_page.dart';
+import 'package:app/features/home/page/schedule_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_pump.dart';
 
-/// 홈 셸 상태 5가지를 기기 폭 320/360/390 × 글자 1.0/1.3/2.0 × 키보드(없음/올라옴) 행렬로 검증한다.
+/// 홈 셸 상태 6가지를 기기 폭 320/360/390 × 글자 1.0/1.3/2.0 × 키보드(없음/올라옴) 행렬로 검증한다.
 ///
 /// 칸마다: 오류(오버플로) 없음, 탭 막대는 키보드가 없을 때만 보이고 라벨이 한 줄이며 폭 안에 있고 내용과 겹치지 않음,
-/// 앱바는 많아야 하나(셸이 앱바를 더하지 않는다, 옛 화면 흉내의 자기 앱바 하나뿐), 운영 탭은 10개 항목이 모두 스크롤로 닿음.
+/// 셸 앱바는 하나(제목이 한 줄로 폭 안에 있고 프로필 버튼은 48 이상으로 오른쪽 끝 안에 있음), 옛 화면 흉내의 자기 앱바는 많아야 하나(투표),
+/// 운영 탭은 10개 항목이 모두 스크롤로 닿음, 일정 탭은 "달력 | 투표" 전환이 폭 안에 있음, 프로필이 열린 모양은 탭 막대 없이 뒤로 가기가 있음.
 void main() {
   setUpAll(loadPretendard);
 
@@ -23,23 +27,34 @@ void main() {
     print('LEGACY-NEEDGROUP-OVERFLOW-CELLS=$legacyOverflowCells');
   });
 
-  final states = homeShellScreenEntry.states.take(5).toList();
-  test('행렬이 검증하는 상태 5가지가 계획한 것이다', () {
+  final states = homeShellScreenEntry.states.take(6).toList();
+  test('행렬이 검증하는 상태 6가지가 계획한 것이다', () {
     expect(states.map((s) => s.label), [
-      '회원 홈 탭 (4탭, 조 미배정 안내)',
-      '회원 투표 탭 (옛 화면 흉내: 자기 AppBar)',
-      '운영진 홈 탭 (5탭)',
-      '운영진 운영 탭 (10개 항목)',
-      '운영진 설정 탭 (옛 화면 흉내: 자기 Scaffold와 AppBar)',
+      '부원 홈 탭 (탭 2개, 조 미배정 안내)',
+      '부원 일정 탭: 달력 (옛 화면 흉내)',
+      '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)',
+      '임원 홈 탭 (탭 3개)',
+      '임원 운영 탭 (10개 항목)',
+      '프로필이 열린 모양 (옛 설정 화면 흉내)',
     ]);
   });
 
   const expectedTabs = {
-    '회원 홈 탭 (4탭, 조 미배정 안내)': ['홈', '투표', '달력', '설정'],
-    '회원 투표 탭 (옛 화면 흉내: 자기 AppBar)': ['홈', '투표', '달력', '설정'],
-    '운영진 홈 탭 (5탭)': ['홈', '투표', '달력', '설정', '운영'],
-    '운영진 운영 탭 (10개 항목)': ['홈', '투표', '달력', '설정', '운영'],
-    '운영진 설정 탭 (옛 화면 흉내: 자기 Scaffold와 AppBar)': ['홈', '투표', '달력', '설정', '운영'],
+    '부원 홈 탭 (탭 2개, 조 미배정 안내)': ['홈', '일정'],
+    '부원 일정 탭: 달력 (옛 화면 흉내)': ['홈', '일정'],
+    '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)': ['홈', '일정'],
+    '임원 홈 탭 (탭 3개)': ['홈', '일정', '운영'],
+    '임원 운영 탭 (10개 항목)': ['홈', '일정', '운영'],
+    '프로필이 열린 모양 (옛 설정 화면 흉내)': <String>[],
+  };
+
+  const shellTitle = {
+    '부원 홈 탭 (탭 2개, 조 미배정 안내)': '홈',
+    '부원 일정 탭: 달력 (옛 화면 흉내)': '일정',
+    '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)': '일정',
+    '임원 홈 탭 (탭 3개)': '홈',
+    '임원 운영 탭 (10개 항목)': '운영',
+    '프로필이 열린 모양 (옛 설정 화면 흉내)': '내 정보',
   };
 
   for (final state in states) {
@@ -53,8 +68,30 @@ void main() {
           );
           testWidgets('${state.label} | $c', (tester) async {
             // 홈 탭 상태는 옛 NeedGroupNotice의 넘침을 따로 모은다 (다른 상태는 어떤 오류도 허용하지 않는다)
-            final legacyHome = state.label.contains('홈 탭');
+            // (프로필이 열린 모양은 아래에 홈 탭이 깔려 있어서 같은 넘침이 나올 수 있다)
+            final profileOpen = state.label.contains('프로필');
+            final legacyHome = state.label.contains('홈 탭') || profileOpen;
             final captured = <FlutterErrorDetails>[];
+            // 옛 NeedGroupNotice의 넘침뿐이고 다른 오류는 없다
+            void verifyLegacyErrors() {
+              if (legacyHome) {
+                for (final error in captured) {
+                  final text = error.toString();
+                  expect(
+                    text,
+                    contains('overflowed'),
+                    reason: '넘침 말고 다른 오류는 없다: $text',
+                  );
+                  expect(
+                    text,
+                    contains('home_need_group_notice.dart'),
+                    reason: '옛 NeedGroupNotice의 넘침뿐이다',
+                  );
+                }
+                if (captured.isNotEmpty) legacyOverflowCells++;
+              }
+            }
+
             // 가로챈 오류 처리는 테스트가 실패하더라도 본문 안에서 반드시 되돌린다 (그렇지 않으면 테스트 틀이 멈춘다)
             final originalOnError = FlutterError.onError;
             if (legacyHome) FlutterError.onError = captured.add;
@@ -66,13 +103,82 @@ void main() {
                 conditions: c,
               );
 
-              // 앱바: 셸은 더하지 않는다
-              expect(find.byType(SmashAppBar), findsNothing);
+              // 앱바: 셸 앱바 하나(프로필이 열렸으면 프로필의 앱바 하나). 옛 화면 흉내의 자기 앱바는 투표에서만 하나 더
+              final appBarFinder = find.byType(SmashAppBar);
+              expect(appBarFinder, findsOneWidget);
               expect(
-                find.byType(AppBar).evaluate().length,
-                lessThanOrEqualTo(1),
-                reason: '앱바가 이중으로 보이지 않는다',
+                tester.widget<SmashAppBar>(appBarFinder).title,
+                shellTitle[state.label],
               );
+              final oldAppBars = find.byType(AppBar).evaluate().length;
+              expect(
+                oldAppBars,
+                state.label.contains('투표') ? 1 : 0,
+                reason: '옛 앱바는 투표 보기에서만 겹친다 (임시)',
+              );
+              // 앱바 제목은 한 줄이고 폭 안에 있다
+              final titleBox = find
+                  .descendant(of: appBarFinder, matching: find.byType(RichText))
+                  .evaluate()
+                  .map((e) => e.renderObject)
+                  .whereType<RenderParagraph>()
+                  .firstWhere(
+                    (p) =>
+                        p.text.toPlainText().replaceAll('\u2060', '') ==
+                        shellTitle[state.label],
+                    orElse: () => throw TestFailure(
+                      '앱바에 제목 "${shellTitle[state.label]}"이 없다',
+                    ),
+                  );
+              expect(
+                titleBox.size.height /
+                    (26 * scale), // 제목 한 줄 높이(26)는 글자 배율을 따른다
+                lessThan(1.5),
+              );
+              expect(
+                titleBox.localToGlobal(Offset.zero).dx + titleBox.size.width,
+                lessThanOrEqualTo(width + 0.5),
+              );
+
+              if (profileOpen) {
+                // 프로필이 열린 모양: 탭 막대가 없고 뒤로 가기가 있고 본문(옛 설정 흉내)이 보인다
+                expect(find.byType(SmashBottomNav), findsNothing);
+                expect(find.byType(HomeProfileButton), findsNothing);
+                expect(find.byType(ProfilePage), findsOneWidget);
+                expect(find.text('부원으로 바꾸기'), findsOneWidget);
+                final back = tester.getRect(
+                  find.descendant(
+                    of: appBarFinder,
+                    matching: find.byType(SmashIconButton),
+                  ),
+                );
+                expect(back.width, greaterThanOrEqualTo(48));
+                expect(back.left, greaterThanOrEqualTo(-0.5));
+                verifyLegacyErrors();
+                expect(tester.takeException(), isNull);
+                return;
+              }
+
+              // 프로필 버튼: 앱바 오른쪽 끝 안에 있고 터치 영역이 48 이상이다
+              final profile = tester.getRect(find.byType(HomeProfileButton));
+              expect(profile.width, greaterThanOrEqualTo(48));
+              expect(profile.height, greaterThanOrEqualTo(48));
+              expect(profile.right, lessThanOrEqualTo(width + 0.5));
+              expect(
+                profile.top,
+                greaterThanOrEqualTo(ScreenConditions.safeTop - 0.5),
+              );
+
+              // 일정 탭: "달력 | 투표" 전환이 폭 안에 있다
+              if (state.label.contains('일정')) {
+                final toggle = tester.getRect(
+                  find.byType(SmashSegmentedControl<ScheduleView>),
+                );
+                expect(toggle.left, greaterThanOrEqualTo(-0.5));
+                expect(toggle.right, lessThanOrEqualTo(width + 0.5));
+                expect(find.text('달력'), findsWidgets);
+                expect(find.text('투표'), findsWidgets);
+              }
 
               final tabs = expectedTabs[state.label]!;
               double bodyBottom =
@@ -155,7 +261,9 @@ void main() {
                   final rect = tester.getRect(find.text(label));
                   expect(
                     rect.top,
-                    greaterThanOrEqualTo(ScreenConditions.safeTop - 0.5),
+                    greaterThanOrEqualTo(
+                      ScreenConditions.safeTop + SmashAppBar.height - 0.5,
+                    ),
                     reason: label,
                   );
                   expect(
@@ -200,22 +308,7 @@ void main() {
                 );
               }
 
-              if (legacyHome) {
-                for (final error in captured) {
-                  final text = error.toString();
-                  expect(
-                    text,
-                    contains('overflowed'),
-                    reason: '넘침 말고 다른 오류는 없다: $text',
-                  );
-                  expect(
-                    text,
-                    contains('home_need_group_notice.dart'),
-                    reason: '옛 NeedGroupNotice의 넘침뿐이다',
-                  );
-                }
-                if (captured.isNotEmpty) legacyOverflowCells++;
-              }
+              verifyLegacyErrors();
               expect(tester.takeException(), isNull);
             } finally {
               FlutterError.onError = originalOnError;

@@ -90,9 +90,9 @@ void main() {
     ),
   ];
 
-  testWidgets('제목 운영과 구역 이름, 항목이 순서대로 보인다', (tester) async {
+  testWidgets('구역 이름과 항목이 순서대로 보이고, 제목 "운영"은 셸 앱바의 몫이라 여기에는 없다', (tester) async {
     await show(tester, sections: stub);
-    expect(find.text('운영'), findsOneWidget);
+    expect(find.text('운영'), findsNothing);
     expect(find.text('가 구역'), findsOneWidget);
     final first = tester.getTopLeft(find.text('첫째')).dy;
     final second = tester.getTopLeft(find.text('둘째')).dy;
@@ -122,13 +122,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('스크린리더: 제목과 구역 이름은 제목으로, 항목 아이콘은 읽지 않는다', (tester) async {
+  testWidgets('스크린리더: 구역 이름은 제목으로, 항목 아이콘은 읽지 않는다', (tester) async {
     final handle = tester.ensureSemantics();
     await show(tester, sections: stub);
-    expect(
-      tester.getSemantics(find.text('운영')).flagsCollection.isHeader,
-      isTrue,
-    );
     expect(
       tester.getSemantics(find.text('가 구역')).flagsCollection.isHeader,
       isTrue,

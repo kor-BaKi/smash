@@ -659,7 +659,13 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
                   ? const Center(
                       child: CircularProgressIndicator(color: AppColors.lime),
                     )
-                  : TableCalendar(
+                  // 임시 처치 (S5에서 달력을 새로 만들 때 제거한다): 일정 탭 안에 놓이면서 위에 셸 앱바와
+                  // "달력 | 투표" 전환이 생겨 달력이 쓸 높이가 줄었다. 넘치는 대신 세로로 스크롤되게 감싼다.
+                  // 달력 동작(좌우 스와이프, 날짜 선택)은 그대로다. 세로 스와이프(형식 바꾸기)는 onFormatChanged가
+                  // 없어서 원래도 아무 일을 하지 않았고, 스크롤과 겹치지 않도록 끈다
+                  : SingleChildScrollView(
+                    child: TableCalendar(
+                      availableGestures: AvailableGestures.horizontalSwipe,
                       rowHeight: _kRowHeight,
                       firstDay: DateTime(2020),
                       lastDay: DateTime(2030),
@@ -750,6 +756,7 @@ class _CalendarTabPageState extends ConsumerState<CalendarTabPage> {
                         ),
                       ),
                     ),
+                  ),
             ),
           ],
         ),

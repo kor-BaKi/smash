@@ -7,6 +7,8 @@ import '../../features/home/page/admin_menu_page.dart';
 import '../../features/home/page/home_need_group_notice.dart';
 import '../../features/home/page/home_page.dart';
 import '../../features/home/page/legacy_tab_frame.dart';
+import '../../features/home/page/profile_page.dart';
+import '../../features/home/page/schedule_tab.dart';
 import '../../features/home/provider/auth_provider.dart';
 import 'fake_auth.dart';
 import 'screen_entry.dart';
@@ -14,21 +16,47 @@ import 'screen_entry.dart';
 /// 갤러리에서 처음 선택할 탭 (상태마다 다르게 덮어쓴다)
 final _initialTabProvider = Provider<HomeTab>((ref) => HomeTab.home);
 
-/// 옛 화면(어두운 화면, 자기 Scaffold와 AppBar)을 흉내 낸 임시 탭 내용.
-/// 홈 셸 안에서 옛 화면이 어떻게 보이는지 확인하려는 것이고, 탭 화면이 새 디자인으로 바뀌면(S3~S6) 필요 없어진다.
+/// 일정 탭에서 처음 보일 것 (달력 또는 투표)
+final _initialViewProvider = Provider<ScheduleView>(
+  (ref) => ScheduleView.calendar,
+);
+
+/// 시작하자마자 프로필(내 정보)을 열어 둘지
+final _openProfileProvider = Provider<bool>((ref) => false);
+
+/// 옛 화면(어두운 화면, 자기 Scaffold와 AppBar)을 흉내 낸 임시 화면.
+/// 홈 셸 안에서 옛 화면이 어떻게 보이는지 확인하려는 것이고, 화면이 새 디자인으로 바뀌면(S3b~S8) 필요 없어진다.
 class _OldStylePage extends StatelessWidget {
-  const _OldStylePage(this.title);
+  const _OldStylePage(this.title, {this.withAppBar = true, this.actions});
 
   final String title;
+
+  /// 옛 투표 화면처럼 자기 앱바(제목, 임원의 + 버튼)를 가진 모양인지. 옛 달력 화면은 앱바가 없고 머리글만 있다
+  final bool withAppBar;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(title: Text(title)),
+      appBar: withAppBar
+          ? AppBar(title: Text(title), actions: actions)
+          : null,
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          if (!withAppBar)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.white,
+                ),
+              ),
+            ),
           for (var i = 1; i <= 8; i++)
             Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -48,7 +76,7 @@ class _OldStylePage extends StatelessWidget {
   }
 }
 
-/// 설정 탭 흉내: 눌러서 역할(운영진/회원)을 바꿔 탭이 5개에서 4개로(또는 반대로) 바뀌는 것을 볼 수 있다
+/// 프로필(내 정보) 안쪽 흉내: 눌러서 역할(운영진/부원)을 바꿔 탭이 3개에서 2개로(또는 반대로) 바뀌는 것을 볼 수 있다
 class _RoleSwitchPage extends ConsumerWidget {
   const _RoleSwitchPage();
 
@@ -58,7 +86,6 @@ class _RoleSwitchPage extends ConsumerWidget {
     final isAdmin = user?.isAdmin ?? false;
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(title: const Text('설정')),
       body: Center(
         child: ElevatedButton(
           onPressed: () {
@@ -67,7 +94,7 @@ class _RoleSwitchPage extends ConsumerWidget {
               isAdmin ? FakeAuthNotifier.fakeUser : FakeAuthNotifier.fakeAdmin,
             );
           },
-          child: Text(isAdmin ? '회원으로 바꾸기' : '운영진으로 바꾸기'),
+          child: Text(isAdmin ? '부원으로 바꾸기' : '운영진으로 바꾸기'),
         ),
       ),
     );
@@ -95,64 +122,128 @@ Widget _galleryTab(BuildContext context, HomeTab tab, UserInfo user) {
     HomeTab.home => LegacyTabFrame(
       child: user.groupId == null
           ? NeedGroupNotice(isAdmin: user.isAdmin)
-          : const _OldStylePage('홈'),
+          : const _OldStylePage('홈', withAppBar: false),
     ),
-    HomeTab.polls => const LegacyTabFrame(child: _OldStylePage('투표')),
-    HomeTab.calendar => const LegacyTabFrame(child: _OldStylePage('달력')),
-    HomeTab.settings => const LegacyTabFrame(child: _RoleSwitchPage()),
+    HomeTab.schedule => ScheduleTab(
+      initialView: ProviderScope.containerOf(
+        context,
+      ).read(_initialViewProvider),
+      calendarBuilder: (_) => const _OldStylePage('캘린더', withAppBar: false),
+      pollsBuilder: (_) => _OldStylePage(
+        '투표',
+        actions: user.isAdmin
+            ? [IconButton(icon: const Icon(Icons.add), onPressed: () {})]
+            : null,
+      ),
+    ),
     HomeTab.admin => AdminMenuPage(customSections: _stubAdminSections),
   };
 }
 
-List<Override> _overrides(UserInfo user, HomeTab tab) => [
+/// 처음 그린 뒤에 프로필을 연다 (프로필이 열린 모양을 상태로 보여 주려는 것)
+class _AutoOpenProfile extends StatefulWidget {
+  const _AutoOpenProfile({required this.open, required this.child});
+
+  final bool open;
+  final Widget child;
+
+  @override
+  State<_AutoOpenProfile> createState() => _AutoOpenProfileState();
+}
+
+class _AutoOpenProfileState extends State<_AutoOpenProfile> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.open) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => _galleryProfile(context)),
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+Widget _galleryProfile(BuildContext context) =>
+    const ProfilePage(content: _RoleSwitchPage());
+
+List<Override> _overrides(
+  UserInfo user,
+  HomeTab tab, {
+  ScheduleView view = ScheduleView.calendar,
+  bool openProfile = false,
+}) => [
   authProvider.overrideWith(
     (ref) => FakeAuthNotifier(initial: AuthState(user: user)),
   ),
   _initialTabProvider.overrideWithValue(tab),
+  _initialViewProvider.overrideWithValue(view),
+  _openProfileProvider.overrideWithValue(openProfile),
 ];
 
 final homeShellScreenEntry = ScreenEntry(
-  name: '홈 셸 (S2b)',
+  name: '홈 셸 (S3a-1)',
   description:
-      '하단 탭(홈, 투표, 달력, 설정, 운영진은 운영). 탭 안쪽 화면은 옛 화면을 흉내 낸 임시 화면이다 (S3~S6에서 교체)',
+      '하단 탭(부원은 홈, 일정 / 운영진은 홈, 일정, 운영). 앱바 오른쪽 위에 프로필 버튼(내 정보). 일정 탭은 달력 | 투표 전환. 탭 안쪽 화면은 옛 화면을 흉내 낸 임시 화면이다 (S3b~S8에서 교체)',
   path: '/home',
   // 실제 앱처럼 앱 전체 테마는 옛 어두운 테마다
   builder: (_) => Theme(
     data: AppTheme.dark(),
     child: Consumer(
-      builder: (context, ref, _) => HomePage(
-        initialTab: ref.watch(_initialTabProvider),
-        tabBuilder: _galleryTab,
+      builder: (context, ref, _) => _AutoOpenProfile(
+        open: ref.watch(_openProfileProvider),
+        child: HomePage(
+          initialTab: ref.watch(_initialTabProvider),
+          tabBuilder: _galleryTab,
+          profileBuilder: _galleryProfile,
+        ),
       ),
     ),
   ),
   stubPaths: const ['/login'],
   states: [
     ScreenState(
-      '회원 홈 탭 (4탭, 조 미배정 안내)',
+      '부원 홈 탭 (탭 2개, 조 미배정 안내)',
       overrides: _overrides(FakeAuthNotifier.fakeUser, HomeTab.home),
     ),
     ScreenState(
-      '회원 투표 탭 (옛 화면 흉내: 자기 AppBar)',
-      overrides: _overrides(FakeAuthNotifier.fakeUser, HomeTab.polls),
+      '부원 일정 탭: 달력 (옛 화면 흉내)',
+      overrides: _overrides(FakeAuthNotifier.fakeUser, HomeTab.schedule),
     ),
     ScreenState(
-      '운영진 홈 탭 (5탭)',
+      '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)',
+      overrides: _overrides(
+        FakeAuthNotifier.fakeUser,
+        HomeTab.schedule,
+        view: ScheduleView.polls,
+      ),
+    ),
+    ScreenState(
+      '임원 홈 탭 (탭 3개)',
       overrides: _overrides(FakeAuthNotifier.fakeAdmin, HomeTab.home),
     ),
     ScreenState(
-      '운영진 운영 탭 (10개 항목)',
+      '임원 운영 탭 (10개 항목)',
       overrides: _overrides(FakeAuthNotifier.fakeAdmin, HomeTab.admin),
     ),
     ScreenState(
-      '운영진 설정 탭 (옛 화면 흉내: 자기 Scaffold와 AppBar)',
-      overrides: _overrides(FakeAuthNotifier.fakeAdmin, HomeTab.settings),
+      '프로필이 열린 모양 (옛 설정 화면 흉내)',
+      overrides: _overrides(
+        FakeAuthNotifier.fakeAdmin,
+        HomeTab.home,
+        openProfile: true,
+      ),
     ),
     ScreenState(
-      '직접 눌러 보기 (설정 탭에서 역할 바꾸기)',
+      '직접 눌러 보기 (프로필에서 역할 바꾸기)',
       hint:
-          '운영 탭을 선택한 채로 설정 탭에서 "회원으로 바꾸기"를 눌러 탭이 5개에서 4개로 바뀌고 홈으로 돌아가는지, 키보드 올린 모양에서 탭 막대가 숨는지 확인해 보세요',
-      overrides: _overrides(FakeAuthNotifier.fakeAdmin, HomeTab.settings),
+          '운영 탭을 선택한 채로 프로필 버튼을 눌러 "부원으로 바꾸기"를 누르면 탭이 3개에서 2개로 바뀌고 뒤로 가면 홈으로 돌아와 있는지, 일정 탭에서 달력 | 투표를 눌러 보세요',
+      overrides: _overrides(FakeAuthNotifier.fakeAdmin, HomeTab.admin),
     ),
   ],
 );

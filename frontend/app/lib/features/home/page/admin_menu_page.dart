@@ -103,7 +103,7 @@ final List<AdminMenuSection> adminMenuSections = [
   ),
 ];
 
-/// 운영진의 "운영" 탭 화면. 운영 기능 10개를 구역별 목록으로 보여 준다.
+/// 운영진의 "운영" 탭 화면. 운영 기능 10개를 구역별 목록으로 보여 준다 (제목 "운영"은 셸 앱바가 그린다).
 ///
 /// 항목을 누르면 지금처럼 옛 화면이 위에 쌓인다 (그 화면들은 운영 화면을 옮기는 S8에서 교체한다).
 class AdminMenuPage extends StatelessWidget {
@@ -121,18 +121,6 @@ class AdminMenuPage extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.only(bottom: SmashSpacing.lg),
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              SmashSpacing.md,
-              SmashSpacing.md,
-              SmashSpacing.md,
-              SmashSpacing.xs,
-            ),
-            child: Semantics(
-              header: true,
-              child: const SmashLabel('운영', style: SmashText.title),
-            ),
-          ),
           for (final section in sections) ...[
             const SizedBox(height: SmashSpacing.sm),
             SmashSectionHeader(

@@ -5,6 +5,8 @@ import 'package:app/dev/screens/fake_auth.dart';
 import 'package:app/features/auth/model/auth_model.dart';
 import 'package:app/features/home/page/admin_menu_page.dart';
 import 'package:app/features/home/page/home_page.dart';
+import 'package:app/features/home/page/home_profile_button.dart';
+import 'package:app/features/home/page/profile_page.dart';
 import 'package:app/features/home/page/setting_page.dart';
 import 'package:app/features/home/provider/auth_provider.dart';
 import 'package:dio/dio.dart';
@@ -23,7 +25,9 @@ import '../../support/screen_pump.dart';
 /// 하단 탭이 아래 안전 영역을 맡으므로 탭 안쪽의 옛 화면은 아래 inset을 받지 않아야 한다.
 /// 예전에는 옛 달력/설정 화면의 자기 SafeArea가 34를 또 비워서 iPhone 16 Pro급 기기에서 5줄 달 달력이 넘쳤다.
 ///
-/// 6줄 달과 iPhone SE처럼 작은 화면의 달력 넘침은 이전부터 있던 문제라 여기서 확인하지 않는다 (달력을 새로 만드는 S6에서).
+/// 일정 탭의 달력은 셸 앱바(56)와 "달력 | 투표" 전환이 위에 생겨 쓸 높이가 줄었다. 그래서 옛 달력을 세로로 스크롤되게 감싼
+/// 임시 처치가 들어 있고(S5에서 달력을 새로 만들 때 제거), 4/5/6줄 달이 어느 기기 크기에서도 넘치지 않는지 여기서 확인한다.
+/// (처치 전에는 6줄 달과 iPhone SE처럼 작은 화면에서 이전부터 넘쳤다)
 void main() {
   setUpAll(() async {
     await initializeDateFormatting('ko_KR', null);
@@ -140,63 +144,146 @@ void main() {
     return errors.where((e) => e.contains('overflowed')).toList();
   }
 
-  group('달력 탭: 줄 수를 아는 달로 옮겨서 확인 (날짜와 무관)', () {
-    for (final rows in [4, 5]) {
-      testWidgets('iPhone 16 Pro 조건(402×874, 위 62, 아래 34): $rows줄 달이 넘치지 않는다', (
-        tester,
-      ) async {
-        late List<String> overflows;
-        await capture((errors) async {
-          await open(tester, HomeTab.calendar);
-          await goMonths(tester, monthsToNearest(rows));
-          overflows = await overflowsAtTarget(tester, errors);
+  group('일정 탭의 달력: 줄 수를 아는 달로 옮겨서 확인 (날짜와 무관)', () {
+    // (이름, 크기, 위 안전 영역, 아래 안전 영역)
+    const devices = <(String, Size, double, double)>[
+      ('iPhone 16 Pro', Size(402, 874), 62, 34),
+      ('iPhone 15', Size(393, 852), 59, 34),
+      ('Android 360×800', Size(360, 800), 24, 0),
+      ('Android 360×640', Size(360, 640), 24, 0),
+      ('iPhone SE', Size(375, 667), 20, 0),
+      ('갤러리 320×568', Size(320, 568), 44, 34),
+    ];
+    for (final d in devices) {
+      for (final rows in [4, 5, 6]) {
+        testWidgets('${d.$1}: $rows줄 달이 넘치지 않는다', (tester) async {
+          late List<String> overflows;
+          await capture((errors) async {
+            await open(
+              tester,
+              HomeTab.schedule,
+              size: d.$2,
+              top: d.$3,
+              bottom: d.$4,
+            );
+            await goMonths(tester, monthsToNearest(rows));
+            overflows = await overflowsAtTarget(tester, errors);
+          });
+          expect(find.byType(TableCalendar), findsOneWidget);
+          expect(
+            overflows,
+            isEmpty,
+            reason: overflows.join('\n').split('\n').take(4).join(' | '),
+          );
         });
-        expect(find.byType(TableCalendar), findsOneWidget);
-        expect(
-          overflows,
-          isEmpty,
-          reason: overflows.join('\n').split('\n').take(4).join(' | '),
-        );
-
-        // 달력에 주어진 높이가 필요한 높이(머리글 64 + 요일 28 + 줄 수 × 110) 이상이다
-        final area = tester
-            .getSize(
-              find
-                  .ancestor(
-                    of: find.byType(TableCalendar),
-                    matching: find.byType(Expanded),
-                  )
-                  .first,
-            )
-            .height;
-        expect(area, greaterThanOrEqualTo(64 + 28 + rows * 110));
-      });
+      }
     }
 
-    testWidgets('Android 조건(360×800, 위 24, 아래 0): 5줄 달이 넘치지 않는다 (기존과 같다)', (
-      tester,
-    ) async {
-      late List<String> overflows;
+    testWidgets('달력 아래 줄까지 스크롤로 닿는다 (높이가 모자란 기기: 6줄 달)', (tester) async {
       await capture((errors) async {
         await open(
           tester,
-          HomeTab.calendar,
-          size: const Size(360, 800),
+          HomeTab.schedule,
+          size: const Size(360, 640),
           top: 24,
           bottom: 0,
         );
-        await goMonths(tester, monthsToNearest(5));
-        overflows = await overflowsAtTarget(tester, errors);
+        await goMonths(tester, monthsToNearest(6));
       });
-      expect(overflows, isEmpty);
+      final view = tester.view.physicalSize.height;
+      final nav = tester.getRect(find.byType(SmashBottomNav));
+      expect(nav.top, lessThan(view));
+      // 달력을 끌어 올리면 마지막 줄(말일이 있는 줄)이 탭 막대 위에 나타난다
+      // (손가락이 놓이는 곳은 화면 안이어야 하므로 달력 위젯이 아니라 화면에 보이는 스크롤 영역을 끈다)
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -2000),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final scroll = tester.state<ScrollableState>(
+        find
+            .descendant(
+              of: find.byType(SingleChildScrollView),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(scroll.position.pixels, greaterThan(0), reason: '세로로 스크롤된다');
+      expect(
+        scroll.position.pixels,
+        scroll.position.maxScrollExtent,
+        reason: '끝까지 닿는다 (마지막 줄이 탭 막대 위에 보인다)',
+      );
+    });
+
+    testWidgets('달력 동작은 그대로다: 좌우로 밀면 달이 바뀌고 날짜를 누르면 선택된다', (tester) async {
+      await capture((errors) async {
+        await open(tester, HomeTab.schedule);
+      });
+      String header() => tester
+          .widgetList<Text>(find.textContaining('년'))
+          .map((t) => t.data ?? t.textSpan?.toPlainText() ?? '')
+          .firstWhere((t) => t.contains('월'), orElse: () => '');
+      final before = header();
+      await tester.flingFrom(
+        tester.getTopLeft(find.byType(TableCalendar)) + const Offset(180, 150),
+        const Offset(-400, 0),
+        1500,
+      );
+      await tester.pumpAndSettle();
+      final after = header();
+      expect(after, isNot(before), reason: '왼쪽으로 밀면 다음 달');
+      await tester.flingFrom(
+        tester.getTopLeft(find.byType(TableCalendar)) + const Offset(180, 150),
+        const Offset(400, 0),
+        1500,
+      );
+      await tester.pumpAndSettle();
+      expect(header(), before, reason: '오른쪽으로 밀면 돌아온다');
+
+      final calendar = tester.widget<TableCalendar>(find.byType(TableCalendar));
+      final today = DateTime.now();
+      final target = DateTime(
+        today.year,
+        today.month,
+        today.day == 15 ? 16 : 15,
+      );
+      expect(calendar.selectedDayPredicate!(target), isFalse);
+      await tester.tap(find.text('${target.day}').first);
+      await tester.pumpAndSettle();
+      final selected = tester.widget<TableCalendar>(find.byType(TableCalendar));
+      expect(
+        selected.selectedDayPredicate!(target),
+        isTrue,
+        reason: '누른 날짜가 선택된다',
+      );
+    });
+
+    testWidgets('달력의 세로 제스처는 꺼져 있다 (스크롤과 겹치지 않는다)', (tester) async {
+      await capture((errors) async {
+        await open(tester, HomeTab.schedule);
+      });
+      expect(
+        tester
+            .widget<TableCalendar>(find.byType(TableCalendar))
+            .availableGestures,
+        AvailableGestures.horizontalSwipe,
+      );
     });
   });
 
-  group('설정 탭', () {
-    testWidgets('옛 설정 화면의 SafeArea가 아래를 또 비우지 않는다 (아래 inset 0)', (
+  group('프로필(내 정보) 화면: 옛 설정 화면이 안전 영역을 두 번 비우지 않는다', () {
+    testWidgets('앱바와 뒤로 가기가 있고, 옛 설정 화면의 SafeArea는 위와 아래를 또 비우지 않는다', (
       tester,
     ) async {
-      await open(tester, HomeTab.settings);
+      await open(tester, HomeTab.home);
+      await tester.tap(find.byType(HomeProfileButton));
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfilePage), findsOneWidget);
+      expect(find.byType(SettingPage), findsOneWidget);
+      expect(find.byType(SmashAppBar), findsOneWidget);
+
       final safeArea = find.descendant(
         of: find.byType(SettingPage),
         matching: find.byType(SafeArea),
@@ -206,16 +293,25 @@ void main() {
           .widget<Padding>(
             find.descendant(of: safeArea, matching: find.byType(Padding)).first,
           )
-          .padding;
-      expect(
-        padding.resolve(TextDirection.ltr).bottom,
-        0,
-        reason: '하단 탭이 아래 안전 영역을 이미 맡고 있다',
-      );
+          .padding
+          .resolve(TextDirection.ltr);
+      expect(padding.top, 0, reason: '앱바가 위 안전 영역을 맡고 있다');
+      expect(padding.bottom, 0, reason: '프로필 화면의 본문 틀이 아래 안전 영역을 이미 맡고 있다');
+    });
+
+    testWidgets('뒤로 가면 탭 화면으로 돌아오고 탭 선택은 그대로다', (tester) async {
+      await open(tester, HomeTab.schedule);
+      await tester.tap(find.byType(HomeProfileButton));
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfilePage), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('뒤로'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfilePage), findsNothing);
+      expect(tester.widget<SmashAppBar>(find.byType(SmashAppBar)).title, '일정');
     });
 
     testWidgets('탭 막대는 여전히 아래 안전 영역(34)을 자기 안쪽에서 비운다', (tester) async {
-      await open(tester, HomeTab.settings);
+      await open(tester, HomeTab.home);
       final nav = tester.getRect(find.byType(SmashBottomNav));
       expect(nav.bottom, 874);
       expect(nav.height, greaterThan(34 + 48));
@@ -256,7 +352,7 @@ void main() {
     testWidgets('아래 inset 0인 기기에서도 달력과 탭 막대 위치가 그대로다 (회귀 없음)', (tester) async {
       await open(
         tester,
-        HomeTab.calendar,
+        HomeTab.schedule,
         size: const Size(360, 800),
         top: 24,
         bottom: 0,
