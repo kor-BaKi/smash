@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:app/features/auth/auth_messages.dart';
 import 'package:app/core/design/components/components.dart';
+import 'package:app/dev/screens/bottom_bar_compare_states.dart';
 import 'package:app/dev/screens/login_screen_states.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
 import 'package:app/dev/screens/screen_gallery_app.dart';
@@ -202,6 +203,24 @@ void main() {
         await tester.tap(find.text(label));
         await tester.pumpAndSettle();
       }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('하단 막대 비교: 목록에 상태 8개가 있고 상태를 열어 막대를 눌러 볼 수 있다', (tester) async {
+      await open(tester);
+      await tester.tap(find.text('하단 막대 비교 (S3a 후속)'));
+      await tester.pumpAndSettle();
+      for (final label in bottomBarCompareScreenEntry.states.map(
+        (s) => s.label,
+      )) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      await tester.tap(find.text('안 3 떠 있는 막대 · 임원 3탭'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(barOuterKey), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel(RegExp('^운영, ')));
+      await tester.pumpAndSettle();
+      expect(tester.widget<SmashAppBar>(find.byType(SmashAppBar)).title, '운영');
       expect(tester.takeException(), isNull);
     });
 

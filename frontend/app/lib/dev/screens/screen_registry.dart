@@ -1,3 +1,4 @@
+import 'bottom_bar_compare_states.dart';
 import 'home_shell_states.dart';
 import 'login_screen_states.dart';
 import 'screen_entry.dart';
@@ -9,4 +10,5 @@ final List<ScreenEntry> screenGalleryEntries = [
   loginScreenEntry,
   signupScreenEntry,
   homeShellScreenEntry,
+  bottomBarCompareScreenEntry,
 ];
