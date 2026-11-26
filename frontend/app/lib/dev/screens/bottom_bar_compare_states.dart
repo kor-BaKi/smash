@@ -12,7 +12,6 @@ import '../../core/design/radius.dart';
 import '../../core/design/shadows.dart';
 import '../../core/design/spacing.dart';
 import '../../core/design/typography.dart';
-import '../../features/home/page/home_page.dart';
 import 'screen_entry.dart';
 
 /// 하단 막대 모양 비교 (개발 전용). 탭 구조(부원 홈/일정, 임원 홈/일정/운영)는 그대로이고 막대 모양만 다르다.
@@ -63,7 +62,7 @@ final ValueNotifier<double?> compareBodyBottomPadding = ValueNotifier(null);
 
 /// 탭 구성 (구조는 아직 확정이 아니라 갤러리에서만 비교한다)
 enum TabSet {
-  /// 지금: 부원 홈/일정, 임원 홈/일정/운영
+  /// 예전 구성(S3a-1): 부원 홈/일정, 임원 홈/일정/운영 (이 비교 화면에서만 고정해 둔다)
   base(''),
 
   /// 구성 C: 부원 홈/일정/내 정보, 임원 홈/일정/운영/내 정보
@@ -111,9 +110,8 @@ enum TabSet {
       selectedIcon: Icons.sports_tennis,
     );
     return switch (this) {
-      TabSet.base => [
-        for (final t in homeTabsFor(isAdmin: admin)) t.destination,
-      ],
+      // 갤러리 비교용 "예전 구성"(부원 홈/일정, 임원 홈/일정/운영)을 고정한다. 실제 홈 셸의 탭 구성(`homeTabsFor`)과 별개다
+      TabSet.base => [home, schedule, if (admin) operate],
       TabSet.c => [home, schedule, if (admin) operate, me],
       TabSet.aRecord => [home, schedule, record, if (admin) operate, me],
       TabSet.aActivity => [home, schedule, activity, if (admin) operate, me],

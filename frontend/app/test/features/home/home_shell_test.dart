@@ -9,7 +9,6 @@ import 'package:app/dev/screens/screen_entry.dart';
 import 'package:app/features/auth/model/auth_model.dart';
 import 'package:app/features/home/page/admin_menu_page.dart';
 import 'package:app/features/home/page/home_need_group_notice.dart';
-import 'package:app/features/home/page/home_profile_button.dart';
 import 'package:app/features/home/page/home_page.dart';
 import 'package:app/features/home/page/legacy_tab_frame.dart';
 import 'package:app/features/home/provider/auth_provider.dart';
@@ -98,35 +97,49 @@ void main() {
   }
 
   group('탭 구성', () {
-    test('역할별 탭 목록: 부원은 홈과 일정, 운영진은 운영이 마지막에 하나 더', () {
-      expect(homeTabsFor(isAdmin: false), [HomeTab.home, HomeTab.schedule]);
+    test('역할별 탭 목록: 부원은 홈, 일정, 내 정보 / 운영진은 일정 다음에 운영, 내 정보는 항상 마지막', () {
+      expect(homeTabsFor(isAdmin: false), [
+        HomeTab.home,
+        HomeTab.schedule,
+        HomeTab.profile,
+      ]);
       expect(homeTabsFor(isAdmin: true), [
         HomeTab.home,
         HomeTab.schedule,
         HomeTab.admin,
+        HomeTab.profile,
       ]);
     });
 
-    test('탭 이름은 홈, 일정, 운영이고 아이콘은 선택 아이콘이 따로 있다', () {
-      expect(HomeTab.values.map((t) => t.label), ['홈', '일정', '운영']);
-      for (final tab in HomeTab.values) {
-        expect(tab.selectedIcon, isNot(tab.icon), reason: tab.label);
-      }
-    });
+    test(
+      '탭 이름은 홈, 일정, 운영, 내 정보이고 아이콘은 선택 아이콘이 따로 있다 (내 정보는 person_outline / person)',
+      () {
+        expect(HomeTab.values.map((t) => t.label), ['홈', '일정', '운영', '내 정보']);
+        expect(HomeTab.profile.icon, Icons.person_outline);
+        expect(HomeTab.profile.selectedIcon, Icons.person);
+        for (final tab in HomeTab.values) {
+          expect(tab.selectedIcon, isNot(tab.icon), reason: tab.label);
+        }
+      },
+    );
 
-    testWidgets('부원: 탭 2개, 첫 탭 선택', (tester) async {
+    testWidgets('부원: 탭 3개(홈, 일정, 내 정보), 첫 탭 선택', (tester) async {
       await open(tester, user: FakeAuthNotifier.fakeUser);
-      expect(labels(tester), ['홈', '일정']);
+      expect(labels(tester), ['홈', '일정', '내 정보']);
       expect(nav(tester).selectedIndex, 0);
       expect(find.text('TAB-home'), findsOneWidget);
     });
 
-    testWidgets('운영진: 탭 3개, 운영이 마지막', (tester) async {
+    testWidgets('운영진: 탭 4개(홈, 일정, 운영, 내 정보), 운영은 일정 다음이고 내 정보가 마지막', (
+      tester,
+    ) async {
       await open(tester, user: FakeAuthNotifier.fakeAdmin);
-      expect(labels(tester), ['홈', '일정', '운영']);
+      expect(labels(tester), ['홈', '일정', '운영', '내 정보']);
     });
 
-    testWidgets('투표, 달력, 설정 탭은 없다 (투표는 일정 안에서, 설정은 프로필 버튼으로 간다)', (tester) async {
+    testWidgets('투표, 달력, 설정 탭은 없다 (투표는 일정 안에서, 설정은 내 정보 탭에서 만난다)', (
+      tester,
+    ) async {
       await open(tester, user: FakeAuthNotifier.fakeAdmin);
       for (final gone in ['투표', '달력', '설정']) {
         expect(find.bySemanticsLabel(RegExp('^$gone, ')), findsNothing);
@@ -172,7 +185,7 @@ void main() {
 
     testWidgets('운영 탭까지 모두 눌러 볼 수 있다', (tester) async {
       await open(tester, user: FakeAuthNotifier.fakeAdmin);
-      for (final label in ['일정', '운영', '홈']) {
+      for (final label in ['일정', '운영', '내 정보', '홈']) {
         await select(tester, label);
         expect(
           nav(tester).destinations[nav(tester).selectedIndex].label,
@@ -183,7 +196,7 @@ void main() {
   });
 
   group('역할이 바뀌어 탭 수가 달라질 때 선택이 범위를 벗어나지 않는다', () {
-    testWidgets('운영진 → 부원 (3 → 2탭): 운영 탭에 있었다면 홈으로 돌아간다', (tester) async {
+    testWidgets('운영진 → 부원 (4 → 3탭): 운영 탭에 있었다면 홈으로 돌아간다', (tester) async {
       final fake = await open(
         tester,
         user: FakeAuthNotifier.fakeAdmin,
@@ -195,9 +208,26 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(labels(tester), ['홈', '일정']);
+      expect(labels(tester), ['홈', '일정', '내 정보']);
       expect(nav(tester).selectedIndex, 0);
       expect(find.text('TAB-home'), findsOneWidget);
+    });
+
+    testWidgets('운영진 → 부원: 내 정보 탭에 있었다면 칸 번호는 3에서 2로 바뀌어도 내 정보가 그대로 선택된다', (
+      tester,
+    ) async {
+      final fake = await open(
+        tester,
+        user: FakeAuthNotifier.fakeAdmin,
+        initialTab: HomeTab.profile,
+      );
+      expect(nav(tester).selectedIndex, 3);
+      fake.setUser(FakeAuthNotifier.fakeUser);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(labels(tester), ['홈', '일정', '내 정보']);
+      expect(nav(tester).selectedIndex, 2);
+      expect(find.text('TAB-profile'), findsOneWidget);
     });
 
     testWidgets('운영진 → 부원: 운영이 아닌 탭에 있었다면 그 탭이 그대로다', (tester) async {
@@ -212,12 +242,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(labels(tester).length, 2);
+      expect(labels(tester).length, 3);
       expect(nav(tester).selectedIndex, 1);
       expect(find.text('TAB-schedule'), findsOneWidget);
     });
 
-    testWidgets('부원 → 운영진 (2 → 3탭): 선택은 그대로이고 운영 탭이 생긴다', (tester) async {
+    testWidgets('부원 → 운영진 (3 → 4탭): 선택은 그대로이고 운영 탭이 일정 다음에 생긴다', (
+      tester,
+    ) async {
       final fake = await open(
         tester,
         user: FakeAuthNotifier.fakeUser,
@@ -226,8 +258,24 @@ void main() {
       fake.setUser(FakeAuthNotifier.fakeAdmin);
       await tester.pumpAndSettle();
 
-      expect(labels(tester), ['홈', '일정', '운영']);
+      expect(labels(tester), ['홈', '일정', '운영', '내 정보']);
       expect(nav(tester).selectedIndex, 1);
+    });
+
+    testWidgets('부원 → 운영진: 내 정보 탭에 있었다면 칸 번호는 2에서 3으로 바뀌어도 내 정보가 그대로 선택된다', (
+      tester,
+    ) async {
+      final fake = await open(
+        tester,
+        user: FakeAuthNotifier.fakeUser,
+        initialTab: HomeTab.profile,
+      );
+      expect(nav(tester).selectedIndex, 2);
+      fake.setUser(FakeAuthNotifier.fakeAdmin);
+      await tester.pumpAndSettle();
+      expect(labels(tester), ['홈', '일정', '운영', '내 정보']);
+      expect(nav(tester).selectedIndex, 3);
+      expect(find.text('TAB-profile'), findsOneWidget);
     });
 
     testWidgets('운영 탭에서 부원이 되었다가 다시 운영진이 되어도 운영 탭이 되살아나지 않는다 (홈에 머문다)', (
@@ -288,7 +336,8 @@ void main() {
 
     testWidgets('셸이 앱바를 하나 그린다: 제목은 지금 탭 이름이고 탭을 바꾸면 따라 바뀐다', (tester) async {
       await open(tester, user: FakeAuthNotifier.fakeAdmin);
-      String title() => tester.widget<SmashAppBar>(find.byType(SmashAppBar)).title;
+      String title() =>
+          tester.widget<SmashAppBar>(find.byType(SmashAppBar)).title;
       expect(find.byType(SmashAppBar), findsOneWidget);
       expect(find.byType(AppBar), findsNothing);
       expect(title(), '홈');
@@ -296,17 +345,51 @@ void main() {
       expect(title(), '일정');
       await select(tester, '운영');
       expect(title(), '운영');
+      await select(tester, '내 정보');
+      expect(title(), '내 정보');
     });
 
-    testWidgets('앱바 오른쪽에 프로필 버튼이 있고 "내 정보"로 읽힌다 (세 탭 모두)', (tester) async {
+    testWidgets('앱바에는 프로필 버튼도 뒤로 가기도 없다 (모든 탭, 내 정보 탭 포함)', (tester) async {
       final handle = tester.ensureSemantics();
       await open(tester, user: FakeAuthNotifier.fakeAdmin);
-      for (final label in ['홈', '일정', '운영']) {
+      for (final label in ['홈', '일정', '운영', '내 정보']) {
         await select(tester, label);
-        expect(find.byType(HomeProfileButton), findsOneWidget, reason: label);
-        expect(find.bySemanticsLabel('내 정보'), findsOneWidget, reason: label);
+        expect(
+          find.descendant(
+            of: find.byType(SmashAppBar),
+            matching: find.byType(SmashIconButton),
+          ),
+          findsNothing,
+          reason: label,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(SmashAppBar),
+            matching: find.byType(SmashAvatar),
+          ),
+          findsNothing,
+          reason: label,
+        );
+        expect(find.bySemanticsLabel('뒤로'), findsNothing, reason: label);
       }
       handle.dispose();
+    });
+
+    test('프로필 버튼 소스와 진입 경로가 없다 (파일이 없고 홈 셸이 부르지 않는다)', () {
+      expect(
+        File('lib/features/home/page/home_profile_button.dart').existsSync(),
+        isFalse,
+      );
+      final home = File(
+        'lib/features/home/page/home_page.dart',
+      ).readAsStringSync();
+      expect(home.contains('HomeProfileButton'), isFalse);
+      expect(home.contains('profileBuilder'), isFalse);
+      expect(
+        home.contains('MaterialPageRoute'),
+        isFalse,
+        reason: '내 정보는 쌓는 화면이 아니라 탭이다',
+      );
     });
   });
 
@@ -378,8 +461,16 @@ void main() {
         r'LegacyTabFrame\(',
       ).allMatches(File(path).readAsStringSync()).length;
       expect(uses('lib/features/home/page/home_page.dart'), 1, reason: '홈');
-      expect(uses('lib/features/home/page/schedule_tab.dart'), 1, reason: '달력과 투표');
-      expect(uses('lib/features/home/page/profile_page.dart'), 1, reason: '설정');
+      expect(
+        uses('lib/features/home/page/schedule_tab.dart'),
+        1,
+        reason: '달력과 투표',
+      );
+      expect(
+        uses('lib/features/home/page/profile_page.dart'),
+        1,
+        reason: '내 정보 탭의 옛 설정',
+      );
     });
   });
 }

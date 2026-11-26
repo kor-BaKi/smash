@@ -5,7 +5,6 @@ const migratedScreens = <String>[
   'lib/features/auth/page/signup_page.dart', // S1b
   'lib/features/home/page/home_page.dart', // S2b 홈 셸 (탭 안쪽 옛 화면은 LegacyTabFrame으로 감싼다)
   'lib/features/home/page/admin_menu_page.dart', // S2b 운영 탭
-  'lib/features/home/page/home_profile_button.dart', // S3a-1 프로필 버튼
-  'lib/features/home/page/profile_page.dart', // S3a-1 내 정보 임시 화면(옛 설정 연결)
+  'lib/features/home/page/profile_page.dart', // S3a-1b 내 정보 탭 내용(옛 설정 연결, 임시)
   'lib/features/home/page/schedule_tab.dart', // S3a-1 일정 탭의 달력 | 투표 전환
 ];

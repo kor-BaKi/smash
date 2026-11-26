@@ -5,7 +5,6 @@ import 'package:app/dev/screens/fake_auth.dart';
 import 'package:app/features/auth/model/auth_model.dart';
 import 'package:app/features/home/page/admin_menu_page.dart';
 import 'package:app/features/home/page/home_page.dart';
-import 'package:app/features/home/page/home_profile_button.dart';
 import 'package:app/features/home/page/profile_page.dart';
 import 'package:app/features/home/page/setting_page.dart';
 import 'package:app/features/home/provider/auth_provider.dart';
@@ -273,41 +272,52 @@ void main() {
     });
   });
 
-  group('프로필(내 정보) 화면: 옛 설정 화면이 안전 영역을 두 번 비우지 않는다', () {
-    testWidgets('앱바와 뒤로 가기가 있고, 옛 설정 화면의 SafeArea는 위와 아래를 또 비우지 않는다', (
-      tester,
-    ) async {
-      await open(tester, HomeTab.home);
-      await tester.tap(find.byType(HomeProfileButton));
-      await tester.pumpAndSettle();
-      expect(find.byType(ProfilePage), findsOneWidget);
-      expect(find.byType(SettingPage), findsOneWidget);
-      expect(find.byType(SmashAppBar), findsOneWidget);
+  group('내 정보 탭: 옛 설정 화면이 안전 영역을 두 번 비우지 않는다', () {
+    testWidgets(
+      '앱바(제목 내 정보)가 있고 뒤로 가기는 없고, 옛 설정 화면의 SafeArea는 위와 아래를 또 비우지 않는다',
+      (tester) async {
+        await open(tester, HomeTab.profile);
+        expect(find.byType(ProfilePage), findsOneWidget);
+        expect(find.byType(SettingPage), findsOneWidget);
+        expect(find.byType(SmashAppBar), findsOneWidget);
+        expect(
+          tester.widget<SmashAppBar>(find.byType(SmashAppBar)).title,
+          '내 정보',
+        );
+        expect(find.bySemanticsLabel('뒤로'), findsNothing);
 
-      final safeArea = find.descendant(
-        of: find.byType(SettingPage),
-        matching: find.byType(SafeArea),
-      );
-      expect(safeArea, findsOneWidget);
-      final padding = tester
-          .widget<Padding>(
-            find.descendant(of: safeArea, matching: find.byType(Padding)).first,
-          )
-          .padding
-          .resolve(TextDirection.ltr);
-      expect(padding.top, 0, reason: '앱바가 위 안전 영역을 맡고 있다');
-      expect(padding.bottom, 0, reason: '프로필 화면의 본문 틀이 아래 안전 영역을 이미 맡고 있다');
-    });
+        final safeArea = find.descendant(
+          of: find.byType(SettingPage),
+          matching: find.byType(SafeArea),
+        );
+        expect(safeArea, findsOneWidget);
+        final padding = tester
+            .widget<Padding>(
+              find
+                  .descendant(of: safeArea, matching: find.byType(Padding))
+                  .first,
+            )
+            .padding
+            .resolve(TextDirection.ltr);
+        expect(padding.top, 0, reason: '앱바가 위 안전 영역을 맡고 있다');
+        expect(padding.bottom, 0, reason: '하단 탭이 아래 안전 영역을 이미 맡고 있다');
+      },
+    );
 
-    testWidgets('뒤로 가면 탭 화면으로 돌아오고 탭 선택은 그대로다', (tester) async {
+    testWidgets('다른 탭으로 갔다가 내 정보 탭으로 오가도 오류가 없고 선택이 따라간다', (tester) async {
       await open(tester, HomeTab.schedule);
-      await tester.tap(find.byType(HomeProfileButton));
+      await tester.tap(find.bySemanticsLabel(RegExp('^내 정보, ')));
       await tester.pumpAndSettle();
       expect(find.byType(ProfilePage), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel('뒤로'));
+      expect(
+        tester.widget<SmashAppBar>(find.byType(SmashAppBar)).title,
+        '내 정보',
+      );
+      await tester.tap(find.bySemanticsLabel(RegExp('^일정, ')));
       await tester.pumpAndSettle();
       expect(find.byType(ProfilePage), findsNothing);
       expect(tester.widget<SmashAppBar>(find.byType(SmashAppBar)).title, '일정');
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('탭 막대는 여전히 아래 안전 영역(34)을 자기 안쪽에서 비운다', (tester) async {

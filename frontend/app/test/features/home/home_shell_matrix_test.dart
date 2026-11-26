@@ -2,8 +2,6 @@ import 'package:app/core/design/components/components.dart';
 import 'package:app/dev/screens/home_shell_states.dart';
 import 'package:app/dev/screens/screen_conditions.dart';
 import 'package:app/features/home/page/admin_menu_page.dart';
-import 'package:app/features/home/page/home_profile_button.dart';
-import 'package:app/features/home/page/profile_page.dart';
 import 'package:app/features/home/page/schedule_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -14,8 +12,8 @@ import '../../support/screen_pump.dart';
 /// 홈 셸 상태 6가지를 기기 폭 320/360/390 × 글자 1.0/1.3/2.0 × 키보드(없음/올라옴) 행렬로 검증한다.
 ///
 /// 칸마다: 오류(오버플로) 없음, 탭 막대는 키보드가 없을 때만 보이고 라벨이 한 줄이며 폭 안에 있고 내용과 겹치지 않음,
-/// 셸 앱바는 하나(제목이 한 줄로 폭 안에 있고 프로필 버튼은 48 이상으로 오른쪽 끝 안에 있음), 옛 화면 흉내의 자기 앱바는 많아야 하나(투표),
-/// 운영 탭은 10개 항목이 모두 스크롤로 닿음, 일정 탭은 "달력 | 투표" 전환이 폭 안에 있음, 프로필이 열린 모양은 탭 막대 없이 뒤로 가기가 있음.
+/// 셸 앱바는 하나(제목이 한 줄로 폭 안에 있고 앱바에 뒤로 가기나 프로필 버튼 같은 버튼이 없음), 옛 화면 흉내의 자기 앱바는 많아야 하나(투표),
+/// 운영 탭은 10개 항목이 모두 스크롤로 닿음, 일정 탭은 "달력 | 투표" 전환이 폭 안에 있음, 내 정보 탭은 옛 설정 흉내가 보이고 뒤로 가기가 없음.
 void main() {
   setUpAll(loadPretendard);
 
@@ -30,31 +28,31 @@ void main() {
   final states = homeShellScreenEntry.states.take(6).toList();
   test('행렬이 검증하는 상태 6가지가 계획한 것이다', () {
     expect(states.map((s) => s.label), [
-      '부원 홈 탭 (탭 2개, 조 미배정 안내)',
+      '부원 홈 탭 (탭 3개, 조 미배정 안내)',
       '부원 일정 탭: 달력 (옛 화면 흉내)',
       '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)',
-      '임원 홈 탭 (탭 3개)',
+      '임원 홈 탭 (탭 4개)',
       '임원 운영 탭 (10개 항목)',
-      '프로필이 열린 모양 (옛 설정 화면 흉내)',
+      '내 정보 탭 (옛 설정 화면 흉내)',
     ]);
   });
 
   const expectedTabs = {
-    '부원 홈 탭 (탭 2개, 조 미배정 안내)': ['홈', '일정'],
-    '부원 일정 탭: 달력 (옛 화면 흉내)': ['홈', '일정'],
-    '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)': ['홈', '일정'],
-    '임원 홈 탭 (탭 3개)': ['홈', '일정', '운영'],
-    '임원 운영 탭 (10개 항목)': ['홈', '일정', '운영'],
-    '프로필이 열린 모양 (옛 설정 화면 흉내)': <String>[],
+    '부원 홈 탭 (탭 3개, 조 미배정 안내)': ['홈', '일정', '내 정보'],
+    '부원 일정 탭: 달력 (옛 화면 흉내)': ['홈', '일정', '내 정보'],
+    '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)': ['홈', '일정', '내 정보'],
+    '임원 홈 탭 (탭 4개)': ['홈', '일정', '운영', '내 정보'],
+    '임원 운영 탭 (10개 항목)': ['홈', '일정', '운영', '내 정보'],
+    '내 정보 탭 (옛 설정 화면 흉내)': ['홈', '일정', '운영', '내 정보'],
   };
 
   const shellTitle = {
-    '부원 홈 탭 (탭 2개, 조 미배정 안내)': '홈',
+    '부원 홈 탭 (탭 3개, 조 미배정 안내)': '홈',
     '부원 일정 탭: 달력 (옛 화면 흉내)': '일정',
     '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)': '일정',
-    '임원 홈 탭 (탭 3개)': '홈',
+    '임원 홈 탭 (탭 4개)': '홈',
     '임원 운영 탭 (10개 항목)': '운영',
-    '프로필이 열린 모양 (옛 설정 화면 흉내)': '내 정보',
+    '내 정보 탭 (옛 설정 화면 흉내)': '내 정보',
   };
 
   for (final state in states) {
@@ -68,9 +66,7 @@ void main() {
           );
           testWidgets('${state.label} | $c', (tester) async {
             // 홈 탭 상태는 옛 NeedGroupNotice의 넘침을 따로 모은다 (다른 상태는 어떤 오류도 허용하지 않는다)
-            // (프로필이 열린 모양은 아래에 홈 탭이 깔려 있어서 같은 넘침이 나올 수 있다)
-            final profileOpen = state.label.contains('프로필');
-            final legacyHome = state.label.contains('홈 탭') || profileOpen;
+            final legacyHome = state.label.contains('홈 탭');
             final captured = <FlutterErrorDetails>[];
             // 옛 NeedGroupNotice의 넘침뿐이고 다른 오류는 없다
             void verifyLegacyErrors() {
@@ -140,34 +136,27 @@ void main() {
                 lessThanOrEqualTo(width + 0.5),
               );
 
-              if (profileOpen) {
-                // 프로필이 열린 모양: 탭 막대가 없고 뒤로 가기가 있고 본문(옛 설정 흉내)이 보인다
-                expect(find.byType(SmashBottomNav), findsNothing);
-                expect(find.byType(HomeProfileButton), findsNothing);
-                expect(find.byType(ProfilePage), findsOneWidget);
-                expect(find.text('부원으로 바꾸기'), findsOneWidget);
-                final back = tester.getRect(
-                  find.descendant(
-                    of: appBarFinder,
-                    matching: find.byType(SmashIconButton),
-                  ),
-                );
-                expect(back.width, greaterThanOrEqualTo(48));
-                expect(back.left, greaterThanOrEqualTo(-0.5));
-                verifyLegacyErrors();
-                expect(tester.takeException(), isNull);
-                return;
-              }
-
-              // 프로필 버튼: 앱바 오른쪽 끝 안에 있고 터치 영역이 48 이상이다
-              final profile = tester.getRect(find.byType(HomeProfileButton));
-              expect(profile.width, greaterThanOrEqualTo(48));
-              expect(profile.height, greaterThanOrEqualTo(48));
-              expect(profile.right, lessThanOrEqualTo(width + 0.5));
+              // 앱바에는 버튼이 없다 (뒤로 가기도, 프로필 버튼도): 내 정보는 하단 탭이고 첫 화면이라 뒤로 가기가 없다
               expect(
-                profile.top,
-                greaterThanOrEqualTo(ScreenConditions.safeTop - 0.5),
+                find.descendant(
+                  of: appBarFinder,
+                  matching: find.byType(SmashIconButton),
+                ),
+                findsNothing,
               );
+              expect(
+                find.descendant(
+                  of: appBarFinder,
+                  matching: find.byType(SmashAvatar),
+                ),
+                findsNothing,
+                reason: '프로필 버튼(이름 첫 글자 원)이 없다',
+              );
+              expect(find.bySemanticsLabel('뒤로'), findsNothing);
+              // 내 정보 탭: 옛 설정 흉내가 보인다
+              if (state.label.contains('내 정보 탭')) {
+                expect(find.text('부원으로 바꾸기'), findsOneWidget);
+              }
 
               // 일정 탭: "달력 | 투표" 전환이 폭 안에 있다
               if (state.label.contains('일정')) {

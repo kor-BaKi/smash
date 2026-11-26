@@ -291,10 +291,9 @@ void main() {
         tester.widget<Text>(find.text('홈')).style!.fontWeight,
         isNot(tester.widget<Text>(find.text('일정')).style!.fontWeight),
       );
-      final pill = tester.widget<AnimatedContainer>(
-        find.ancestor(of: find.byIcon(Icons.home), matching: find.byType(AnimatedContainer)),
-      );
+      final pill = tester.widget<DecoratedBox>(find.byKey(SmashBottomNav.highlightKey));
       expect((pill.decoration as BoxDecoration).color, SmashColors.brandTint);
+      expect(find.byKey(SmashBottomNav.highlightKey), findsOneWidget, reason: '알약은 하나뿐이다');
     });
 
     testWidgets('스크린리더: 라벨, 몇 번째/전체, 선택됨, 버튼', (tester) async {

@@ -76,12 +76,12 @@ void main() {
     test('홈 셸은 계획한 상태와 직접 눌러 보기를 가지고 운영 메뉴 항목은 실제와 같다', () {
       final labels = homeShellScreenEntry.states.map((s) => s.label).toList();
       expect(labels.take(6), [
-        '부원 홈 탭 (탭 2개, 조 미배정 안내)',
+        '부원 홈 탭 (탭 3개, 조 미배정 안내)',
         '부원 일정 탭: 달력 (옛 화면 흉내)',
         '부원 일정 탭: 투표 (옛 화면 흉내: 자기 앱바가 겹침)',
-        '임원 홈 탭 (탭 3개)',
+        '임원 홈 탭 (탭 4개)',
         '임원 운영 탭 (10개 항목)',
-        '프로필이 열린 모양 (옛 설정 화면 흉내)',
+        '내 정보 탭 (옛 설정 화면 흉내)',
       ]);
       expect(labels.last, startsWith('직접 눌러 보기'));
       expect(screenGalleryEntries, contains(homeShellScreenEntry));
